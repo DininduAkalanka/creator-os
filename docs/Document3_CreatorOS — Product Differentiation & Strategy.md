@@ -1,3 +1,11 @@
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+>
+> The wedge (raw footage → rough cut) is **confirmed and narrowed** to talking-head and screen-recording videos, with export to Premiere Pro, DaVinci Resolve and Final Cut Pro. "Intelligent tool routing" is not an MVP differentiator.
+>
+> **Read instead:** Doc 26 §3–4, ADR-001, ADR-010.
+
+---
+
 # CreatorOS
 ## Product Differentiation & Strategy
 

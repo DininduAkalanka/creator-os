@@ -1,3 +1,11 @@
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+>
+> **Superseded:** the script → AI voice → assembled video path as the MVP (now Phase 3, opt-in), and full-file upload as the default. The MVP is audio-first, with export to the creator's editor.
+>
+> **Read instead:** ADR-001, ADR-015, ADR-017, Doc 26 §5–6.
+
+---
+
 # CreatorOS
 ## Document 19 — Media Processing & AI Video Production Pipeline Specification
 

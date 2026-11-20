@@ -1,3 +1,11 @@
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+>
+> **Superseded:** the pricing tiers ($19 / $49 / $99 / $249+), the credit system, and the $1.60-per-video cost target. New model: Free / $19 / $39 / $99, priced per hour of raw footage, with about 50% lower prices in South Asia. Cost is about $0.31–0.88 per footage hour.
+>
+> **Read instead:** Doc 26 §7–9, ADR-014, ADR-018.
+
+---
+
 # CreatorOS
 ## Business Model & Financial Feasibility
 
