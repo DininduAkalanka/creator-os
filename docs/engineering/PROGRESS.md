@@ -4,19 +4,26 @@ The coding agent updates this file at the end of every session (AGENTS.md §7, s
 
 ## Current milestone
 
-M0 — Engineering plan: **written, waiting for approval** ([PLAN.md](./PLAN.md)). M1 starts only after approval.
+- **Pre-launch website (W1, part 1): built as a preview** on branch `feat/website-scaffold` (local worktree `C:\dev\creator-os`, not pushed). It can't launch yet: the preview notice lists the blockers.
+- M0 — Engineering plan: **written, waiting for approval** ([PLAN.md](./PLAN.md)). Product milestones (M1 onwards) start only after approval. The workspace scaffold below covers only what the website needs.
 
 ## Done
 
 | Date | Milestone / task | Commit | How it was verified |
 | --- | --- | --- | --- |
+| 2026-11-20 | CI workflow (format, lint, typecheck, test, build; gitleaks secret scan; `pnpm audit`), Dependabot, AGENTS.md §6 commands, README "Local development" | branch `feat/website-scaffold` | Full local gate passes; `pnpm audit --prod --audit-level high`: no known vulnerabilities. Workflow not run on GitHub yet (not pushed) |
+| 2026-11-20 | Website pages: home (hero, problem, how it works, features, audiences, founding offer, data handling, FAQ, waitlist), draft privacy policy and terms, about, 404, robots.txt, sitemap, icon, social image | `c60ded3` | `next build`: all 9 routes static. Served with `next start` and checked with curl: every route 200 (unknown route 404), `noindex` meta and `Disallow: /` while `SITE_INDEXABLE` is unset. Form posted without JavaScript: invalid input shows the field errors and keeps the values; valid input gets the "not open yet" message. Screenshots: desktop dark and light themes, and a real 390 px phone width with no horizontal scroll |
+| 2026-11-20 | Waitlist rules: optional role, channel (URL or @handle), videos per month, editing hours, language; error codes; "waitlist storage" launch blocker | `32a56f2` | 28 unit tests pass (Vitest) |
+| 2026-11-20 | Workspace scaffold: pnpm 12 + Turborepo, shared tsconfig, `apps/www` (Next.js 16.4, React 19.3, Tailwind 4.3, TS 6.0.3), site and offer config, launch-blocker logic | `4e58b50` | lint, typecheck, test and build pass |
 | 2026-11-20 | ADR-020 worldwide market focus: Decision Log, AGENTS.md, prompts 02/03, docs index, banners on Docs 01/04/05/26 and the Implementation Plan, unit-economics model (one global price) | branch `docs/adr-020-worldwide-focus` | `python docs/models/unit_economics.py` prints ARPU $33.00, contribution $24.38 (74%), break-even 16 / 123 customers, matching ADR-020; grep shows no South Asia instructions left in AGENTS.md or the prompts |
 | 2026-11-20 | M0 — `docs/engineering/PLAN.md` (layout, versions, migration 001 SQL, bootstrap, UUID v7, tests, CI, Windows notes) | branch `docs/m0-engineering-plan` | Docs only. Versions checked with `npm view` on 2026-11-20 (pnpm not installed; same registry). SQL reviewed by reading; not executed (no database in M0) |
 
 ## Next
 
-1. Human review of PLAN.md, answers to Q1–Q11, and a yes/no on each proposal below.
-2. M1 — Monorepo scaffold (after approval, ideally after the repo moves out of OneDrive, Q10).
+1. Human review of the website branch (run `pnpm dev` in `C:\dev\creator-os`), PLAN.md, the open questions and the proposals below.
+2. **W1, part 2: waitlist storage** (needs approval: it adds a database table). Proposed: a `waitlist_signups` table (email, optional answers, consent text version and time, confirmation token hash, confirmed time, unsubscribed time), double opt-in by email, rate limiting and a honeypot field. Needs a database account (for example Neon) and an email account (for example Resend) that you create. When it lands, set `FEATURES.waitlistStorage` to true in the same change.
+3. Fill in the launch blockers: product name and domain, company details, lawyer review (Q12), then a real demo video from your own footage to replace the illustration.
+4. M1 onwards, after PLAN.md is approved.
 
 ## Open questions for the human
 
@@ -29,8 +36,10 @@ M0 — Engineering plan: **written, waiting for approval** ([PLAN.md](./PLAN.md)
 7. **Selling entity (not needed until T5.1):** is the company registered in Sri Lanka? This decides the merchant of record (P-05), or whether a US entity with Stripe is an option.
 8. **Product name** (unchanged): the website and brand wait for it; code uses `creatoros`.
 9. **Git base:** local `main` is stale and I did not fetch (CLAUDE.md: ask before network beyond the package registry). This branch is based on `docs/prompt-kit-and-cleanup` (76ba005), which you say was merged as PR #2. May I `git fetch` and rebase onto `origin/main` before you open the PR?
-10. **Dev machine:** may I plan M1 assuming the repo moves to a WSL2 Ubuntu filesystem (or `C:\dev`, outside OneDrive), with pnpm through `corepack enable`? Both need your action or approval to install.
+10. **Dev machine — answered.** Code lives locally in `C:\dev\creator-os`, never in OneDrive (approved 20 Nov 2026). pnpm is installed globally with npm.
 11. **Implementation Plan copy:** the live plan you pasted is newer than `docs/Implementation_Plan.md` (status lines: decision log "merged to main", "make the repo private", first action ticked). Should the repo copy be updated?
+12. **For the lawyer reviewing the privacy policy and terms** (drafts at `/privacy` and `/terms`): the retention period after the waitlist closes; how long hosting logs are kept; the minimum age (the draft says 16); the governing law; whether an EU and a UK representative are needed (GDPR Art. 27); the email footer for CAN-SPAM and CASL (postal address, unsubscribe); and the list of service providers, once chosen.
+13. **Website claims to confirm:** the site describes these as planned, from accepted ADRs: audio-only upload where possible and deletion of uploaded originals after 7 days (ADR-015), optional read-only YouTube access (ADR-009), Creator plan $19 for 5 h with a 12-month price lock for 50 founding creators (ADR-014, `src/config/offer.ts`; see P-11), month-to-month plans you can cancel at any time, and no multi-camera support at first. Tell me if any of these should change.
 
 ## Proposed decisions (to become ADRs once approved)
 
@@ -50,7 +59,10 @@ M0 — Engineering plan: **written, waiting for approval** ([PLAN.md](./PLAN.md)
 
 ## Known issues and tech debt
 
-- No application code yet (expected).
-- pnpm and FFmpeg are not installed; no WSL Ubuntu distro; no git identity configured (PLAN.md §8).
-- The repo lives under OneDrive (PLAN.md §8).
-- Local `main` is stale; this branch is based on `docs/prompt-kit-and-cleanup` (Q9).
+- No product code yet (expected); only the website exists.
+- The waitlist form stores nothing yet (by design until part 2 above). The site must not launch before then; the preview notice enforces this.
+- GitHub Actions are pinned to major versions (`@v5`, `@v4`, `@v2`), not commit SHAs, because checking the latest SHAs needs network access beyond the package registry. Dependabot will update them; pin SHAs once the repo is on GitHub.
+- The gitleaks action is free for personal GitHub accounts; a GitHub organization needs a `GITLEAKS_LICENSE` secret.
+- pnpm 12 is installed globally with npm (Node 26 no longer bundles corepack). FFmpeg is not installed; no WSL Ubuntu distro (PLAN.md §8).
+- Code lives in the local worktree `C:\dev\creator-os` (outside OneDrive). The original clone under OneDrive is still there for the docs branches.
+- Local `main` is stale; the branches are based on `docs/prompt-kit-and-cleanup` (Q9).

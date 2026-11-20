@@ -137,14 +137,22 @@ tools/
 
 ## 6. Commands
 
-Fill these in during M1. Keep them accurate whenever scripts change.
+Keep these accurate whenever scripts change.
 
 ```bash
-pnpm install
-docker compose up -d          # postgres+pgvector, redis, minio
+pnpm install                  # Node 26.13.1 (.nvmrc), pnpm from "packageManager"
+pnpm dev                      # every app in watch mode (today: apps/www on http://localhost:3000)
+pnpm --filter @creatoros/www dev   # one app only
+pnpm format                   # fix formatting (Prettier)
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # the local gate (CI runs the same)
+pnpm audit --prod --audit-level high   # dependency audit (CI runs it too)
+```
+
+Not available yet (added in later milestones):
+
+```bash
+docker compose up -d          # postgres+pgvector, redis, local S3 (P-03)
 pnpm db:migrate               # apply migrations
-pnpm dev                      # web + api + worker
-pnpm lint && pnpm typecheck && pnpm test && pnpm build   # the local gate
 pnpm test:int                 # integration tests (Testcontainers)
 pnpm test:e2e                 # Playwright
 ```

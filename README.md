@@ -9,7 +9,7 @@ An AI first-pass editor and review workspace for YouTube creators.
 
 A free Channel Audit shows what to film next.
 
-Status: planning and validation. No product code yet.
+Status: planning and validation. The pre-launch website (`apps/www`) is built as a preview; the product itself has no code yet.
 
 - [Documentation index](docs/README.md)
 - [Document 26: Revised SaaS Foundation & Unit Economics](docs/26_Revised_SaaS_Foundation_and_Unit_Economics.md)
@@ -22,6 +22,11 @@ Status: planning and validation. No product code yet.
 ```
 AGENTS.md                 standing rules for AI coding agents
 CLAUDE.md                 Claude Code entry point (imports AGENTS.md)
+apps/
+  www/                    pre-launch website (Next.js): home, waitlist, privacy, terms, about
+packages/
+  config/                 shared TypeScript config
+.github/                  CI (format, lint, typecheck, test, build, secret scan, audit), Dependabot
 prompts/                  coding-agent prompt kit (01 kickoff … 04 review)
 docs/
   README.md               documentation index: start here
@@ -36,3 +41,24 @@ docs/
 ```
 
 Doc files are named `NN_Title.md`, where `NN` is the document number used in cross-references ("Doc 26 §8").
+
+## Local development
+
+Keep the code outside OneDrive or any other synced folder (for example `C:\dev\creator-os`); syncing `node_modules` is slow and breaks installs.
+
+Requirements: Node 26.13.1 (see `.nvmrc`) and pnpm 12 (the exact version is in `package.json` under `packageManager`).
+
+```bash
+pnpm install
+cp .env.example .env.local    # optional: defaults work for local use
+pnpm dev                      # http://localhost:3000
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # run before every commit
+```
+
+### The website (`apps/www`)
+
+- Brand and company details live in `apps/www/src/config/site.ts`. Unknown values are `null` and show as **[to be added]** on the site. Never fill them with guesses.
+- A preview notice lists what still blocks launch (product name, company details, lawyer review, waitlist storage). It disappears only when all of them are done.
+- The waitlist form validates input but **does not store anything yet**. It tells visitors so. Storage needs the approved waitlist schema, a database and an email provider.
+- Search engines are kept out unless `SITE_INDEXABLE=true`. Set it only on the launched production site.
+- Page text lives in `apps/www/src/content/`, apart from layout code, so it can be translated later.
