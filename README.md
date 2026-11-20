@@ -14,3 +14,5 @@ Status: planning and validation. No product code yet.
 - [Documentation index](docs/README.md)
 - [Document 26: Revised SaaS Foundation & Unit Economics](docs/Document26_Revised_SaaS_Foundation_and_Unit_Economics.md)
 - [Decision Log](docs/00_Decision_Log.md)
+- [Implementation Plan](docs/Implementation_Plan.md)
+- [AGENTS.md](AGENTS.md): rules for AI coding agents, and the [prompt kit](prompts/README.md)

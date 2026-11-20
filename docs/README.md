@@ -4,6 +4,10 @@
 
 1. [Document 26 — Revised SaaS Foundation & Unit Economics](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md): what we build first, pricing, and whether it makes a profit.
 2. [Decision Log](./00_Decision_Log.md): the 19 accepted decisions. **It wins over every other document.**
+3. [Implementation Plan](./Implementation_Plan.md): the step-by-step build plan, a copy of the live plan doc.
+4. [Engineering progress](./engineering/PROGRESS.md): where the build is now; the coding agent keeps it up to date.
+
+Coding agents: start with [AGENTS.md](../AGENTS.md) and the [prompt kit](../prompts/README.md).
 
 Documents marked "Partly superseded" have a status note at the top that says which parts changed.
 
