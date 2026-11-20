@@ -10,6 +10,7 @@ M0 — Engineering plan: **written, waiting for approval** ([PLAN.md](./PLAN.md)
 
 | Date | Milestone / task | Commit | How it was verified |
 | --- | --- | --- | --- |
+| 2026-11-20 | ADR-020 worldwide market focus: Decision Log, AGENTS.md, prompts 02/03, docs index, banners on Docs 01/04/05/26 and the Implementation Plan, unit-economics model (one global price) | branch `docs/adr-020-worldwide-focus` | `python docs/models/unit_economics.py` prints ARPU $33.00, contribution $24.38 (74%), break-even 16 / 123 customers, matching ADR-020; grep shows no South Asia instructions left in AGENTS.md or the prompts |
 | 2026-11-20 | M0 — `docs/engineering/PLAN.md` (layout, versions, migration 001 SQL, bootstrap, UUID v7, tests, CI, Windows notes) | branch `docs/m0-engineering-plan` | Docs only. Versions checked with `npm view` on 2026-11-20 (pnpm not installed; same registry). SQL reviewed by reading; not executed (no database in M0) |
 
 ## Next
@@ -19,7 +20,7 @@ M0 — Engineering plan: **written, waiting for approval** ([PLAN.md](./PLAN.md)
 
 ## Open questions for the human
 
-1. **Market focus (blocks M7 region and Step 2 speech-to-text).** You said the target is worldwide: mainly the USA, Canada, Europe, Australia and the UAE, not Sri Lanka. The accepted docs still say otherwise (ADR-013 region Mumbai/Singapore, ADR-016 Sinhala/Tamil/Hindi router, ADR-018 South Asia pricing, Doc 26 §4.2/§10/§11, the "Sinhala, Tamil and Hindi come later" line in AGENTS.md §5). Do you approve P-01? Recommended region: US East, with an EU region later if EU customers need it.
+1. **Market focus — answered.** Worldwide (mainly the USA, Canada, the UK and Europe, Australia and the UAE), recorded as ADR-020 on 20 Nov 2026.
 2. **Auth provider for M4** (unchanged): Better Auth (recommended: self-hosted, data in our Postgres, no per-user fee) or Clerk? If Better Auth: map its user table onto our `users`, and keep organizations and memberships as our own RLS tables instead of the Better Auth organization plugin (recommended), or use the plugin?
 3. **How does a request name its organization?** A header such as `X-Organization-Id` checked against the membership (recommended, default = personal org), a path segment, or an "active organization" stored in the session? The docs don't say.
 4. **Queue (decide before M6):** keep ADR-008 (Redis + BullMQ + transactional outbox), or accept P-04 (a Postgres-native queue)?
@@ -35,7 +36,7 @@ M0 — Engineering plan: **written, waiting for approval** ([PLAN.md](./PLAN.md)
 
 | # | Proposal | Supersedes / touches | Why |
 | --- | --- | --- | --- |
-| P-01 | **Global-first market.** First customers are English-speaking creators worldwide (USA, Canada, Europe, Australia, UAE). Primary region US East; EU region later. Speech-to-text router English-first; other languages added per measured demand. One USD price list; optional PPP discounts later, not a 50% South Asia tier | ADR-001 (customer group 3), ADR-013 (region), ADR-016, ADR-018, Doc 26 §4.2/§10/§11, Track A step 3, AGENTS.md §5 i18n line | Founder's stated focus. Without the South Asia half price, blended revenue per customer rises from $24.75 to $33.00 and contribution from $16.70 to about $24 (Doc 26 model re-run) |
+| P-01 | **Accepted on 20 Nov 2026 as ADR-020** (worldwide market focus) | ADR-013, ADR-016, ADR-018, Doc 26, Implementation Plan, AGENTS.md | Founder decision |
 | P-02 | Pin **TypeScript 6.0.x** (6.0.3), not 7.0.x, until typescript-eslint and the NestJS Better Auth adapter support 7 | AGENTS.md §5 (versions) | typescript-eslint 8.73 peer `<6.1.0`; `@thallesp/nestjs-better-auth` peer `^5.9.2 \|\| ^6.0.0` |
 | P-03 | **Replace MinIO for local S3** with a maintained S3-compatible image (candidates: SeaweedFS, Garage, RustFS, or Chainguard's free MinIO image). Tests target S3 API behaviour only (presigned PUT, multipart, CORS) | AGENTS.md §5, Implementation Plan Step 1.3 | MinIO stopped publishing community images (Oct 2025); repository archived (Apr 2026) |
 | P-04 | **Postgres-native job queue** (pg-boss or Graphile Worker; first check whether BullMQ 6 can use its optional `pg` peer). Enqueue in the same transaction as the state change and the `usage_ledger` row; no outbox relay; no Redis in the MVP | ADR-006 (Redis), ADR-008 (outbox) | Transactional enqueue for free, one less managed service, M6 much smaller. Job volume is tiny (long media/AI jobs), well within Postgres-queue throughput |

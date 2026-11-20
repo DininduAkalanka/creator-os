@@ -5,7 +5,7 @@
 
 **Status values:** Accepted · Superseded · Proposed
 
-The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan. The background for ADR-014 to ADR-019 is in [Document 26 — Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md).
+The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan. The background for ADR-014 to ADR-019 is in [Document 26 — Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md). ADR-020 records the founder's market decision of 20 November 2026; its numbers come from the Doc 26 model re-run with one global price.
 
 ---
 
@@ -25,13 +25,14 @@ The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan
 | 010 | AI gateway | Accepted |
 | 011 | No Python service in MVP | Accepted |
 | 012 | Billing | Accepted (extended 20 Nov 2026) |
-| 013 | Hosting | Accepted |
+| 013 | Hosting | Accepted (region superseded by ADR-020) |
 | 014 | Price and meter by footage hours | Accepted |
 | 015 | Audio-first media, NLE hand-off | Accepted |
-| 016 | Speech-to-text language router | Accepted |
+| 016 | Speech-to-text language router | Accepted (language list superseded by ADR-020) |
 | 017 | Do-not-build list | Accepted |
-| 018 | Regional pricing | Accepted |
+| 018 | Regional pricing | **Superseded by ADR-020** |
 | 019 | Build order: copilot before Channel Audit | Accepted |
+| 020 | Worldwide market focus | **Accepted (20 Nov 2026)** |
 
 ---
 
@@ -239,3 +240,31 @@ We will **not** build, in the MVP or Phase 2 without a new ADR:
 **Why:** the paid product doesn't wait on Google's review, so revenue and learning start sooner.
 
 **Supersedes:** the CTO plan's order (Channel Intelligence first, weeks 3–6).
+
+## ADR-020 — Worldwide market focus
+
+**Decision (founder, 20 November 2026):**
+
+- **Customers:** English-speaking YouTube creators and the freelance editors who work with them, **worldwide**: mainly the USA, Canada, the UK and Europe, Australia and the UAE. There is no country-first launch market.
+- **Language:** English first. Add another language only when customer demand and a measured speech-to-text benchmark justify it.
+- **Pricing:** one USD price list for every country (ADR-014's plans). No regional tier. Purchasing-power discounts may be tested later as a promotion, not as a plan.
+- **Hosting:** primary region **US East** for the API, workers and database. Add an EU region only when EU customers need data residency.
+- **Go-to-market:** the waitlist, global creator and editor communities, and founder-led interviews with creators and freelance editors in the target countries.
+- **Compliance:** the rules of the buyers' countries (EU GDPR, including an Article 27 representative; UK GDPR; Canada's CASL; the US CAN-SPAM Act; the UAE PDPL) plus the law of the country where the company is registered. Taxes are handled by the merchant of record (ADR-012).
+- **Speech-to-text benchmark (week 1):** 20 English clips across recording types (talking head, screen recording, podcast, noisy room). Candidates include AssemblyAI, Deepgram, Speechmatics, ElevenLabs Scribe and Gladia. Score word error rate, word-timestamp error, filler-word recall with each provider's verbatim/disfluency setting on (fillers are removed by default), and cost.
+- **Week-4 gate (Doc 26 §11):** the mixed-language check is removed. Pass 4 of the remaining 5 checks, including time saved.
+- **ADR-015 stays:** a 30 GB 4K upload takes about 3.5 hours at 20 Mbps, so audio-first upload still matters everywhere.
+
+**Why:**
+
+- The founder's target market is global creators, not one region.
+- With one global price, blended revenue per paying customer rises from $24.75 to $33.00, and contribution from $16.70 (67%) to $24.38 (74%), using Doc 26's own costs and plan mix. Break-even becomes about 16 paying customers solo ($400 a month) or about 123 with a $3,000-a-month team ([models/unit_economics.py](./models/unit_economics.py)).
+
+**Supersedes:**
+
+- ADR-013: the region "near users (Mumbai or Singapore)".
+- ADR-016: the routing for Sinhala–, Tamil– and Hindi–English. The SttGateway, per-language routing and storing the provider and model on every transcript stay.
+- ADR-018 in full, including its month-9 revenue guardrail.
+- Doc 26 §4.2 customer group 3, the language routing in §5.1 item 3, regional pricing in §7, the South Asia assumption in §8.3, the "danger zone" in §9, the language edge in §10, and the benchmark clips, South Asia price and mixed-language check in §11.
+- The Implementation Plan's South Asia items: limit 4's reason, the pricing note, problem 12, Track A steps 3 and 5, the gate's language check, the language risk, Sinhala/Tamil/Hindi launch pages, and "public beta and India".
+- The geography in Docs 01, 04 and 05 (Sri Lanka → India → Southeast Asia → global).

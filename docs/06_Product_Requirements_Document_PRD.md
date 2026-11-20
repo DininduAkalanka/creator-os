@@ -3,6 +3,8 @@
 > **Superseded:** the MVP scope and P0 list. The MVP is the AI first-pass editor + review workspace + NLE export, plus a free Channel Audit.
 >
 > **Read instead:** Doc 26 §5, ADR-001.
+>
+> **Geography superseded by ADR-020:** the "Initial Market: Sri Lanka → India → Global" header line no longer applies. The focus is English-speaking creators worldwide.
 
 ---
 

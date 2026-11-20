@@ -1,3 +1,14 @@
+> **Status update — 20 Nov 2026 (ADR-020, worldwide focus).** The customers are English-speaking creators and their editors worldwide (mainly the USA, Canada, the UK and Europe, Australia and the UAE). Superseded here:
+>
+> - customer group 3 (§4.2) and the language routing in §5.1 item 3;
+> - regional pricing (§7) and the South Asia assumption in §8.3 (with one global price, contribution is **$24.38 (74%)** and break-even is about **16** customers solo or **123** with a team);
+> - the "danger zone" (§9) and the language edge (§10);
+> - the benchmark clips, the regional price and the mixed-language gate check in §11 (the gate is now 4 of 5, including time saved).
+>
+> **Read instead:** [Decision Log ADR-020](./00_Decision_Log.md).
+
+---
+
 # CreatorOS
 ## Document 26 — Revised SaaS Foundation & Unit Economics
 

@@ -33,12 +33,16 @@ print("overage $3/hr margin at high cost:", f"{(3-3*0.07-C['high'])/3:.0%}")
 free_cost = 0.05 + 0.30*0.5*C["mid"]
 print("\nfree user cost/month", round(free_cost,3), "x10 free per paid =", round(10*free_cost,2))
 
-# blended ARPU: mix 60/30/10; 50% customers in South Asia at 50% regional price
+# blended ARPU: plan mix 60/30/10.
+# ADR-020: one global USD price, so no customer pays a regional price (regional_share = 0).
+# Doc 26 s8.3 originally used regional_share = 0.5 at a 50% discount (ARPU 24.75, contribution 16.70).
+regional_share, regional_discount = 0.0, 0.5
 mix = {"Creator":0.6,"Pro":0.3,"Studio":0.1}
 glob = sum(mix[n]*plans[n][0] for n in mix)
-blend = 0.5*glob + 0.5*glob*0.5
+blend = (1-regional_share)*glob + regional_share*glob*(1-regional_discount)
 cogs = sum(mix[n]*plans[n][1]*0.5*C["mid"] for n in mix)
-fees = sum(mix[n]*(0.5*fee(plans[n][0]) + 0.5*fee(plans[n][0]*0.5)) for n in mix)
+fees = sum(mix[n]*((1-regional_share)*fee(plans[n][0])
+                   + regional_share*fee(plans[n][0]*(1-regional_discount))) for n in mix)
 support = 1.0
 contrib = blend - cogs - fees - 10*free_cost - support
 print(f"global ARPU {glob:.2f} blended ARPU {blend:.2f} cogs {cogs:.2f} fees {fees:.2f} free {10*free_cost:.2f} support {support:.2f} -> contribution {contrib:.2f} ({contrib/blend:.0%})")

@@ -1,4 +1,6 @@
 > **Copy of the live plan doc, 20 Nov 2026.** The live version is the "CreatorOS — CTO Review & Step-by-Step Implementation Plan" doc in Claude. If the two differ, ask which is newer. The Decision Log still wins over both.
+>
+> **ADR-020 (worldwide focus) overrides every South Asia item below:** the Mumbai/Singapore region (now US East), the 50% regional price (now one USD price list), the Sinhala/Tamil/Hindi benchmark and gate check (now an English benchmark; the gate is 4 of 5 including time saved), the language risk and launch pages, and "public beta and India" (now "public beta").
 
 # CreatorOS — CTO Review & Step-by-Step Implementation Plan
 

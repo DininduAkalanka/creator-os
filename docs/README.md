@@ -3,7 +3,7 @@
 **Start here:**
 
 1. [Document 26 — Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md): what we build first, pricing, and whether it makes a profit.
-2. [Decision Log](./00_Decision_Log.md): the 19 accepted decisions. **It wins over every other document.**
+2. [Decision Log](./00_Decision_Log.md): the decisions (ADR-001 to 020; ADR-020 sets the worldwide market focus). **It wins over every other document.**
 3. [Implementation Plan](./Implementation_Plan.md): the step-by-step build plan, a copy of the live plan doc.
 4. [Engineering progress](./engineering/PROGRESS.md): where the build is now; the coding agent keeps it up to date.
 
@@ -15,12 +15,12 @@ Documents marked "Partly superseded" have a status note at the top that says whi
 
 | # | Document | Status |
 | --- | --- | --- |
-| 01 | [Market & Competitor Research](./01_Market_and_Competitor_Research.md) | Current (add Gling, YouTube A/B testing and Ask Studio; see Doc 26 §10) |
+| 01 | [Market & Competitor Research](./01_Market_and_Competitor_Research.md) | Current (add Gling, YouTube A/B testing and Ask Studio; see Doc 26 §10). Geography superseded by ADR-020 |
 | 02 | [Customer Problem & Validation Research](./02_Customer_Problem_and_Validation_Research.md) | Current |
 | 03 | [Product Differentiation & Strategy](./03_Product_Differentiation_and_Strategy.md) | Partly superseded (wedge confirmed and narrowed) |
-| 04 | [Business Model & Financial Feasibility](./04_Business_Model_and_Financial_Feasibility.md) | Partly superseded (pricing, cost target) |
-| 05 | [MVP, GTM & Execution Roadmap](./05_MVP_GTM_and_Execution_Roadmap.md) | Partly superseded (MVP order, gate) |
-| 26 | [Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md) | **Current, wins** |
+| 04 | [Business Model & Financial Feasibility](./04_Business_Model_and_Financial_Feasibility.md) | Partly superseded (pricing, cost target, geography: ADR-020) |
+| 05 | [MVP, GTM & Execution Roadmap](./05_MVP_GTM_and_Execution_Roadmap.md) | Partly superseded (MVP order, gate, geography: ADR-020) |
+| 26 | [Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md) | **Current, wins** (market focus, pricing region and the week-4 gate updated by ADR-020) |
 
 ## Product
 

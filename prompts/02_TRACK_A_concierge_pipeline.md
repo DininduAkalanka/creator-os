@@ -3,7 +3,7 @@
 **Why this exists:** the validation gate at the end of week 4 needs real numbers:
 - hours saved;
 - the cut acceptance rate;
-- speech-to-text quality on Sinhala, Tamil and Hindi mixed with English;
+- speech-to-text quality on English talking-head, screen-recording and podcast audio, including filler words and word timestamps (ADR-020);
 - the cost per footage hour.
 
 These scripts produce those numbers from 10 real creator videos. They also become **pipeline v0** for the product, so the logic must be clean and reusable.
@@ -25,7 +25,7 @@ You are the AI/ML and media engineer for CreatorOS (internal code name). Read `A
 A CLI in `tools/concierge` (TypeScript on Node; FFmpeg is called as a subprocess):
 
 ```bash
-pnpm concierge run <video-or-audio-file> --lang en|si-en|ta-en|hi-en [--provider deepgram|...]
+pnpm concierge run <video-or-audio-file> [--lang en] [--provider assemblyai|deepgram|...]
 pnpm concierge bench <clips-folder> --providers deepgram,<others>
 ```
 
@@ -41,7 +41,7 @@ pnpm concierge bench <clips-folder> --providers deepgram,<others>
 - `cost.json` (cost per step and the total, per footage hour).
 
 **`bench`** writes `bench/results.md` and `bench/results.csv`, with:
-- word error rate per provider and per language set (against human reference transcripts I provide);
+- word error rate per provider and per recording type (against human reference transcripts I provide);
 - timestamp error;
 - filler and retake detection precision and recall (against my labels, where present);
 - cost per hour.
@@ -55,7 +55,7 @@ pnpm concierge bench <clips-folder> --providers deepgram,<others>
 
   Each one gets unit tests.
 - **Retakes:** detected by an LLM over transcript windows. Use a zod output schema that returns time ranges and a reason, and pass the transcript as data, never as instructions. Keep the prompt in a versioned file.
-- **Providers:** speech-to-text and LLM providers sit behind interfaces (`SttProvider`, `LlmProvider`). Each call returns the provider, model, tokens or minutes, cost in USD and latency. Start with Deepgram Nova-3 batch, then add 2–3 more candidates that list Sinhala support (for example AssemblyAI, Gladia, ElevenLabs Scribe, Google). Check each provider's current docs and prices; never guess.
+- **Providers:** speech-to-text and LLM providers sit behind interfaces (`SttProvider`, `LlmProvider`). Each call returns the provider, model, tokens or minutes, cost in USD and latency. Start with one provider, then add the other ADR-020 candidates (AssemblyAI, Deepgram, Speechmatics, ElevenLabs Scribe, Gladia). Turn on each provider's verbatim/disfluency setting: most remove "um" and "uh" by default, which would hide the filler words we need to cut. Check each provider's current docs and prices; never guess.
 - **Exporters:** a separate module per format, with golden-file tests.
   - Check which FCPXML version current DaVinci Resolve and Final Cut Pro import, and target it.
   - I will open the files in Resolve, Premiere and Final Cut to confirm the cuts survive.
@@ -92,7 +92,7 @@ pnpm concierge bench <clips-folder> --providers deepgram,<others>
   - The cost per footage hour summary.
 - **C5 — Benchmark.**
   - Two to three more speech-to-text adapters.
-  - The `bench` command and its results table across the 4 language sets.
+  - The `bench` command and its results table across the ADR-020 recording types (talking head, screen recording, podcast, noisy room).
 - **C6 — Browser audio-extraction spike** (ADR-015 risk).
   - A minimal page in `tools/audio-spike` that extracts the audio from a local 1-hour 4K file in the browser, using WebCodecs (with ffmpeg.wasm as the fallback), and reports the time and memory used.
 

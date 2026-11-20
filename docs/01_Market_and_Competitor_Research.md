@@ -3,6 +3,8 @@
 > Still current, but **missing three competitors** that now matter: Gling (YouTube rough-cut tool with Premiere/Resolve/Final Cut export), YouTube Studio's free A/B testing for titles and thumbnails, and YouTube's free Ask Studio analytics assistant.
 >
 > **Read instead:** Doc 26 §2 and §10.
+>
+> **Geography superseded by ADR-020:** the "Sri Lanka → India → Southeast Asia → global" order (§38–39) no longer applies. The focus is English-speaking creators worldwide from day one.
 
 ---
 

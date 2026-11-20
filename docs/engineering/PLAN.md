@@ -3,7 +3,7 @@
 **Status:** Draft, waiting for approval before M1.
 **Written:** 20 November 2026, on branch `docs/m0-engineering-plan`.
 **Covers:** Step 1 — Foundation, milestones M1 to M7 in [prompts/01_KICKOFF_foundation.md](../../prompts/01_KICKOFF_foundation.md).
-**Rule:** this plan follows the [Decision Log](../00_Decision_Log.md) (ADR-001 to 019). Where it recommends a change, the change is listed as a proposal (P-01, P-02, …) in [PROGRESS.md](./PROGRESS.md). Nothing here edits an accepted ADR.
+**Rule:** this plan follows the [Decision Log](../00_Decision_Log.md) (ADR-001 to 020). Where it recommends a change, the change is listed as a proposal (P-01, P-02, …) in [PROGRESS.md](./PROGRESS.md). Nothing here edits an accepted ADR.
 
 ---
 
@@ -508,7 +508,7 @@ When PostgreSQL 18 runs in every environment (P-08), add `DEFAULT uuidv7()` as a
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| The founder's target market is now worldwide (USA, Canada, Europe, Australia, UAE), but ADR-013/016/018, Doc 26 §4.2/§10/§11 and AGENTS.md still put South Asia first | Agents build the wrong defaults: Mumbai/Singapore region, a Sinhala/Tamil/Hindi STT router, South Asia pricing | P-01; decide before M7 (region) and Step 2 (STT) |
+| ~~Market focus conflict between the founder and the docs~~ **Resolved by ADR-020** (worldwide focus, US East region, English-first STT, one USD price) | — | Docs, prompts and AGENTS.md updated on branch `docs/adr-020-worldwide-focus` |
 | TypeScript 7 (`latest`) breaks typescript-eslint and the NestJS Better Auth adapter | Red CI from day one | Pin 6.0.3 (P-02) |
 | New majors are newer than agent training data | Wrong config, invented APIs | Read migration guides; small PRs; never guess (AGENTS.md §5) |
 | MinIO's community edition is archived and its official Docker image is no longer published (AGENTS.md §5 says "MinIO locally") | `docker compose up` fails in M3 | P-03: pick a maintained S3-compatible image; test only S3 API behaviour |
@@ -517,7 +517,7 @@ When PostgreSQL 18 runs in every environment (P-08), add `DEFAULT uuidv7()` as a
 | The bootstrap function trusts `app.current_user_id` | A code bug could create an empty personal org for another user (no data exposure) | Only the session guard sets the user context; tests |
 | Better Auth's own tables vs. ours (users, and the organization plugin) | Rework in M4 | Q2: decide the table mapping in M4 before code |
 | ADR-008's outbox + relay is the most complex part of Step 1 | M6 runs long | P-04: a Postgres-native queue makes enqueue transactional without a relay |
-| Managed Postgres version and region | `uuidv7()` and latency | Neon has PG18 GA; it has Singapore and US regions but no Mumbai. Decide with P-01 |
+| Managed Postgres version and region | `uuidv7()` and latency | Neon has PG18 GA and US regions; ADR-020 picks US East |
 | Local `main` is stale and `origin/main` wasn't fetched (no network beyond the registry without approval) | This branch is based on `docs/prompt-kit-and-cleanup`, not on `main` | Q9 |
 | Windows + OneDrive friction | Slow, flaky installs | Section 8 |
 
