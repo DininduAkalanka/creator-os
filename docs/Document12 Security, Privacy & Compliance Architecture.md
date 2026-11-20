@@ -1,3 +1,11 @@
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+>
+> **Superseded:** "workspace" tenancy (use organization). YouTube access is now optional and read-only at first (Channel Audit); the upload scope comes in Phase 2 through incremental consent.
+>
+> **Read instead:** ADR-002, ADR-009.
+
+---
+
 # CreatorOS
 ## Document 12 — Security, Privacy & Compliance Architecture
 

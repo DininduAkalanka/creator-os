@@ -1,3 +1,11 @@
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+>
+> **Superseded:** percentage confidence in mockups (for example "Confidence 82%"); show High / Medium / Low instead. Onboarding no longer starts with YouTube connect; it starts with "drop in your footage".
+>
+> **Read instead:** ADR-004, ADR-001.
+
+---
+
 # CreatorOS
 ## UX/UI & Complete User Journey Specification
 

@@ -1,3 +1,11 @@
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+>
+> **Superseded:** the `{success, data, meta}` envelope (use `{data, meta}` and `{error}`), Bearer tokens for the web app (use HttpOnly cookies), and `/projects/:id` routes for one video (use `/contents/:id`).
+>
+> **Read instead:** ADR-003, ADR-005, ADR-009.
+
+---
+
 # CreatorOS
 ## Document 11 — API Specification & Engineering Contracts
 

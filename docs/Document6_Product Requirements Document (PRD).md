@@ -1,3 +1,11 @@
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+>
+> **Superseded:** the MVP scope and P0 list. The MVP is the AI first-pass editor + review workspace + NLE export, plus a free Channel Audit.
+>
+> **Read instead:** Doc 26 §5, ADR-001.
+
+---
+
 # CreatorOS
 ## Product Requirements Document (PRD)
 

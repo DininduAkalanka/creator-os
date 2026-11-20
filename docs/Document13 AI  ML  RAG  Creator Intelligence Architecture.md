@@ -1,3 +1,11 @@
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+>
+> **Superseded:** learned "intelligent routing" as an MVP feature (Router v1 is a config table), and percentage confidence. Speech-to-text gets its own language router.
+>
+> **Read instead:** ADR-004, ADR-010, ADR-016.
+
+---
+
 # CreatorOS
 ## Document 13 — AI / ML / RAG & Creator Intelligence Architecture
 

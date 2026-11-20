@@ -1,3 +1,11 @@
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+>
+> **Superseded:** learned routing in the MVP and percentage confidence. AI proposes, deterministic code executes (unchanged).
+>
+> **Read instead:** ADR-004, ADR-010, ADR-016.
+
+---
+
 # CreatorOS
 ## Document 25 — AI Intelligence, Machine Learning & AI Engineering Architecture
 
