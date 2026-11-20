@@ -17,3 +17,25 @@ desktop.ini
 # Python
 __pycache__/
 *.pyc
+
+# Node, pnpm, Turborepo, Next.js
+node_modules/
+.turbo/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+*.log
+
+# Creator media and data: never commit footage, audio, transcripts or creator names
+data/
+*.mp4
+*.mov
+*.mkv
+*.m4a
+*.wav
+*.mp3
+*.opus

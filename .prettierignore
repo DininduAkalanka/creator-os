@@ -1,0 +1,15 @@
+# Hand-written docs and prompts are reviewed by people; don't reformat them.
+docs/
+prompts/
+AGENTS.md
+CLAUDE.md
+README.md
+**/AGENTS.md
+
+# Generated or vendored
+pnpm-lock.yaml
+**/.next/
+**/.turbo/
+**/coverage/
+**/dist/
+**/next-env.d.ts

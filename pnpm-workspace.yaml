@@ -1,0 +1,9 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# pnpm 12 runs dependency install scripts only when allowed here.
+# Same choices create-next-app 16.4.6 made: Next works without these native builds.
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
