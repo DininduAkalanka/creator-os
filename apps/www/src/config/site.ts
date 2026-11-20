@@ -36,6 +36,18 @@ export const COMPANY: Company = {
   legalTextsReviewed: false,
 };
 
+export interface Features {
+  /**
+   * True only in the same change that makes the joinWaitlist action save sign-ups and send the
+   * confirmation email. Until then the form says, truthfully, that sign-ups are not open.
+   */
+  waitlistStorage: boolean;
+}
+
+export const FEATURES: Features = {
+  waitlistStorage: false,
+};
+
 /** Public URL of this site; set NEXT_PUBLIC_SITE_URL in each environment. */
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 

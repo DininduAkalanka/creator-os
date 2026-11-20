@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Brand, Company } from "@/config/site";
+import type { Brand, Company, Features } from "@/config/site";
 import { launchBlockers } from "./launch";
 
 const readyBrand: Brand = { name: "Example", nameIsFinal: true };
@@ -11,21 +11,24 @@ const readyCompany: Company = {
   founderName: "Example Founder",
   legalTextsReviewed: true,
 };
+const readyFeatures: Features = { waitlistStorage: true };
 
 describe("launchBlockers", () => {
-  it("returns nothing when every launch field is set", () => {
-    expect(launchBlockers(readyBrand, readyCompany)).toEqual([]);
+  it("returns nothing when every launch item is done", () => {
+    expect(launchBlockers(readyBrand, readyCompany, readyFeatures)).toEqual([]);
   });
 
   it("lists each missing item", () => {
     const blockers = launchBlockers(
       { ...readyBrand, nameIsFinal: false },
       { ...readyCompany, postalAddress: null, legalTextsReviewed: false },
+      { waitlistStorage: false },
     );
     expect(blockers).toEqual([
       "Final product name",
       "Business postal address",
       "Lawyer review of the privacy policy and terms",
+      "Waitlist storage and confirmation email",
     ]);
   });
 });
