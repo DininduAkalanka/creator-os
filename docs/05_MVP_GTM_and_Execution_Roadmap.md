@@ -1,4 +1,4 @@
-> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
 >
 > **Superseded:** the MVP order (metadata + analytics first, editing later) and the validation gate. New order: the copilot first (it needs no YouTube login), then the free Channel Audit; YouTube publishing after Google's audit.
 >

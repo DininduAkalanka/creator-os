@@ -1,4 +1,4 @@
-> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
 >
 > **Superseded:** `creator_id` tenancy (use `organization_id` + RLS), "Project = one video" (Content = one video; Project = optional series), and the reviews entity (use approvals). New entities: media_assets, transcripts, edit_decision_lists, review_comments, export_jobs, usage_ledger.
 >

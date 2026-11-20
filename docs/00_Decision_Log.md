@@ -5,7 +5,7 @@
 
 **Status values:** Accepted · Superseded · Proposed
 
-The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan. The background for ADR-014 to ADR-019 is in [Document 26 — Revised SaaS Foundation & Unit Economics](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md).
+The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan. The background for ADR-014 to ADR-019 is in [Document 26 — Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md).
 
 ---
 

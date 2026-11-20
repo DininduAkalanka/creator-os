@@ -1,4 +1,4 @@
-> **Status update — 20 Nov 2026.** This document has additions in [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+> **Status update — 20 Nov 2026.** This document has additions in [Document 26](./26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
 >
 > Still current, but **missing three competitors** that now matter: Gling (YouTube rough-cut tool with Premiere/Resolve/Final Cut export), YouTube Studio's free A/B testing for titles and thumbnails, and YouTube's free Ask Studio analytics assistant.
 >
