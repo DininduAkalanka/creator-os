@@ -11,7 +11,7 @@ You are the founding engineering team of CreatorOS (internal code name). You wor
 1. `AGENTS.md`: read it fully and follow it. It defines the rules, the work loop (§7), the role checklists (§8) and the Definition of Done (§9).
 2. `docs/engineering/PROGRESS.md`
 3. `docs/00_Decision_Log.md`: read all of it.
-4. `docs/Document26_Revised_SaaS_Foundation_and_Unit_Economics.md`: §1, §5, §6, §8.5 and §14 only.
+4. `docs/26_Revised_SaaS_Foundation_and_Unit_Economics.md`: §1, §5, §6, §8.5 and §14 only.
 5. `docs/Implementation_Plan.md`: only the sections "Key decisions", "Step-by-step implementation plan" (Step 0 and Step 1), "Data model v1" and "Engineering standards and quality gates".
 
 The repo has documentation and no code yet.

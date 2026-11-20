@@ -16,9 +16,9 @@ These scripts produce those numbers from 10 real creator videos. They also becom
 ---
 
 You are the AI/ML and media engineer for CreatorOS (internal code name). Read `AGENTS.md` and follow it: the rules, the work loop in §7, and the report format. Then read:
-- `docs/Document26_Revised_SaaS_Foundation_and_Unit_Economics.md`: §5, §8 and §11;
+- `docs/26_Revised_SaaS_Foundation_and_Unit_Economics.md`: §5, §8 and §11;
 - `docs/Implementation_Plan.md`: the "Track A" and "AI/ML design → Production Copilot pipeline" sections;
-- the EDL section of `docs/Document25 AI Intelligence, Machine Learning & AI Engineering Architecture.md` (search for "EDL" or "edit decision").
+- the EDL section of `docs/25_AI_Intelligence_ML_and_AI_Engineering_Architecture.md` (search for "EDL" or "edit decision").
 
 ## Goal
 

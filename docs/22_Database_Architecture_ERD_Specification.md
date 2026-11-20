@@ -1,4 +1,4 @@
-> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./Document26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
+> **Status update — 20 Nov 2026.** Parts of this document are replaced by [Document 26](./26_Revised_SaaS_Foundation_and_Unit_Economics.md) and the [Decision Log](./00_Decision_Log.md). Where they disagree, those two win.
 >
 > **Missing tables to add:** approvals, transcripts, edit_decision_lists / edit_decisions, review_comments, qa_results, export_jobs, usage_ledger, entitlements, outbox_events, idempotency_keys, creator_style_profiles.
 >

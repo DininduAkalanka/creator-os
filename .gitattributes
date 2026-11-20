@@ -1,0 +1,15 @@
+# Store and check out text files with LF on every OS.
+# Stops Windows (core.autocrlf=true) from showing unchanged files as modified.
+* text=auto eol=lf
+
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.pdf  binary
+*.zip  binary
+*.mp4  binary
+*.mov  binary
+*.wav  binary
+*.mp3  binary
