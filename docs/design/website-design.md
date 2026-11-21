@@ -1,6 +1,6 @@
 # Website design: research, system and quality bar
 
-Status: v6.1 of the pre-launch site (`apps/www`), 22 Nov 2026: **light first** (§11), **adobe.com-style type and icons** (§12). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11, §11 wins.
+Status: v6.2 of the pre-launch site (`apps/www`), 22 Nov 2026: **light first** (§11), **adobe.com-style type and icons** (§12), **the services as a guided tour** (§13). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11, §11 wins.
 
 ## 1. What we learned from production sites
 
@@ -67,7 +67,7 @@ No requests to Google Fonts or any other third party.
 
 ### Components
 
-`SectionIntro` (optionally centred), `ServiceRail` (client, v6), `AppIcon` and the line icons in `icons.tsx` (v6.1), `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (white, one readable column), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
+`SectionIntro` (optionally centred), `ServiceSwitcher` (client, v6.2; replaced `ServiceRail`), `AppIcon` and the line icons in `icons.tsx` (v6.1), `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (white, one readable column), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
 
 ## 4. Engineering quality bar
 
@@ -320,3 +320,24 @@ Deliberately **not** used: in the hero (the header already shows it), on the AI-
 **Performance:** the fonts got smaller (one 29 KB file on most pages, instead of 40 KB for the display font plus the text font). Lighthouse on this machine varied a lot this session because Docker was running alongside; alternating runs of the previous build (v6, in Docker) and this build under the same conditions gave v6 82-87 and v6.1 98 (mobile performance), with accessibility and best practices at 100. Several runs failed with the known `NO_NAVSTART` trace error and were discarded.
 
 **Tests:** all 74 end-to-end tests pass (12 skipped by design). New: the footer lists every service, each linked to its section.
+
+## 13. v6.2: the services as a guided tour (22 Nov 2026)
+
+**Why:** the founder judged the v6 services row (§11, adobe.com's opening cards) unprofessional, and was right. adobe.com's version works with five wide cards; ours had six in a narrower container, so the closed cards were about 130 px wide: their titles and descriptions were cut off ("Capt…", "Exp…"), every narrow photo carried its AI label, the Audit and recommendation previews were sliced off, and a status pill repeated on every card.
+
+**Now (`ServiceSwitcher`):** the pattern product sites use for "everything we do", feature tabs with a stage.
+
+- **List:** all six services with their app icon, full name and honest status; nothing is truncated. On phones the list becomes a row of chips above the stage, and it scrolls sideways.
+- **Stage:** the selected service as a product screen (a dark app window, as the product is an editor) on a soft backdrop in the colour of the service's icon, with its full description and a "More about …" link to its section. The screens reuse the page's own visuals (transcript with cuts and a new waveform strip, captions with chapters and thumbnail ideas, export files with the three editors, the review thread, the Audit chart and insight, the recommendation), so the section has no photos and no AI labels.
+- **Swapper:** it moves on by itself every 6.5 s while at least half of it is on screen, with the time shown in the active tab. It holds while the mouse is over it or keyboard focus is inside; choosing a service (click, key, swipe on the stage) stops the tour for good; a pause and play button sits beside the list (WCAG 2.2.2). Nothing moves for reduced-motion or data-saver visitors.
+- **Motion:** the new screen and caption rise in (the caption 90 ms later) while the backdrop crossfades to the new colour.
+- **No layout shift:** every panel sits in the same grid cell and only the selected one is visible, so the stage is always as tall as the tallest panel (measured: 603 px on desktop and 587 px on phones for all six services).
+- **Space used well:** on large screens the existing status explanation (`statusHelp`: what First release, Beta and Later mean) fills the bottom of the list column.
+
+**Accessibility:** WAI-ARIA tabs with automatic activation; arrow keys in either direction, Home and End; one tabpanel, the hidden panels are `inert` and invisible; changes are announced only while the tour is not running; the product screens are decorative.
+
+**Measured:** the switcher costs nothing measurable. Alternating Lighthouse runs (mobile) of the previous build and this one on the same machine: 95, 97, 99 before and 98, 98, 99 after (total blocking time 84-240 ms before, 105-159 ms after). Accessibility 100.
+
+**Tests:** the services-row tests were replaced: every service is listed in full with its status; choosing a service shows it on the stage with its link, and arrow keys move between services; the tour moves on by itself and the pause button stops it; on phones the chips scroll sideways and the stage swipes; with reduced motion no tour control is offered. Because the page now has two tab lists, the hero's tests look up tabs inside the hero only. 78 end-to-end tests pass, 10 skipped by design.
+
+**Lesson:** a pattern that works for adobe.com at its width and item count can break at ours. Check the narrowest state (here, a closed card) at real sizes before adopting it.
