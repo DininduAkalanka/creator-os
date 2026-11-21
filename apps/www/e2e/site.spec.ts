@@ -83,6 +83,73 @@ test.describe("hero slideshow", () => {
     );
   });
 
+  test("keeps going while the mouse rests on a slide", async ({ page, isMobile }) => {
+    test.skip(isMobile, "A phone has no resting mouse.");
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    // v4 stopped for good here: on a full-screen hero the mouse is nearly always over a slide.
+    const hero = page.locator('section[aria-roledescription="carousel"]');
+    const box = await hero.boundingBox();
+    if (!box) throw new Error("The hero has no size.");
+    await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.4);
+    await expect(page.getByRole("tab", { name: /Captions/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+      { timeout: 12_000 },
+    );
+  });
+
+  test("holds while the pointer is on the tabs, then carries on", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Hover needs a mouse.");
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    const progress = page.locator(".tab-progress");
+    await page.getByRole("tab", { name: /Editor review/ }).hover();
+    await expect(progress).toHaveCSS("animation-play-state", "paused");
+    await page.mouse.move(5, 300);
+    await expect(progress).toHaveCSS("animation-play-state", "running");
+  });
+
+  test("swipes between slides on a touch screen", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Swiping is for touch screens.");
+    await page.goto("/");
+    // Pause first, so the automatic rotation can't move the slide during the test.
+    const pause = page.getByRole("button", { name: "Pause slideshow and video" });
+    await expect(pause).toBeVisible({ timeout: 15_000 });
+    await pause.click();
+    const hero = page.locator('section[aria-roledescription="carousel"]');
+    const box = await hero.boundingBox();
+    if (!box) throw new Error("The hero has no size.");
+    const y = box.y + box.height * 0.35;
+    const swipe = async (from: number, to: number) => {
+      const touch = { pointerId: 1, pointerType: "touch", isPrimary: true, clientY: y };
+      await hero.dispatchEvent("pointerdown", { ...touch, clientX: box.x + box.width * from });
+      await hero.dispatchEvent("pointerup", { ...touch, clientX: box.x + box.width * to });
+    };
+    await swipe(0.85, 0.15);
+    const captions = page.getByRole("tab", { name: /Captions/ });
+    await expect(captions).toHaveAttribute("aria-selected", "true");
+    // The sideways-scrolling tab bar follows, so the active tab is fully in view.
+    await expect
+      .poll(() =>
+        captions.evaluate((tab) => {
+          const bar = tab.parentElement?.getBoundingClientRect();
+          const box = tab.getBoundingClientRect();
+          return Boolean(bar && box.left >= bar.left - 1 && box.right <= bar.right + 1);
+        }),
+      )
+      .toBe(true);
+    await swipe(0.15, 0.85);
+    await expect(page.getByRole("tab", { name: /Rough cut/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
   test("shows every service, each with an honest status", async ({ page }) => {
     await page.goto("/");
     const product = page.locator("#product");
@@ -134,13 +201,62 @@ test.describe("media", () => {
   });
 });
 
+test.describe("story slider", () => {
+  test("the dots move between stories", async ({ page }) => {
+    await page.goto("/");
+    const third = page.getByRole("button", { name: "Story 3 of 3" });
+    await third.scrollIntoViewIfNeeded();
+    await third.click();
+    await expect(third).toHaveAttribute("aria-current", "true");
+    await expect(page.getByRole("button", { name: "Story 1 of 3" })).not.toHaveAttribute(
+      "aria-current",
+    );
+  });
+
+  test("the arrows move between stories and go round", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Phones swipe or use the dots; the arrows are for larger screens.");
+    await page.goto("/");
+    const third = page.getByRole("button", { name: "Story 3 of 3" });
+    await third.scrollIntoViewIfNeeded();
+    await page.getByRole("button", { name: "Previous story" }).click();
+    await expect(third).toHaveAttribute("aria-current", "true");
+    await page.getByRole("button", { name: "Next story" }).click();
+    await expect(page.getByRole("button", { name: "Story 1 of 3" })).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+});
+
+test.describe("scroll animations", () => {
+  test("content below the first screen rises in when scrolled to", async ({ page }) => {
+    await page.goto("/");
+    const plan = page.locator("#plans li.reveal").first();
+    await expect(plan).toHaveAttribute("data-reveal", "wait");
+    // Nothing on the first screen is ever hidden (no blink, no delay to the main paint).
+    const hiddenOnFirstScreen = await page.evaluate(
+      () =>
+        [...document.querySelectorAll("[data-reveal]")].filter(
+          (element) => element.getBoundingClientRect().top < window.innerHeight,
+        ).length,
+    );
+    expect(hiddenOnFirstScreen).toBe(0);
+
+    await plan.scrollIntoViewIfNeeded();
+    await expect(plan).toHaveCSS("opacity", "1");
+    // Once shown, the element goes back to its own styles.
+    await expect(plan).not.toHaveAttribute("data-reveal");
+  });
+});
+
 test.describe("reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 
-  test("shows still images instead of playing any video", async ({ page }) => {
+  test("shows still images instead of playing any video, and hides nothing", async ({ page }) => {
     await page.goto("/");
     await page.waitForTimeout(3000);
     await expect(page.locator("video")).toHaveCount(0);
+    await expect(page.locator("[data-reveal]")).toHaveCount(0);
   });
 });
 

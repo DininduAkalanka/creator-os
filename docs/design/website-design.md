@@ -27,7 +27,7 @@ The product lives next to Premiere Pro, DaVinci Resolve and Final Cut Pro, which
 - **Timecode details.** Section markers (`01 — The problem`), mono labels, a ruler, waveforms and a playhead.
 - **One hot accent.** "Cut" orange for anything that is removed or is a call to action; mint "keep" green for what stays.
 - **Rhythm.** Dark sections alternate with warm "paper" sections (Who it's for, FAQ, legal pages) so a long page doesn't feel like one block.
-- **Texture.** A faint film-grain overlay and soft orange glows; no stock photos.
+- **Texture.** Soft orange glows. (The film-grain overlay was removed in v5 for a cleaner look, see §8.)
 
 ## 3. System
 
@@ -54,7 +54,7 @@ No requests to Google Fonts or any other third party.
 ### Motion
 
 - On load: the headline strike (0.8 s), staggered rise of hero elements, and a one-time playhead sweep that raises the cut flags. All CSS, all under 5 s, all off with `prefers-reduced-motion`.
-- On scroll: sections rise in with CSS scroll-driven animations where supported; elsewhere content is simply visible.
+- On scroll: see §8 (v5). Content rises in once as it arrives, the hero drifts and dims, large media settle.
 - Animate only `transform` and `opacity` (the playhead was moved off `left` for this reason).
 
 ### Components
@@ -145,3 +145,37 @@ Also stated on the page, because the docs rule them out: no analytics chatbot, n
 **Product previews** (Channel Audit, recommendation) are drawn in code, labelled "Preview with example data", and aria-hidden because the section text says the same thing.
 
 **Measured (local Lighthouse, final build):** mobile performance 88-91 over five runs (median 89), accessibility 100, best practices 100; desktop 99. Scroll-reveal animations were removed: they cost about 3 mobile points on the longer page. 45 end-to-end tests pass, including against the Docker container.
+
+## 8. v5: Adobe-style motion and a hero swapper that keeps moving (21 Nov 2026)
+
+**Why:** the founder asked for adobe.com's feel: a hero "swapper" that works, animation while scrolling, and a very clean page. Source: a 27-second screen recording of adobe.com (`Screen Recordings/`, git-ignored), studied frame by frame (22 frames).
+
+**What adobe.com does, and what we took**
+
+| Seen in the recording | Here |
+| --- | --- |
+| Hero slides keep rotating while the mouse rests on them; tab cards along the bottom with a progress line | Rotation no longer stops on hover over the slide. It holds only while the pointer is on the tab bar or keyboard focus is inside, then continues where it stopped (the progress line pauses instead of restarting) |
+| New slide crossfades in | Plus: its text rises in line by line and its picture settles from 106% to 100% (slide 1's first paint is left exactly as loaded) |
+| While scrolling, the hero moves up at about half speed and dims as a rounded sheet slides over it | CSS scroll timeline on the hero (`.hero-drift`, `.hero-dim`) |
+| Card rows and grids rise in one after another as they arrive | `ScrollReveal` (one IntersectionObserver): `.reveal` elements below the first screen rise in once, 90 ms apart, capped |
+| Large media start slightly larger and shrink into place as they enter | CSS view timeline (`.settle`) on the feature media and the story slider |
+| Testimonial slider: current slide centred, neighbours peeking at both edges, white round arrows on the edges, dots inside | Story slider rebuilt that way (still no testimonials, names or quotes); dots are real buttons (24 px targets) |
+| A giant wordmark closes the page | `BRAND.name` sized from its length (any final name fits), rising from a clipped edge as the page ends |
+
+Also new: **swipe** between hero slides on touch screens (sideways drags only, so vertical scrolling is untouched), and on phones the sideways-scrolling tab bar follows the active slide.
+
+**Clean:** the full-page film-grain overlay is gone (it made photos look noisy, and it was a fixed layer composited on every scroll frame).
+
+**Rules kept:** only `transform` and `opacity` move. Everything is off for reduced motion (the hero video and rotation also stay off for data-saver visitors). Nothing on the first screen is ever hidden, and without JavaScript nothing is hidden at all. Slide changes are announced to screen readers only while rotation is off (APG). Browsers without CSS scroll timelines (Firefox today) get the reveal and the slideshow, just not the scroll-linked effects.
+
+**Lessons (measured, so nobody repeats them)**
+
+- A full-screen hero must not pause on hover: the mouse is nearly always over it, so v4's slideshow never moved for most desktop visitors (reproduced: 11 s with the mouse on the slide, no change). A click on a tab must not hold it either: hold on keyboard focus only (`:focus-visible`).
+- **Read, then write.** The first `ScrollReveal` read `window.scrollY` after hiding each element. Reading the scroll position or page height makes Chrome lay out the page again, so it ran 54 forced layouts during load and the Lighthouse mobile median fell from 80 to 72. Now positions come from the observer's first report and each callback reads before it writes (trace: 0 forced layouts).
+- `overflow: hidden` makes a box a scroll container, so CSS view timelines inside it attach to that box and never move. Use `overflow-x: clip` / `overflow: clip` where a scroll-linked element needs clipping.
+- An element at the very end of the page can never cross a reveal line set above the bottom edge; `ScrollReveal` leaves such elements visible.
+- Shorthand `animation` resets `animation-timeline`; scroll-linked rules use longhands.
+
+**Measured (local Lighthouse 13.6, simulated phone, same machine and session, previous version vs v5):** mobile performance median 81 → 82 (five runs each: 72-84 vs 74-89), desktop 98-99 → 99-100, accessibility 100, best practices 100. This machine was noisier than for the v4 numbers in §7, so compare only within one session. Layout shift: the previous version showed CLS 0.055 in most runs, caused by the web fonts swapping in on the hero text (not preloaded on purpose, see §6). v5 reads CLS 0, but the swap still happens; the hero now sits in a transform-animated layer, which the metric does not count. Fixing the swap itself (fallback-font metrics) is a separate task.
+
+**Tests:** 8 new unit tests (`src/lib/motion.ts`: swipe direction, stagger). New end-to-end tests: the slideshow keeps going with the mouse on a slide; it holds on the tab bar and resumes; swipe on touch; the tab bar follows the active slide; story dots and arrows (wrapping); scroll reveal (hidden below the fold, shown when scrolled to, attribute removed afterwards, nothing hidden on the first screen); nothing hidden with reduced motion.
