@@ -3,6 +3,8 @@
 > **Superseded:** the MVP order (metadata + analytics first, editing later) and the validation gate. New order: the copilot first (it needs no YouTube login), then the free Channel Audit; YouTube publishing after Google's audit.
 >
 > **Read instead:** Doc 26 §5, §11, §12, ADR-001, ADR-019.
+>
+> **Geography superseded by ADR-020:** the Sri Lanka launch, India expansion and regional order (§53–56) no longer apply. The focus is English-speaking creators worldwide.
 
 ---
 

@@ -24,7 +24,7 @@ The product name is **not final**. "CreatorOS" / `creatoros` is the internal cod
 
 | # | File | Use |
 | --- | --- | --- |
-| 1 | `docs/00_Decision_Log.md` | ADR-001 to 019. **Wins over everything.** |
+| 1 | `docs/00_Decision_Log.md` | ADR-001 to 020. **Wins over everything.** |
 | 2 | `docs/26_Revised_SaaS_Foundation_and_Unit_Economics.md` | Scope, MVP in/out, pricing, metering, data additions (§14) |
 | 3 | `docs/Implementation_Plan.md` | Steps, exit tests, data model v1, engineering standards, beta metrics |
 | 4 | `docs/engineering/PROGRESS.md` | Where we are now, what's next, open questions |
@@ -131,7 +131,7 @@ tools/
   - Prefer well-maintained packages.
   - Explain each new dependency in the commit message.
   - Don't add a dependency for something you can write clearly in under 30 lines.
-- **Text.** UI strings are i18n-ready (Sinhala, Tamil and Hindi come later). Test with non-Latin text.
+- **Text.** UI strings are i18n-ready. English first; other languages only when demand justifies them (ADR-020). Test with non-Latin and right-to-left text.
 
 ---
 
@@ -202,7 +202,7 @@ Needs from you: <accounts, keys, approvals, answers>
 
 - **Staff engineer:** Does it match the ADRs? Is it the simplest design that meets the exit test? Are the package boundaries respected? Is anything built that the task didn't ask for?
 - **Backend:** Is input validated at the edge? Are transactions correct? Is it idempotent where retried? Does it use the error-code catalog? Is there pagination? Are there N+1 queries? Are timeouts set?
-- **Frontend:** Are loading, empty and error states covered? Is it accessible (labels, keyboard, focus, contrast)? Does it use the typed client? Are there no secrets in the client bundle? Does it handle Sinhala/Tamil text?
+- **Frontend:** Are loading, empty and error states covered? Is it accessible (labels, keyboard, focus, contrast)? Does it use the typed client? Are there no secrets in the client bundle? Does it handle non-Latin and right-to-left text?
 - **QA:** Are there unit tests and integration tests? Is there a cross-tenant test for new data? Are edge cases covered: empty, maximum size, unicode, concurrency, retries?
 - **Security:**
   - Does every route check auth and membership/role?
