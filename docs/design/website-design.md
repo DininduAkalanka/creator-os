@@ -116,3 +116,32 @@ v3 moves from drawn illustrations to a photo- and video-led page, modelled on ad
 **Measured (local Lighthouse, 22 Nov 2026):** mobile performance 89-91 (median 91), accessibility 100, best practices 100; desktop performance 99. Real (observed) LCP about 0.86 s on the simulated phone; Lighthouse's simulated LCP is about 3.2 s because the hero is now an image, which is the main remaining performance gap. 39 end-to-end tests pass, including axe on every page.
 
 Spare generated assets not used yet: `talking-to-lens.jpg` (good for a future captions page) and the original mobile hero photo.
+
+## 7. v4: every service, Adobe-style structure (22 Nov 2026)
+
+**Why:** v3 only showed the Production Copilot, so the product looked like another cutting tool. The docs describe a loop (cut → review → learn → next idea), and that loop is the difference. v4 shows every planned service with an honest status.
+
+**Services and status (from the docs):**
+
+| Service | Status label | Source |
+| --- | --- | --- |
+| AI rough cut, captions/chapters/titles/thumbnail ideas, export to the creator's editor | First release | ADR-001, ADR-015 |
+| Editor review (seats, time-coded comments, approvals) | Beta | ADR-002, Implementation Plan Step 4 |
+| Free Channel Audit (read-only; own-channel baselines at day 7/28; topic groups; 5-8 rule-based insights with evidence; High/Medium/Low confidence; feedback buttons; auto creator profile) | Beta | ADR-001, ADR-004, ADR-009, ADR-019, Step 3 |
+| What to film next (recommendations built on Audit evidence; accept/dismiss/already planned) | Beta | Core loop; ADR-004 |
+| Publishing, Shorts, B-roll, outcome tracking, creator memory, cloud render | Later | "After the beta" list; ADR-001 Phase 2 |
+
+Also stated on the page, because the docs rule them out: no analytics chatbot, no title/thumbnail A/B tests, no comparisons with other creators' private data (ADR-017), and plans differ only by footage hours, seats and channels (ADR-014).
+
+**Adobe patterns adopted (from adobe.com screenshots and the Premiere page):**
+
+- Hero "swapper": five full-bleed slides (one per service) with tab cards along the bottom; the active tab turns white with a progress line; auto-advance every 8 s; next arrow. Built as a WAI-ARIA tabbed carousel: arrow/Home/End keys, inactive slides `inert`, rotation pauses on hover/focus, one pause button for slideshow and video (WCAG 2.2.2), no motion for reduced-motion or data-saver visitors.
+- Header transparent over the hero, then a floating, frosted, rounded bar once the page scrolls.
+- The first section is a rounded "sheet" that slides over the hero.
+- "Everything you need" card rail: label bar with status on top, large visual below.
+- Full-width story slider (scroll-snap, arrows, dots) for who it's for, with no quotes or names.
+- Section-by-section loading: only slide 1's poster loads eagerly; other slides' media mount after the page loads; videos download only when played; the demo's code downloads only when scrolled near.
+
+**Product previews** (Channel Audit, recommendation) are drawn in code, labelled "Preview with example data", and aria-hidden because the section text says the same thing.
+
+**Measured (local Lighthouse, final build):** mobile performance 88-91 over five runs (median 89), accessibility 100, best practices 100; desktop 99. Scroll-reveal animations were removed: they cost about 3 mobile points on the longer page. 45 end-to-end tests pass, including against the Docker container.

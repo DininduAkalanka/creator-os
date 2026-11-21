@@ -15,10 +15,12 @@ test.describe("home page", () => {
 
   test("cut demo: accept all, keep one, start over", async ({ page }) => {
     await page.goto("/");
+    await page.locator("#try-it").scrollIntoViewIfNeeded();
     const demo = page.getByRole("figure", { name: "Suggested cuts" });
     const length = (value: string) => demo.getByText(value, { exact: true });
 
-    await expect(length("0:27.0")).toBeVisible();
+    // The demo code loads only when scrolled to, so allow extra time for the first render.
+    await expect(length("0:27.0")).toBeVisible({ timeout: 20_000 });
 
     await demo.getByRole("button", { name: "Accept all cuts" }).click();
     await expect(length("0:14.3")).toBeVisible();
@@ -36,12 +38,64 @@ test.describe("home page", () => {
 
   test("cut demo works from the keyboard", async ({ page }) => {
     await page.goto("/");
+    await page.locator("#try-it").scrollIntoViewIfNeeded();
     const demo = page.getByRole("figure", { name: "Suggested cuts" });
     const retake = demo.getByRole("button", { name: /^Cut retake:/ });
+    await expect(retake).toBeVisible({ timeout: 20_000 });
     await retake.focus();
     await page.keyboard.press("Enter");
     await expect(retake).toHaveAttribute("aria-pressed", "true");
     await expect(demo.getByText("0:23.2", { exact: true })).toBeVisible();
+  });
+});
+
+test.describe("hero slideshow", () => {
+  test("tabs switch the slide, and arrow keys move between tabs", async ({ page }) => {
+    await page.goto("/");
+    const auditTab = page.getByRole("tab", { name: /Channel Audit/ });
+    await auditTab.click();
+    await expect(auditTab).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("heading", { name: "See what your channel is already telling you." }),
+    ).toBeVisible();
+
+    await page.keyboard.press("ArrowRight");
+    const nextTab = page.getByRole("tab", { name: /What to film next/ });
+    await expect(nextTab).toBeFocused();
+    await expect(nextTab).toHaveAttribute("aria-selected", "true");
+    await page.keyboard.press("Home");
+    await expect(page.getByRole("tab", { name: /Rough cut/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
+  test("pausing stops the slideshow from advancing", async ({ page }) => {
+    await page.goto("/");
+    const pause = page.getByRole("button", { name: "Pause slideshow and video" });
+    await expect(pause).toBeVisible({ timeout: 15_000 });
+    await pause.click();
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(9000);
+    await expect(page.getByRole("tab", { name: /Rough cut/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
+  test("shows every service, each with an honest status", async ({ page }) => {
+    await page.goto("/");
+    const product = page.locator("#product");
+    for (const name of [
+      "AI rough cut",
+      "Free Channel Audit",
+      "What to film next",
+      "Editor review",
+    ]) {
+      await expect(product.getByRole("heading", { name, exact: true })).toBeVisible();
+    }
+    await expect(page.locator("#channel-audit")).toContainText("Preview with example data");
+    await expect(page.locator("#next-video")).toContainText("Example data for illustration");
   });
 });
 
@@ -52,10 +106,12 @@ test.describe("media", () => {
       () => document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') !== "",
     );
     test.skip(!canPlayMp4, "This browser build has no H.264 decoder (open-source Chromium in CI).");
-    const pause = page.getByRole("button", { name: "Pause background video" }).first();
+    const pause = page.getByRole("button", { name: "Pause slideshow and video" }).first();
     await expect(pause).toBeVisible({ timeout: 15_000 });
     await pause.click();
-    await expect(page.getByRole("button", { name: "Play background video" }).first()).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Play slideshow and video" }).first(),
+    ).toBeVisible();
   });
 
   test("does not load videos below the fold until they are scrolled to", async ({ page }) => {
@@ -117,10 +173,10 @@ test.describe("navigation", () => {
       "aria-expanded",
       "true",
     );
-    await expect(page.getByRole("link", { name: "Founding offer" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Plans", exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
-    await expect(page.getByRole("link", { name: "Founding offer" })).toBeHidden();
+    await expect(page.getByRole("link", { name: "Plans", exact: true })).toBeHidden();
   });
 
   test("unknown pages return 404 with a way home", async ({ page }) => {
