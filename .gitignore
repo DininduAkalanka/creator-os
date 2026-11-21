@@ -43,3 +43,10 @@ data/
 *.wav
 *.mp3
 *.opus
+
+# Original photo/video-poster exports (large). Web-ready copies live in apps/www/src/assets/media.
+apps/www/media-src/
+apps/www/src/photos/
+
+# Exception: the website's own AI-generated marketing loops (not creator footage).
+!apps/www/public/videos/*.mp4

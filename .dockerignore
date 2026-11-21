@@ -23,3 +23,6 @@ data
 **/*.opus
 npm-debug.log*
 pnpm-debug.log*
+
+# Exception: the website's own marketing loops must be in the image.
+!apps/www/public/videos/*.mp4
