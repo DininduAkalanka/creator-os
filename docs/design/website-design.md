@@ -1,6 +1,6 @@
 # Website design: research, system and quality bar
 
-Status: v6 of the pre-launch site (`apps/www`), 21 Nov 2026: **light first** (§11). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11, §11 wins.
+Status: v6.1 of the pre-launch site (`apps/www`), 22 Nov 2026: **light first** (§11), **adobe.com-style type and icons** (§12). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11, §11 wins.
 
 ## 1. What we learned from production sites
 
@@ -50,11 +50,12 @@ v6 values (the v2 to v5.1 dark and paper values are gone; see §11 for why).
 
 Every text token meets WCAG AA (4.5:1) on `--bg`, `--raised` and `--panel` in both themes; the axe tests check this on every page. `--brand` is 3.3:1 on white, enough for graphics (WCAG 1.4.11) but not for small text, which uses `--accent`. Shadows (`shadow-soft`, `shadow-float`, `shadow-lift`) take their colour from `--shadow`, so they stay soft on white and deep on black.
 
-### Type (self-hosted, OFL, Latin subset, about 127 KB in total)
+### Type (self-hosted, OFL, Latin subset; since v6.1, see §12)
 
-- **Bricolage Grotesque** (display): headlines, with optical sizing. Class `.display`.
-- **Instrument Sans** (body and UI).
-- **Martian Mono** (labels, timecodes, file names). Class `.label-mono`.
+- **Source Sans 3** for headlines, text and UI: one family, as adobe.com uses one. Weights 200 to 900; headlines 800 (`.display`), the hero and page titles 900. 29 KB upright, 29 KB italic (the italic loads only when italic text is on screen).
+- **Detail labels** (`.detail`): Source Sans 3, 12 px, bold, uppercase, as adobe.com's "detail" text (eyebrows on media, status badges, small labels).
+- **Martian Mono** only inside the product screens (the editor demo, the previews, a video timecode). Class `.label-mono`.
+- Until v6, Bricolage Grotesque (display) and Instrument Sans (text) were used; both are gone.
 
 No requests to Google Fonts or any other third party.
 
@@ -66,7 +67,7 @@ No requests to Google Fonts or any other third party.
 
 ### Components
 
-`SectionIntro` (optionally centred), `ServiceRail` (client, v6), `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (white, one readable column), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
+`SectionIntro` (optionally centred), `ServiceRail` (client, v6), `AppIcon` and the line icons in `icons.tsx` (v6.1), `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (white, one readable column), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
 
 ## 4. Engineering quality bar
 
@@ -289,3 +290,33 @@ Deliberately **not** used: in the hero (the header already shows it), on the AI-
 - A colour inside a Tailwind arbitrary gradient list (`bg-[radial-gradient(...),#0e0d1c]`) is invalid CSS: a colour can't be a background-image layer, so the browser drops the whole declaration. The old dark page hid this; on white the card went see-through. Set the colour and the gradient as two classes.
 - The quality gates run axe with reduced motion, so states that exist only with motion on are not checked there. Lighthouse found the faded word; it now has its own test.
 - On a white page, dark scrims on carousel neighbours look heavy; a white wash plus a slight scale reads as depth.
+
+## 12. v6.1: adobe.com-style type and icons (22 Nov 2026)
+
+**Why:** the founder asked for adobe.com's fonts and icons too, not only its white page.
+
+**Research (adobe.com's public Milo library: `libs/styles/styles.css`, `libs/blocks/marquee/marquee.css`):**
+
+| adobe.com (Milo) | Value |
+| --- | --- |
+| Font | `'Adobe Clean', adobe-clean, 'Trebuchet MS', sans-serif` for everything; there is no separate heading font |
+| Headings | Weight 700 (800 on the newer mobile-web pages); desktop sizes 80 / 44 / 36 / 28 / 24 px; line height about 1.1 to 1.25 |
+| Text | 18 px / 27 px by default; 16 px / 24 px for smaller text |
+| Detail (eyebrow) text | Weight 700, uppercase, 12 to 16 px |
+| Buttons | Pill-shaped (radius 16 to 30 px), 2 px border, weight 700, 15 to 22 px; outline buttons fill with the text colour on hover |
+| Icons | Sizes 16, 24, 32, 40, 56, 64, 80 px; a product icon next to each product name |
+| Colours | Text `#2c2c2c`, greys `#F8F8F8` to `#242424`, accent blue `rgb(59, 99, 251)` |
+
+**What we can't copy:** Adobe Clean is Adobe's own typeface, licensed only to Adobe, and Adobe's product icons are its trademarks. We use their system, not their assets.
+
+**Type:** **Source Sans 3** is Adobe's open-source humanist sans (Paul D. Hunt, Adobe Type; SIL Open Font License), the closest relative of Adobe Clean that anyone may ship. Like adobe.com, the site now uses one family for everything: headlines 800 with slightly tight spacing (-0.025em), the hero and page titles 900 (black), text 18 to 20 px with relaxed line height, the navigation and buttons bold. Section eyebrows are plain sentence-case text above the heading (adobe.com: "Features and Releases" above "Explore what's new."), and sections are no longer numbered. Small labels use `.detail`: bold uppercase, as on adobe.com. The timecode mono font stays only where it belongs: inside the product screens.
+
+**Buttons:** bold pills with a 2 px border. The primary one is navy (our colour where adobe.com uses blue or black); the outline one fills with the text colour on hover, as adobe.com's does.
+
+**App icons (`AppIcon`):** an original family in the spirit of adobe.com's product icons. Each service has a rounded tile in the logo's navy with its two-letter mark in its own colour and a thin inner line of the same colour: Rc (AI rough cut) red, Cc (captions) amber, Ex (export) blue, Rv (editor review) violet, Au (Channel Audit) green, Nx (what to film next) pink. Planned items have quieter grey marks. Every letter colour is at least 6.5:1 on the navy. Sizes follow Milo's scale (16 to 56 px). The icons appear wherever adobe.com shows a product icon: on the services cards, in the Product menu, on the hero tabs and slides, on the "Later" cards, and in a new footer "Product" column (adobe.com's "Featured products"). They are decorative (`aria-hidden`): the name is always written next to them.
+
+**UI icons (`icons.tsx`):** one line family on a 20 px grid with rounded ends (chevrons, arrows, plus, close, menu, loop, play, pause, check, cross). They replace the text characters → › ↺ + and the one-off drawings, so every icon has the same weight in every browser and font. Arrows and chevrons flip in right-to-left text. The video and slideshow pause buttons inside media became rounded squares, like adobe.com's.
+
+**Performance:** the fonts got smaller (one 29 KB file on most pages, instead of 40 KB for the display font plus the text font). Lighthouse on this machine varied a lot this session because Docker was running alongside; alternating runs of the previous build (v6, in Docker) and this build under the same conditions gave v6 82-87 and v6.1 98 (mobile performance), with accessibility and best practices at 100. Several runs failed with the known `NO_NAVSTART` trace error and were discarded.
+
+**Tests:** all 74 end-to-end tests pass (12 skipped by design). New: the footer lists every service, each linked to its section.
