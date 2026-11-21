@@ -206,3 +206,32 @@ Also new: **swipe** between hero slides on touch screens (sideways drags only, s
 - Wait for something that only exists after hydration (the pause button) before clicking client-side controls.
 
 **Verified:** 59 end-to-end tests pass (9 skipped by design: touch-only or mouse-only), the slider group 84 times in a row under parallel load; axe finds nothing on the open menu; no horizontal overflow at 1887, 1280, 1024 and 412 px.
+
+## 10. Brand logo (21 Nov 2026)
+
+**Source:** the founder's two logo PNGs (repo folder `logo/`): the symbol with the name, and the symbol only. Both are 2000 x 2000, navy `#0b0a47` and red `#fe4d49` on a flat near-white background (not transparent), so they cannot be placed on the dark site as they are.
+
+**Pipeline:** copies live in `apps/www/media-src/brand/` (git-ignored, like the photos) as `logo-full.png` and `logo-symbol.png`. `pnpm --filter @creatoros/www logo` traces each colour separately into SVG paths (coverage field per colour, 50% contours with sub-pixel marching squares, light pre-blur against the PNGs' soft edges, Ramer-Douglas-Peucker at 0.3 px) and writes:
+
+| Output | Use |
+| --- | --- |
+| `src/components/brand-paths.ts` | `<Logo>` (symbol and name, 7 KB), `<LogoSymbol>` (5.5 KB), `<Wordmark>` (the name only, 4 KB) |
+| `src/app/icon.svg` | Favicon: the symbol on a white rounded tile |
+| `src/app/apple-icon.png` | 180 x 180 home-screen icon |
+
+The traces follow the PNGs faithfully, including their slightly uneven edges (visible only far above any size the site uses). When the designer's original vector files exist, they should replace these traces.
+
+**Colour:** the navy "ink" is drawn in the current text colour, so on the dark site the logo is warm white; the red accent always stays the logo's red. On white (favicon, app icon) the logo keeps its navy.
+
+**Where it is used, and why**
+
+| Place | Drawing | Size |
+| --- | --- | --- |
+| Header, every page | Symbol and name (introduces the brand, links home; accessible name "CreatorOS") | 28 px tall on phones, 36 px on larger screens |
+| Footer brand column | Symbol and name | 36 px |
+| Closing wordmark at the very end | The name as set in the logo, not re-typed in our display font | Full content width, rises in at the end of the page |
+| 404 page | Symbol only | 80 px |
+| Browser tab, home screen | Symbol on a white tile, so it reads on light and dark tabs | 16-180 px |
+| Social preview card | Symbol and name, light | 72 px |
+
+Deliberately **not** used: in the hero (the header already shows it), on the AI-generated photos, or inside the product previews. Don't stretch it, don't recolour the red, and keep the full logo at least 24 px tall (the symbol at least 16 px).

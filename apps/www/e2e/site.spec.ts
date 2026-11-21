@@ -414,6 +414,31 @@ test.describe("waitlist form", () => {
 });
 
 test.describe("navigation", () => {
+  test("the header logo is named for screen readers and leads home", async ({ page }) => {
+    await page.goto("/privacy");
+    const home = page.getByRole("banner").getByRole("link", { name: "CreatorOS", exact: true });
+    await expect(home).toBeVisible();
+    await home.click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("the favicon and home-screen icon come from the logo and load", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/");
+    const icons = page.locator('link[rel="icon"], link[rel="apple-touch-icon"]');
+    await expect(icons).toHaveCount(2);
+    const hrefs = await icons.evaluateAll((links) =>
+      links.map((link) => link.getAttribute("href")),
+    );
+    for (const href of hrefs) {
+      expect(href).toBeTruthy();
+      const response = await request.get(href ?? "");
+      expect(response.ok()).toBe(true);
+    }
+  });
+
   test("mobile menu opens, and Escape closes it and returns focus", async ({ page, isMobile }) => {
     test.skip(!isMobile, "The menu button only exists on small screens.");
     await page.goto("/");

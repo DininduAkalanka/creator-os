@@ -147,6 +147,8 @@ pnpm format                   # fix formatting (Prettier)
 pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # the local gate (CI runs the same)
 pnpm audit --prod --audit-level high   # dependency audit (CI runs it too)
 pnpm test:e2e                 # Playwright end-to-end + axe accessibility tests (builds first; uses installed Edge locally)
+pnpm --filter @creatoros/www media   # photos/posters in apps/www/media-src/ -> web-ready JPEGs
+pnpm --filter @creatoros/www logo    # logo PNGs in apps/www/media-src/brand/ -> SVG paths, favicon, app icon
 pnpm docker:www               # website production image in Docker -> http://localhost:3000
 pnpm docker:down              # stop it
 ```
