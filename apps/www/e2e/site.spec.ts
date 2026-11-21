@@ -45,6 +45,49 @@ test.describe("home page", () => {
   });
 });
 
+test.describe("media", () => {
+  test("hero video can be paused and resumed", async ({ page }) => {
+    await page.goto("/");
+    const canPlayMp4 = await page.evaluate(
+      () => document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') !== "",
+    );
+    test.skip(!canPlayMp4, "This browser build has no H.264 decoder (open-source Chromium in CI).");
+    const pause = page.getByRole("button", { name: "Pause background video" }).first();
+    await expect(pause).toBeVisible({ timeout: 15_000 });
+    await pause.click();
+    await expect(page.getByRole("button", { name: "Play background video" }).first()).toBeVisible();
+  });
+
+  test("does not load videos below the fold until they are scrolled to", async ({ page }) => {
+    const requested: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/videos/")) requested.push(request.url());
+    });
+    await page.goto("/");
+    await page.waitForTimeout(3000);
+    expect(requested.some((url) => url.includes("talking-loop"))).toBe(false);
+  });
+
+  test("labels every photo and video as AI-generated", async ({ page }) => {
+    await page.goto("/");
+    const figures = page.locator("main figure:has(img)");
+    const labelled = page.locator("main figure:has(img)", { hasText: /AI-generated/ });
+    // The demo figure has no photo; every figure with a photo carries the label.
+    await expect(labelled).toHaveCount(await figures.count());
+    await expect(page.getByText("AI-generated video").first()).toBeVisible();
+  });
+});
+
+test.describe("reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("shows still images instead of playing any video", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForTimeout(3000);
+    await expect(page.locator("video")).toHaveCount(0);
+  });
+});
+
 test.describe("waitlist form", () => {
   test("shows field errors, then says honestly that sign-ups are not open", async ({ page }) => {
     await page.goto("/#waitlist");

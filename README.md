@@ -81,3 +81,4 @@ pnpm docker:down              # stop and remove the container
 - Search engines are kept out unless `SITE_INDEXABLE=true`. Set it only on the launched production site.
 - Page text lives in `apps/www/src/content/`, apart from layout code, so it can be translated later.
 - Design system, research and quality bar: [docs/design/website-design.md](docs/design/website-design.md).
+- Photos and videos: originals go in `apps/www/media-src/` (not committed); run `pnpm --filter @creatoros/www media` to make web-ready copies. Website videos live in `apps/www/public/videos/`. Every AI-generated photo or video must keep its on-page label.

@@ -82,3 +82,37 @@ Lessons recorded here so nobody repeats them:
 - Replace the hero illustration's role as "demo" with a real 30–60 s demo video from the founder's own footage (keep the interactive demo next to it).
 - Final brand: product name, logo and the social card depend on it.
 - Pricing page, Channel Audit page and comparison pages come in the beta phase (pre-launch plan).
+
+## 6. v3: photography, video and loading (22 Nov 2026)
+
+v3 moves from drawn illustrations to a photo- and video-led page, modelled on adobe.com's product pages (Premiere: short verb-led headlines, stacked feature blocks with one strong visual each) while keeping our own system and voice.
+
+**Page story:** video hero (the problem, felt) → "You know this night" (the usual evening vs. the same evening with the product) → hands-on demo → four stacked feature blocks with photos and UI overlays → who it's for (three photo cards, second person, no quotes) → founding pass → creator-worry FAQ → waitlist over the "evening back" photo.
+
+**Voice:** one creator talking to another. Specific ("so, basically", "upload day is Thursday"), never hype. Illustrative times are labelled as examples.
+
+**Honesty rules for media**
+
+- All photos and videos are AI-generated and carry an "AI-generated image/video" label on the page (EU AI Act Art. 50 transparency; AGENTS.md: label mock-ups). An end-to-end test fails if a photo loses its label.
+- Generated people never get names or quotes. Testimonials only from real people, with permission.
+- The product demo is never AI video: it is the interactive demo now and a real screen recording later.
+
+**Media workflow**
+
+1. Put originals in `apps/www/media-src/` (git-ignored) with clean names.
+2. Run `pnpm --filter @creatoros/www media`: sharp writes web-ready JPEGs (max 2000 px, about 80-330 KB) to `src/assets/media/`. Next.js `<Image>` serves AVIF/WebP at the needed size.
+3. Videos go in `public/videos/` (an explicit exception to the repo's "no .mp4" rule, in `.gitignore` and `.dockerignore`). Each has a poster from its first frame in `media-src/`.
+
+**Loading rules (from adobe.com / aem.live "Keeping it 100", verified here with Lighthouse)**
+
+| Rule | How it is applied |
+| --- | --- |
+| Keep the bytes before the main paint small | Hero poster is about 20 KB (AVIF, phone crop); fonts are **not** preloaded (`preload: false`), the display font uses the 40 KB weight-only file |
+| The hero image paints first; video never competes | `BackgroundVideo` starts after `load` + idle, only when on screen; never for reduced-motion or data-saver visitors |
+| Lazy-load everything below the fold | Photos lazy-load; the second video downloads only when scrolled to (tested) |
+| No expensive effects on the first screen | No `backdrop-filter` over the playing video; no blurred-SVG image placeholders (a solid panel colour instead) |
+| Motion is optional | Every looping video has a pause button (WCAG 2.2.2) |
+
+**Measured (local Lighthouse, 22 Nov 2026):** mobile performance 89-91 (median 91), accessibility 100, best practices 100; desktop performance 99. Real (observed) LCP about 0.86 s on the simulated phone; Lighthouse's simulated LCP is about 3.2 s because the hero is now an image, which is the main remaining performance gap. 39 end-to-end tests pass, including axe on every page.
+
+Spare generated assets not used yet: `talking-to-lens.jpg` (good for a future captions page) and the original mobile hero photo.
