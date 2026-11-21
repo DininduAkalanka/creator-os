@@ -514,6 +514,14 @@ test.describe("navigation", () => {
     await expect(page).toHaveURL(/\/$/);
   });
 
+  test("the footer lists every service, each linked to its section", async ({ page }) => {
+    await page.goto("/privacy");
+    const product = page.getByRole("navigation", { name: "Product", exact: true });
+    await expect(product.getByRole("link")).toHaveCount(6);
+    await product.getByRole("link", { name: "Free Channel Audit" }).click();
+    await expect(page).toHaveURL(/\/#channel-audit$/);
+  });
+
   test("the favicon and home-screen icon come from the logo and load", async ({
     page,
     request,
