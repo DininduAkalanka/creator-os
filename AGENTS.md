@@ -146,6 +146,7 @@ pnpm --filter @creatoros/www dev   # one app only
 pnpm format                   # fix formatting (Prettier)
 pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # the local gate (CI runs the same)
 pnpm audit --prod --audit-level high   # dependency audit (CI runs it too)
+pnpm test:e2e                 # Playwright end-to-end + axe accessibility tests (builds first; uses installed Edge locally)
 pnpm docker:www               # website production image in Docker -> http://localhost:3000
 pnpm docker:down              # stop it
 ```
@@ -156,8 +157,9 @@ Not available yet (added in later milestones):
 docker compose up -d          # postgres+pgvector, redis, local S3 (P-03)
 pnpm db:migrate               # apply migrations
 pnpm test:int                 # integration tests (Testcontainers)
-pnpm test:e2e                 # Playwright
 ```
+
+Website look and behaviour: follow `docs/design/website-design.md` (tokens, type, motion, quality bar).
 
 ---
 

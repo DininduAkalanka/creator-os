@@ -38,6 +38,7 @@ docs/
   26_*.md                 revised SaaS foundation and unit economics (current)
   Implementation_Plan.md  step-by-step build plan
   engineering/            PROGRESS.md (agent memory), PLAN.md (written in M0)
+  design/                 website-design.md (design system, research, quality bar)
   models/                 unit_economics.py
 ```
 
@@ -54,6 +55,7 @@ pnpm install
 cp .env.example .env.local    # optional: defaults work for local use
 pnpm dev                      # http://localhost:3000
 pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # run before every commit
+pnpm test:e2e                 # end-to-end + accessibility tests (Playwright + axe; uses your installed Microsoft Edge)
 ```
 
 ### Run the website in Docker
@@ -78,3 +80,4 @@ pnpm docker:down              # stop and remove the container
 - The waitlist form validates input but **does not store anything yet**. It tells visitors so. Storage needs the approved waitlist schema, a database and an email provider.
 - Search engines are kept out unless `SITE_INDEXABLE=true`. Set it only on the launched production site.
 - Page text lives in `apps/www/src/content/`, apart from layout code, so it can be translated later.
+- Design system, research and quality bar: [docs/design/website-design.md](docs/design/website-design.md).
