@@ -1,6 +1,10 @@
 import { ImageResponse } from "next/og";
+import { LOGO_FULL } from "@/components/brand-paths";
+import { LOGO_ACCENT } from "@/components/logo";
 import { BRAND } from "@/config/site";
 import { hero } from "@/content/home";
+
+const LOGO_HEIGHT = 72;
 
 export const alt = `${BRAND.name}: ${hero.headline}`;
 export const size = { width: 1200, height: 630 };
@@ -27,23 +31,16 @@ export default function OpenGraphImage() {
         color: FG,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 18, fontSize: 34 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            width: 64,
-            height: 64,
-            borderRadius: 18,
-            background: ACCENT,
-          }}
+      {/* The logo, light ink for the dark card; the red accent keeps the logo's red. */}
+      <div style={{ display: "flex" }}>
+        <svg
+          width={Math.round((LOGO_HEIGHT * LOGO_FULL.width) / LOGO_FULL.height)}
+          height={LOGO_HEIGHT}
+          viewBox={`0 0 ${LOGO_FULL.width} ${LOGO_FULL.height}`}
         >
-          <div style={{ width: 16, height: 22, borderRadius: 4, background: INK }} />
-          <div style={{ width: 16, height: 22, borderRadius: 4, background: INK, opacity: 0.55 }} />
-        </div>
-        {BRAND.name}
+          <path fill={FG} fillRule="evenodd" d={LOGO_FULL.ink} />
+          <path fill={LOGO_ACCENT} fillRule="evenodd" d={LOGO_FULL.accent} />
+        </svg>
       </div>
       <div
         style={{

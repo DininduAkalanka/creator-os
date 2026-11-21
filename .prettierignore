@@ -16,3 +16,7 @@ pnpm-lock.yaml
 **/test-results/
 **/playwright-report/
 **/blob-report/
+
+# Logo paths written by apps/www/scripts/prepare-logo.mjs
+apps/www/src/components/brand-paths.ts
+apps/www/src/app/icon.svg

@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { BRAND } from "@/config/site";
 import { siteCopy } from "@/content/site";
 import { HeaderShell } from "./header-shell";
-import { LogoMark } from "./logo";
+import { Logo } from "./logo";
 import { MobileMenu } from "./mobile-menu";
 import { ProductMenu } from "./product-menu";
 import { buttonPrimary, container } from "./styles";
@@ -20,12 +19,9 @@ export function SiteHeader() {
   return (
     <HeaderShell>
       <div className={`${container} relative flex h-16 items-center justify-between gap-4`}>
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 text-[0.95rem] font-semibold tracking-tight"
-        >
-          <LogoMark />
-          {BRAND.name}
+        {/* The full logo (symbol and name); its accessible name is the brand name. */}
+        <Link href="/" className="flex shrink-0 items-center rounded-md py-1 text-fg">
+          <Logo className="h-7 w-auto sm:h-9" />
         </Link>
         <nav aria-label={nav.label} className="hidden lg:block">
           <ul className="flex items-center gap-1 text-sm">
