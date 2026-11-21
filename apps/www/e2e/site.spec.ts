@@ -82,9 +82,12 @@ test.describe("home page", () => {
 });
 
 test.describe("hero slideshow", () => {
+  /** The page has two tab lists (the hero and the services); these tests are about the hero. */
+  const heroOf = (page: Page) => page.locator('section[aria-roledescription="carousel"]');
+
   test("tabs switch the slide, and arrow keys move between tabs", async ({ page }) => {
     await page.goto("/");
-    const auditTab = page.getByRole("tab", { name: /Channel Audit/ });
+    const auditTab = heroOf(page).getByRole("tab", { name: /Channel Audit/ });
     await auditTab.click();
     await expect(auditTab).toHaveAttribute("aria-selected", "true");
     await expect(
@@ -92,11 +95,11 @@ test.describe("hero slideshow", () => {
     ).toBeVisible();
 
     await page.keyboard.press("ArrowRight");
-    const nextTab = page.getByRole("tab", { name: /What to film next/ });
+    const nextTab = heroOf(page).getByRole("tab", { name: /What to film next/ });
     await expect(nextTab).toBeFocused();
     await expect(nextTab).toHaveAttribute("aria-selected", "true");
     await page.keyboard.press("Home");
-    await expect(page.getByRole("tab", { name: /Rough cut/ })).toHaveAttribute(
+    await expect(heroOf(page).getByRole("tab", { name: /Rough cut/ })).toHaveAttribute(
       "aria-selected",
       "true",
     );
@@ -109,7 +112,7 @@ test.describe("hero slideshow", () => {
     await pause.click();
     await page.mouse.move(0, 0);
     await page.waitForTimeout(9000);
-    await expect(page.getByRole("tab", { name: /Rough cut/ })).toHaveAttribute(
+    await expect(heroOf(page).getByRole("tab", { name: /Rough cut/ })).toHaveAttribute(
       "aria-selected",
       "true",
     );
@@ -127,7 +130,7 @@ test.describe("hero slideshow", () => {
     const box = await stage.boundingBox();
     if (!box) throw new Error("The hero stage has no size.");
     await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.4);
-    await expect(page.getByRole("tab", { name: /Captions/ })).toHaveAttribute(
+    await expect(heroOf(page).getByRole("tab", { name: /Captions/ })).toHaveAttribute(
       "aria-selected",
       "true",
       { timeout: 12_000 },
@@ -141,7 +144,9 @@ test.describe("hero slideshow", () => {
       timeout: 15_000,
     });
     const progress = page.locator('section[aria-roledescription="carousel"] .tab-progress');
-    await page.getByRole("tab", { name: /Editor review/ }).hover();
+    await heroOf(page)
+      .getByRole("tab", { name: /Editor review/ })
+      .hover();
     await expect(progress).toHaveCSS("animation-play-state", "paused");
     await page.mouse.move(5, 300);
     await expect(progress).toHaveCSS("animation-play-state", "running");
@@ -165,7 +170,7 @@ test.describe("hero slideshow", () => {
       await stage.dispatchEvent("pointerup", { ...touch, clientX: box.x + box.width * to });
     };
     await swipe(0.85, 0.15);
-    const captions = page.getByRole("tab", { name: /Captions/ });
+    const captions = heroOf(page).getByRole("tab", { name: /Captions/ });
     await expect(captions).toHaveAttribute("aria-selected", "true");
     // The sideways-scrolling tab bar follows, so the active tab is fully in view.
     await expect
@@ -178,71 +183,107 @@ test.describe("hero slideshow", () => {
       )
       .toBe(true);
     await swipe(0.15, 0.85);
-    await expect(page.getByRole("tab", { name: /Rough cut/ })).toHaveAttribute(
+    await expect(heroOf(page).getByRole("tab", { name: /Rough cut/ })).toHaveAttribute(
       "aria-selected",
       "true",
     );
   });
 
-  test("shows every service, each with an honest status", async ({ page }) => {
+  test("previews come with an honest example-data label", async ({ page }) => {
     await page.goto("/");
-    const product = page.locator("#product");
-    for (const name of [
-      "AI rough cut",
-      "Free Channel Audit",
-      "What to film next",
-      "Editor review",
-    ]) {
-      await expect(product.getByRole("heading", { name, exact: true })).toBeVisible();
-    }
     await expect(page.locator("#channel-audit")).toContainText("Preview with example data");
     await expect(page.locator("#next-video")).toContainText("Example data for illustration");
   });
 });
 
-test.describe("services row", () => {
-  test("a card opens wide when the mouse rests on it, like adobe.com", async ({
+test.describe("services switcher", () => {
+  /** The switcher in the middle of the screen (where its tour runs), ready to use. */
+  async function showServices(page: Page) {
+    await page.goto("/");
+    const services = page.getByRole("tablist", { name: "Services" });
+    await services.evaluate((element) =>
+      element.scrollIntoView({ block: "center", behavior: "instant" }),
+    );
+    return services;
+  }
+
+  test("lists every service in full, each with an honest status", async ({ page }) => {
+    const services = await showServices(page);
+    await expect(services.getByRole("tab")).toHaveCount(6);
+    for (const [name, status] of [
+      ["AI rough cut", "First release"],
+      ["Captions, chapters & titles", "First release"],
+      ["Export to your editor", "First release"],
+      ["Editor review", "Beta"],
+      ["Free Channel Audit", "Beta"],
+      ["What to film next", "Beta"],
+    ] as const) {
+      const tab = services.getByRole("tab").filter({ hasText: name });
+      await expect(tab).toHaveCount(1);
+      await expect(tab).toContainText(status);
+    }
+  });
+
+  test("choosing a service shows it on the stage, and arrow keys move between services", async ({
+    page,
+  }) => {
+    const services = await showServices(page);
+    const audit = services.getByRole("tab", { name: /Free Channel Audit/ });
+    await audit.click();
+    await expect(audit).toHaveAttribute("aria-selected", "true");
+    const stage = page.locator("[data-service-stage]");
+    await expect(stage.getByRole("heading", { name: "Free Channel Audit" })).toBeVisible();
+    await expect(stage).toContainText("Read-only insights from your own channel");
+    await expect(
+      stage.getByRole("link", { name: "More about Free Channel Audit" }),
+    ).toHaveAttribute("href", "#channel-audit");
+
+    await page.keyboard.press("ArrowDown");
+    const next = services.getByRole("tab", { name: /What to film next/ });
+    await expect(next).toBeFocused();
+    await expect(next).toHaveAttribute("aria-selected", "true");
+    await page.keyboard.press("Home");
+    await expect(services.getByRole("tab", { name: /AI rough cut/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
+  test("moves on by itself, and the pause button stops it", async ({ page }) => {
+    const services = await showServices(page);
+    await page.mouse.move(5, 5);
+    const selected = () => services.locator('[aria-selected="true"]').textContent();
+    const start = await selected();
+    await expect.poll(selected, { timeout: 12_000 }).not.toBe(start);
+
+    await page.getByRole("button", { name: "Pause the tour of the services" }).click();
+    await page.mouse.move(5, 5);
+    const paused = await selected();
+    await page.waitForTimeout(8_000);
+    expect(await selected()).toBe(paused);
+    await expect(page.getByRole("button", { name: "Play the tour of the services" })).toBeVisible();
+  });
+
+  test("on phones the services are chips that scroll sideways, and the stage swipes", async ({
     page,
     isMobile,
   }) => {
-    test.skip(isMobile, "Phones get a row that scrolls sideways instead.");
-    await page.goto("/");
-    const cards = page.locator("#product li[data-open]");
-    await expect(cards).toHaveCount(6);
-    await expect(cards.first()).toHaveAttribute("data-open", "true");
+    test.skip(!isMobile, "Large screens show the list beside the stage.");
+    const services = await showServices(page);
+    expect(await services.evaluate((list) => list.scrollWidth > list.clientWidth)).toBe(true);
 
-    const audit = cards.filter({ hasText: "Free Channel Audit" });
-    await audit.evaluate((element) =>
-      element.scrollIntoView({ block: "center", behavior: "instant" }),
+    // Start from a known service (a tap also stops the tour), then swipe to the next one.
+    await services.getByRole("tab", { name: /AI rough cut/ }).click();
+    const stage = page.locator("[data-service-stage]");
+    const box = await stage.boundingBox();
+    if (!box) throw new Error("The services stage has no size.");
+    const touch = { pointerId: 1, pointerType: "touch", isPrimary: true, clientY: box.y + 80 };
+    await stage.dispatchEvent("pointerdown", { ...touch, clientX: box.x + box.width * 0.85 });
+    await stage.dispatchEvent("pointerup", { ...touch, clientX: box.x + box.width * 0.15 });
+    await expect(services.getByRole("tab", { name: /Captions, chapters/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
     );
-    await audit.hover();
-    await expect(audit).toHaveAttribute("data-open", "true");
-    await expect(cards.first()).toHaveAttribute("data-open", "false");
-    // Really wider, not just marked: an open card is several times a closed one.
-    await expect
-      .poll(async () => {
-        const [open, closed] = await Promise.all([
-          audit.boundingBox(),
-          cards.first().boundingBox(),
-        ]);
-        return (open?.width ?? 0) / (closed?.width ?? 1);
-      })
-      .toBeGreaterThan(2);
-  });
-
-  test("keyboard focus opens a card too", async ({ page, isMobile }) => {
-    test.skip(isMobile, "On phones every card is open.");
-    await page.goto("/");
-    const card = page.locator("#product li[data-open]").filter({ hasText: "Editor review" });
-    await card.getByRole("link").focus();
-    await expect(card).toHaveAttribute("data-open", "true");
-  });
-
-  test("on phones the cards scroll sideways", async ({ page, isMobile }) => {
-    test.skip(!isMobile, "Large screens show the opening row.");
-    await page.goto("/");
-    const row = page.locator("#product li[data-open]").first().locator("xpath=..");
-    expect(await row.evaluate((list) => list.scrollWidth > list.clientWidth)).toBe(true);
   });
 });
 
@@ -482,6 +523,9 @@ test.describe("reduced motion", () => {
     await expect(page.locator("[data-reveal]")).toHaveCount(0);
     // The "Later" photo is shown whole; it only opens like a garage door when motion is on.
     await expect(page.locator("#roadmap .door")).toHaveCSS("clip-path", "none");
+    await expect(page.getByRole("button", { name: "Pause the tour of the services" })).toHaveCount(
+      0,
+    );
   });
 });
 
