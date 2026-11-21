@@ -26,7 +26,8 @@ apps/
   www/                    pre-launch website (Next.js): home, waitlist, privacy, terms, about
 packages/
   config/                 shared TypeScript config
-.github/                  CI (format, lint, typecheck, test, build, secret scan, audit), Dependabot
+.github/                  CI (format, lint, typecheck, test, build, Docker build, secret scan, audit), Dependabot
+compose.yaml              local containers (today: the website, `pnpm docker:www`)
 prompts/                  coding-agent prompt kit (01 kickoff … 04 review)
 docs/
   README.md               documentation index: start here
@@ -54,6 +55,21 @@ cp .env.example .env.local    # optional: defaults work for local use
 pnpm dev                      # http://localhost:3000
 pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # run before every commit
 ```
+
+### Run the website in Docker
+
+Needs Docker Desktop running. This builds the production image and serves it like a real deployment:
+
+```bash
+pnpm docker:www               # build and start -> http://localhost:3000
+pnpm docker:www:logs          # follow the logs
+pnpm docker:down              # stop and remove the container
+```
+
+- Use it to check the production build. For day-to-day work, `pnpm dev` is faster: it reloads on every change.
+- Both use port 3000, so stop one before starting the other. For another port, set `WWW_PORT=3100` before `pnpm docker:www`.
+- `NEXT_PUBLIC_SITE_URL` is baked in at build time; rebuild after changing it.
+- The container runs as a non-root user, with a read-only filesystem and no extra Linux capabilities.
 
 ### The website (`apps/www`)
 

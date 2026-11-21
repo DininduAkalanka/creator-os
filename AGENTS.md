@@ -146,6 +146,8 @@ pnpm --filter @creatoros/www dev   # one app only
 pnpm format                   # fix formatting (Prettier)
 pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # the local gate (CI runs the same)
 pnpm audit --prod --audit-level high   # dependency audit (CI runs it too)
+pnpm docker:www               # website production image in Docker -> http://localhost:3000
+pnpm docker:down              # stop it
 ```
 
 Not available yet (added in later milestones):

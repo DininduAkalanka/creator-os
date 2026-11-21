@@ -36,6 +36,15 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
+  docker:
+    name: Docker image builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      # Build only, never push: proves apps/www/Dockerfile still works.
+      - run: docker build --file apps/www/Dockerfile --tag creatoros-www:ci .
+
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest

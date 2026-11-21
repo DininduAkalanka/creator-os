@@ -1,0 +1,25 @@
+# Keep the build context small and free of secrets and local build output.
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/coverage
+**/*.tsbuildinfo
+**/next-env.d.ts
+.git
+.github
+docs
+prompts
+.env
+.env.*
+!.env.example
+data
+**/*.mp4
+**/*.mov
+**/*.mkv
+**/*.m4a
+**/*.wav
+**/*.mp3
+**/*.opus
+npm-debug.log*
+pnpm-debug.log*
