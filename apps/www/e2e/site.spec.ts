@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const PAGES = ["/", "/privacy", "/terms", "/about"] as const;
 
@@ -107,7 +107,7 @@ test.describe("hero slideshow", () => {
     await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
       timeout: 15_000,
     });
-    const progress = page.locator(".tab-progress");
+    const progress = page.locator('section[aria-roledescription="carousel"] .tab-progress');
     await page.getByRole("tab", { name: /Editor review/ }).hover();
     await expect(progress).toHaveCSS("animation-play-state", "paused");
     await page.mouse.move(5, 300);
@@ -202,10 +202,37 @@ test.describe("media", () => {
 });
 
 test.describe("story slider", () => {
-  test("the dots move between stories", async ({ page }) => {
+  /**
+   * Opens the home page with the whole slider in the middle of the screen, ready to use. The
+   * scroll is instant on purpose: the page scrolls smoothly, and a click measured mid-scroll misses.
+   */
+  async function showStories(page: Page) {
     await page.goto("/");
+    const slider = page.getByRole("group", { name: "Who it's for" });
+    await slider.evaluate((element) =>
+      element.scrollIntoView({ block: "center", behavior: "instant" }),
+    );
+    // The pause button appears once the slider is interactive (hydrated); clicks before that are lost.
+    await expect(page.getByRole("button", { name: "Pause stories" })).toBeVisible();
+    return slider;
+  }
+
+  /**
+   * The slider moves on by itself, and on a slow machine it may already have done so: pause it and
+   * go to the first story, so each test starts from a known place.
+   */
+  async function pausedAtFirstStory(page: Page) {
+    const slider = await showStories(page);
+    await page.getByRole("button", { name: "Pause stories" }).click();
+    const first = page.getByRole("button", { name: "Story 1 of 3" });
+    await first.click();
+    await expect(first).toHaveAttribute("aria-current", "true");
+    return slider;
+  }
+
+  test("the dots move between stories", async ({ page }) => {
+    await showStories(page);
     const third = page.getByRole("button", { name: "Story 3 of 3" });
-    await third.scrollIntoViewIfNeeded();
     await third.click();
     await expect(third).toHaveAttribute("aria-current", "true");
     await expect(page.getByRole("button", { name: "Story 1 of 3" })).not.toHaveAttribute(
@@ -215,9 +242,8 @@ test.describe("story slider", () => {
 
   test("the arrows move between stories and go round", async ({ page, isMobile }) => {
     test.skip(isMobile, "Phones swipe or use the dots; the arrows are for larger screens.");
-    await page.goto("/");
+    await pausedAtFirstStory(page);
     const third = page.getByRole("button", { name: "Story 3 of 3" });
-    await third.scrollIntoViewIfNeeded();
     await page.getByRole("button", { name: "Previous story" }).click();
     await expect(third).toHaveAttribute("aria-current", "true");
     await page.getByRole("button", { name: "Next story" }).click();
@@ -225,6 +251,113 @@ test.describe("story slider", () => {
       "aria-current",
       "true",
     );
+  });
+
+  test("moves on by itself, and the pause button stops it", async ({ page }) => {
+    const slider = await showStories(page);
+    await page.mouse.move(5, 5);
+    const current = () => slider.locator('button[aria-current="true"]').getAttribute("aria-label");
+    const start = await current();
+    await expect.poll(current, { timeout: 12_000 }).not.toBe(start);
+
+    await page.getByRole("button", { name: "Pause stories" }).click();
+    await page.mouse.move(5, 5);
+    const paused = await current();
+    await page.waitForTimeout(8_000);
+    expect(await current()).toBe(paused);
+    await expect(page.getByRole("button", { name: "Play stories" })).toBeVisible();
+  });
+
+  test("drags to the next story with the mouse", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Phones swipe (tested separately).");
+    const slider = await pausedAtFirstStory(page);
+    const box = await slider.boundingBox();
+    if (!box) throw new Error("The story slider has no size.");
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width * 0.7, y);
+    await page.mouse.down();
+    for (let step = 1; step <= 10; step++) {
+      await page.mouse.move(box.x + box.width * (0.7 - step * 0.04), y);
+    }
+    await page.mouse.up();
+    await expect(page.getByRole("button", { name: "Story 2 of 3" })).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+
+  test("swipes to the next story with a finger", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Swiping is for touch screens.");
+    const slider = await pausedAtFirstStory(page);
+    const box = await slider.boundingBox();
+    if (!box) throw new Error("The story slider has no size.");
+    // A real touch gesture (Chromium DevTools protocol), so the browser's own touch handling runs.
+    const cdp = await page.context().newCDPSession(page);
+    const y = box.y + box.height / 2;
+    const touch = (x: number) => [{ x: box.x + box.width * x, y }];
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: touch(0.8) });
+    for (let step = 1; step <= 8; step++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: touch(0.8 - step * 0.075),
+      });
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect(page.getByRole("button", { name: "Story 2 of 3" })).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+  });
+});
+
+test.describe("product menu", () => {
+  test("opens like adobe.com, switches areas, and closes with Escape", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "On phones, Product is a plain link in the menu.");
+    await page.goto("/");
+    // The hero's pause button appears once the page is interactive; clicks before that are lost.
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    const nav = page.getByRole("navigation", { name: "Main" });
+    const button = nav.getByRole("button", { name: "Product" });
+    await button.click();
+    await expect(button).toHaveAttribute("aria-expanded", "true");
+    await expect(nav.getByRole("link", { name: /AI rough cut/ })).toBeVisible();
+
+    await nav.getByRole("tab", { name: "Grow your channel" }).click();
+    await expect(nav.getByRole("link", { name: /Free Channel Audit/ })).toBeVisible();
+    await expect(nav.getByRole("link", { name: /AI rough cut/ })).toHaveCount(0);
+    // Every card says honestly where it stands.
+    await expect(nav.getByRole("tabpanel")).toContainText("Beta");
+
+    const results = await new AxeBuilder({ page })
+      .include("header")
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(results.violations.map((violation) => violation.id)).toEqual([]);
+
+    await page.keyboard.press("Escape");
+    await expect(button).toHaveAttribute("aria-expanded", "false");
+    await expect(button).toBeFocused();
+  });
+
+  test("a card takes you to its section and closes the menu", async ({ page, isMobile }) => {
+    test.skip(isMobile, "On phones, Product is a plain link in the menu.");
+    await page.goto("/");
+    // The hero's pause button appears once the page is interactive; clicks before that are lost.
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    const nav = page.getByRole("navigation", { name: "Main" });
+    const button = nav.getByRole("button", { name: "Product" });
+    await button.click();
+    await nav.getByRole("tab", { name: "Coming later" }).click();
+    await nav.getByRole("link", { name: /Publish to YouTube/ }).click();
+    await expect(page).toHaveURL(/#roadmap$/);
+    await expect(button).toHaveAttribute("aria-expanded", "false");
   });
 });
 

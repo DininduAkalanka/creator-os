@@ -15,7 +15,7 @@ We studied adobe.com, canva.com and grammarly.com (Nov 2026). Adobe and Grammarl
 | Pause control and screen-reader notes for moving content | Adobe (autoplay carousel with pause) | No looping motion. The load animation runs once and is under 5 s (WCAG 2.2.2); everything respects reduced motion |
 | Design tokens as the single source of styling | Adobe Spectrum 2 | Semantic CSS tokens (`--bg`, `--fg`, `--accent`…) with a dark and a paper theme |
 
-What we deliberately did **not** copy, because it only works at their scale or would be dishonest for us: logo walls, user counts, ROI claims and case-study metrics (we have none, and AGENTS.md forbids inventing them); mega-menus; discount banners and countdowns; enterprise sales tiers.
+What we deliberately did **not** copy, because it only works at their scale or would be dishonest for us: logo walls, user counts, ROI claims and case-study metrics (we have none, and AGENTS.md forbids inventing them); mega-menus (changed in v5.1 at the founder's request: one Adobe-style "Product" menu that lists only our real services, with their status, see §9); discount banners and countdowns; enterprise sales tiers.
 
 Supporting research (vendor sources, treat as directional): pages with an interactive demo convert better than static ones, the first screen gets most of the attention, and the primary CTA should be visible without scrolling on every device.
 
@@ -179,3 +179,30 @@ Also new: **swipe** between hero slides on touch screens (sideways drags only, s
 **Measured (local Lighthouse 13.6, simulated phone, same machine and session, previous version vs v5):** mobile performance median 81 → 82 (five runs each: 72-84 vs 74-89), desktop 98-99 → 99-100, accessibility 100, best practices 100. This machine was noisier than for the v4 numbers in §7, so compare only within one session. Layout shift: the previous version showed CLS 0.055 in most runs, caused by the web fonts swapping in on the hero text (not preloaded on purpose, see §6). v5 reads CLS 0, but the swap still happens; the hero now sits in a transform-animated layer, which the metric does not count. Fixing the swap itself (fallback-font metrics) is a separate task.
 
 **Tests:** 8 new unit tests (`src/lib/motion.ts`: swipe direction, stagger). New end-to-end tests: the slideshow keeps going with the mouse on a slide; it holds on the tab bar and resumes; swipe on touch; the tab bar follows the active slide; story dots and arrows (wrapping); scroll reveal (hidden below the fold, shown when scrolled to, attribute removed afterwards, nothing hidden on the first screen); nothing hidden with reduced motion.
+
+## 9. v5.1: full-screen story slider and an Adobe-style Product menu (21 Nov 2026)
+
+**Why:** the founder compared screenshots of adobe.com with our page. Our story slider was boxed in (it stopped at 90rem, so neighbours were cut off by the box, not by the screen), had an empty gap on the left of the first story and did not move by itself; and "Product" was a plain link where Adobe opens a large menu.
+
+**Story slider (rebuilt, `StoryCarousel`)**
+
+- **Size like adobe.com:** full screen width; the current story is about 84% of the width (Adobe: 1582 of 1911 px; ours: 1585 of 1887 px on the same screen) and nearly the full height (`clamp(38rem, 100svh - 9rem, 54rem)` on large screens); neighbours peek in from the screen's edges.
+- **Goes round forever:** slides are placed with transforms around an unbounded position (story = position mod 3), two on each side, so there is always a neighbour on both sides and moving past the last story is just one more step.
+- **Moves by itself** every 7 s; the active dot fills up to show the time, and a pause button sits next to the dots (WCAG 2.2.2). Like the hero, it holds while the pointer is on the arrows or dots and while keyboard focus is inside, never while the mouse merely rests on the picture. It also holds while less than half of it is on screen, and it never starts for reduced-motion visitors.
+- **Drag and swipe:** the slides follow the finger or mouse and glide on from where they are let go; a vertical drag is left to the page (`touch-action: pan-y`); a click on a neighbour moves to it; the click at the end of a drag never opens a link.
+- **Assistive technology:** only the current story is exposed (neighbours and copies are `inert` and `aria-hidden`); changes are announced only while rotation is off.
+
+**Product menu (`ProductMenu`)**
+
+- Laid out like adobe.com's Products menu: area pills on the left (Featured, Edit faster, Work with your editor, Grow your channel, Coming later, plus "See everything"), cards on the right (a two-letter tile in the status colour, the status pill, title and one line), the page behind dims and the header turns solid.
+- Honest by construction: the menu is built from the same `services.cards` and `roadmap.items` as the page (`productMenu` in `src/content/services.ts`), so it can only show what the page shows, with the same status.
+- APG disclosure navigation: button with `aria-expanded`; the areas are a vertical tablist (arrow keys, Home, End); Escape, a click outside or tabbing out closes it, and Escape returns focus to the button. Large screens only; on phones "Product" stays a link in the menu.
+- The dim layer is rendered in a portal: inside the floating header, its `backdrop-filter` would make a fixed overlay cover only the header.
+
+**Testing lessons**
+
+- A slider that moves by itself races any test that assumes where it starts. On a slow machine it had moved on before the test clicked (seen in an event log: the timer moved to story 2, then "Previous" correctly went back to story 1 while the test expected story 3). Tests now pause it and pick a known story first, or only check that the story changed.
+- `html { scroll-behavior: smooth }` makes Playwright's own scrolling animate; a click measured mid-scroll can miss. The slider tests scroll instantly (`scrollIntoView({ behavior: "instant" })`).
+- Wait for something that only exists after hydration (the pause button) before clicking client-side controls.
+
+**Verified:** 59 end-to-end tests pass (9 skipped by design: touch-only or mouse-only), the slider group 84 times in a row under parallel load; axe finds nothing on the open menu; no horizontal overflow at 1887, 1280, 1024 and 412 px.
