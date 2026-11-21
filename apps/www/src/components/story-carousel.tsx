@@ -214,7 +214,7 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
               inert={!current}
               data-current={current ? "" : undefined}
               style={{
-                transform: `translateX(calc(-50% + ${offset} * var(--dir) * (100% + var(--gap)) + var(--drag, 0px)))`,
+                transform: `translateX(calc(-50% + ${offset} * var(--dir) * (100% + var(--gap)) + var(--drag, 0px))) scale(${current ? 1 : 0.94})`,
               }}
               className={`absolute top-0 left-1/2 h-full w-[calc(100%_-_2*var(--peek))] overflow-hidden rounded-[1.5rem] bg-panel ${
                 dragging
@@ -227,24 +227,25 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
                   src={image}
                   alt={slide.imageAlt}
                   sizes="(min-width: 1024px) 84vw, 100vw"
+                  placeholder="blur"
                   draggable={false}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               )}
               <div
                 aria-hidden="true"
-                className="absolute inset-0 bg-[linear-gradient(to_top,rgb(12_11_10/0.95)_15%,rgb(12_11_10/0.4)_60%,transparent)] md:bg-[linear-gradient(to_right,rgb(12_11_10/0.92)_25%,rgb(12_11_10/0.45)_60%,transparent)]"
+                className="absolute inset-0 bg-[linear-gradient(to_top,rgb(6_6_14/0.95)_15%,rgb(6_6_14/0.4)_60%,transparent)] md:bg-[linear-gradient(to_right,rgb(6_6_14/0.9)_25%,rgb(6_6_14/0.45)_60%,transparent)]"
               />
               <div className="relative flex h-full max-w-3xl flex-col justify-end p-6 pb-20 text-white sm:p-10 sm:pb-20 md:justify-center md:p-16 lg:p-20">
-                <p className="label-mono text-[#ff8a5c]">{slide.eyebrow}</p>
-                <h3 className="display mt-4 text-3xl leading-[1.02] font-semibold text-balance sm:text-5xl lg:text-6xl">
+                <p className="label-mono text-[#ff9b96]">{slide.eyebrow}</p>
+                <h3 className="display mt-4 text-3xl leading-[1] font-extrabold tracking-[-0.042em] text-balance sm:text-5xl lg:text-6xl">
                   {slide.heading}
                 </h3>
                 <p className="mt-5 max-w-md text-lg text-white/80">{slide.body}</p>
                 <Link
                   href="#waitlist"
                   draggable={false}
-                  className="mt-8 inline-flex w-fit items-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#0c0b0a] transition-colors hover:bg-white/85"
+                  className="mt-8 inline-flex w-fit items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy transition-colors hover:bg-white/85"
                 >
                   {siteCopy.nav.cta}
                 </Link>
@@ -252,10 +253,11 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
               <span className="label-mono pointer-events-none absolute top-4 right-4 rounded-full bg-black/65 px-2 py-1 text-[0.5625rem] text-white/80">
                 {siteCopy.aiGenerated}
               </span>
-              {/* Neighbours stay darker, so the eye goes to the story in the middle. */}
+              {/* Neighbours are washed out and a little smaller (on a white page), so the eye goes to the
+                  story in the middle; they come forward as they slide into the centre. */}
               <div
                 aria-hidden="true"
-                className={`pointer-events-none absolute inset-0 bg-[#0c0b0a] transition-opacity duration-700 ${current ? "opacity-0" : "opacity-55"}`}
+                className={`pointer-events-none absolute inset-0 bg-bg transition-opacity duration-700 ${current ? "opacity-0" : "opacity-50"}`}
               />
             </div>
           );
@@ -268,7 +270,7 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
         onClick={() => step(-1)}
         aria-label={stories.previous}
         {...holdOnHover}
-        className="absolute top-1/2 left-[max(0.5rem,calc(var(--peek)_-_1.375rem))] z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#0c0b0a] shadow-lg shadow-black/40 transition-transform hover:scale-105 sm:flex"
+        className="absolute top-1/2 left-[max(0.5rem,calc(var(--peek)_-_1.375rem))] z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-navy shadow-float transition-transform hover:scale-105 sm:flex"
       >
         <svg viewBox="0 0 16 16" className="size-4 rtl:rotate-180" aria-hidden="true" fill="none">
           <path
@@ -285,7 +287,7 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
         onClick={() => step(1)}
         aria-label={stories.next}
         {...holdOnHover}
-        className="absolute top-1/2 right-[max(0.5rem,calc(var(--peek)_-_1.375rem))] z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#0c0b0a] shadow-lg shadow-black/40 transition-transform hover:scale-105 sm:flex"
+        className="absolute top-1/2 right-[max(0.5rem,calc(var(--peek)_-_1.375rem))] z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-navy shadow-float transition-transform hover:scale-105 sm:flex"
       >
         <svg viewBox="0 0 16 16" className="size-4 rtl:rotate-180" aria-hidden="true" fill="none">
           <path

@@ -24,8 +24,9 @@ import { AiCredit, Photo, VideoPanel } from "@/components/media";
 import { AuditMini, AuditPreview, NextMini, NextVideoPreview } from "@/components/product-previews";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SectionIntro } from "@/components/section-intro";
+import { ServiceRail } from "@/components/service-rail";
 import { StoryCarousel } from "@/components/story-carousel";
-import { buttonLarge, buttonPrimary, card, container } from "@/components/styles";
+import { buttonLarge, buttonPrimary, container } from "@/components/styles";
 import { WaitlistForm } from "@/components/waitlist-form";
 import { faq, features, finalCta, story, tryIt } from "@/content/home";
 import {
@@ -33,6 +34,7 @@ import {
   nextVideo,
   plans,
   roadmap,
+  serviceMarks,
   services,
   statusLabels,
   stories,
@@ -46,10 +48,16 @@ const storyPhotos: Record<string, StaticImageData> = {
 };
 
 /**
- * Section order follows the product loop. Loading follows adobe.com: the hero's first slide is
- * the only eager media; everything below is lazy (images on approach, demo code on approach).
- * Motion follows adobe.com too: `.reveal` content rises in on scroll (ScrollReveal) and large
- * media `.settle` into place (CSS scroll timeline). Both are off for reduced motion.
+ * v6 (light first, adobe.com's homepage rhythm): white sections with light-grey bands, product
+ * screens and highlight cards where they help, and a dark ending (the "Later" band, the
+ * waitlist, the footer). Section order follows the product loop; what comes after the beta sits
+ * just before the sign-up.
+ *
+ * Loading follows adobe.com: the hero's first slide is the only eager media; everything below is
+ * lazy (images on approach, demo code on approach). Motion follows adobe.com too: `.reveal`
+ * content rises in on scroll (ScrollReveal), large media `.settle` into place, the "Later" band
+ * opens like a garage door and its grid lands column by column (CSS scroll timelines). All of
+ * it is off for reduced motion.
  */
 export default function HomePage() {
   return (
@@ -62,10 +70,10 @@ export default function HomePage() {
       <Features />
       <AuditSection />
       <NextVideoSection />
-      <Roadmap />
       <Stories />
       <Plans />
       <Faq />
+      <Roadmap />
       <Waitlist />
     </>
   );
@@ -101,27 +109,131 @@ function Arrow() {
   );
 }
 
+/** adobe.com's "Everything you need" row: cards that open wide as you point at them. */
+function Services() {
+  const visuals: Record<string, ReactNode> = {
+    "rough-cut": <CardPhoto src={timelineDetail} alt="" />,
+    captions: <CardPhoto src={talkingPoster} alt="" />,
+    export: <CardPhoto src={footageLocal} alt="" />,
+    review: <CardPhoto src={reviewTogether} alt="" />,
+    audit: (
+      <span className="absolute inset-0 flex items-center justify-center bg-[#0e0d1c] bg-[radial-gradient(circle_at_30%_20%,rgb(126_224_181/0.2),transparent_60%)] p-4">
+        <span className="block origin-center scale-[0.82]">
+          <AuditMini />
+        </span>
+      </span>
+    ),
+    next: (
+      <span className="absolute inset-0 flex items-center justify-center bg-[#0e0d1c] bg-[radial-gradient(circle_at_70%_20%,rgb(254_77_73/0.25),transparent_60%)] p-4">
+        <span className="block origin-center scale-[0.82]">
+          <NextMini />
+        </span>
+      </span>
+    ),
+  };
+  const items = services.cards.map((card) => ({
+    ...card,
+    mark: serviceMarks[card.id] ?? "··",
+    visual: visuals[card.id],
+  }));
+  return (
+    <section
+      id="product"
+      aria-labelledby="services-heading"
+      className="pt-16 pb-16 sm:pt-28 sm:pb-24"
+    >
+      <div className={container}>
+        <SectionIntro
+          center
+          id="services-heading"
+          index={services.index}
+          eyebrow={services.eyebrow}
+          heading={services.heading}
+          lead={services.lead}
+        />
+        <div className="mt-14">
+          <ServiceRail items={items} />
+        </div>
+
+        <div className="reveal mt-6 flex flex-col items-center gap-4 rounded-[1.75rem] border border-line p-5 sm:p-6">
+          <h3 className="label-mono text-faint">{services.loopHeading}</h3>
+          {/* Wraps and centres. No sideways scrolling: a scroll box with nothing to focus in it
+              can't be scrolled from the keyboard (axe: scrollable-region-focusable). */}
+          <ol className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-2.5">
+            {services.loop.map((stage, index) => (
+              <li key={stage.step} className="flex shrink-0 items-center gap-1.5">
+                <span className="flex items-center gap-2 rounded-full bg-raised py-2 ps-3 pe-3.5">
+                  <span
+                    aria-hidden="true"
+                    className={`size-1.5 rounded-full ${
+                      stage.status === "first"
+                        ? "bg-keep"
+                        : stage.status === "beta"
+                          ? "bg-brand"
+                          : stage.status === "later"
+                            ? "bg-faint"
+                            : "bg-fg"
+                    }`}
+                  />
+                  <span className="text-sm font-semibold">{stage.step}</span>
+                  <span className="label-mono text-[0.5625rem] text-faint">
+                    {stage.status ? statusLabels[stage.status] : "You"}
+                  </span>
+                </span>
+                {index < services.loop.length - 1 && (
+                  <span aria-hidden="true" className="hidden text-faint sm:inline">
+                    →
+                  </span>
+                )}
+              </li>
+            ))}
+            <li aria-hidden="true" className="shrink-0 ps-1 text-lg text-brand">
+              ↺
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CardPhoto({ src, alt }: { src: StaticImageData; alt: string }) {
+  return (
+    <>
+      <Image
+        src={src}
+        alt={alt}
+        sizes="(min-width: 1024px) 40vw, (min-width: 640px) 46vw, 82vw"
+        placeholder="blur"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-[1.04]"
+      />
+      <AiCredit className="absolute top-3 left-3" />
+    </>
+  );
+}
+
 function Story() {
   return (
-    <section id="how-it-works" aria-labelledby="story-heading" className="border-t border-line">
-      <div className={`${container} py-24 sm:py-32`}>
+    <section id="how-it-works" aria-labelledby="story-heading">
+      <div className={`${container} py-20 sm:py-28 lg:py-32`}>
         <SectionIntro
+          center
           id="story-heading"
           index={story.index}
           eyebrow={story.eyebrow}
           heading={story.heading}
         />
-        <div className="mt-14 grid gap-5 lg:grid-cols-2">
-          <article className={`reveal ${card} overflow-hidden`}>
+        <div className="mt-14 grid gap-4 lg:grid-cols-2">
+          <article className="reveal overflow-hidden rounded-[2rem] bg-raised">
             <Photo
               src={nightEdit}
               alt={story.before.imageAlt}
               sizes="(min-width: 1024px) 50vw, 100vw"
-              className="aspect-[16/9] rounded-none border-0"
+              className="aspect-[16/9] rounded-none"
             />
-            <div className="p-6 sm:p-8">
+            <div className="p-6 sm:p-10">
               <p className="label-mono text-faint">{story.before.label}</p>
-              <h3 className="display mt-3 text-2xl leading-tight font-semibold sm:text-3xl">
+              <h3 className="display mt-3 text-2xl leading-tight font-bold tracking-[-0.03em] sm:text-3xl">
                 {story.before.title}
               </h3>
               <ol className="mt-6 space-y-4">
@@ -135,18 +247,17 @@ function Story() {
             </div>
           </article>
 
-          <article
-            className={`reveal ${card} overflow-hidden border-accent/40 shadow-[0_30px_80px_-40px_rgb(255_90_31/0.45)]`}
-          >
+          {/* The same evening with the product: the navy highlight card. */}
+          <article className="reveal theme-dark overflow-hidden rounded-[2rem] bg-navy">
             <Photo
               src={eveningBack}
               alt={story.after.imageAlt}
               sizes="(min-width: 1024px) 50vw, 100vw"
-              className="aspect-[16/9] rounded-none border-0"
+              className="aspect-[16/9] rounded-none"
             />
-            <div className="p-6 sm:p-8">
+            <div className="p-6 sm:p-10">
               <p className="label-mono text-accent">{story.after.label}</p>
-              <h3 className="display mt-3 text-2xl leading-tight font-semibold sm:text-3xl">
+              <h3 className="display mt-3 text-2xl leading-tight font-bold tracking-[-0.03em] sm:text-3xl">
                 {story.after.title}
               </h3>
               <ol className="mt-6 space-y-4">
@@ -162,7 +273,7 @@ function Story() {
             </div>
           </article>
         </div>
-        <p className="mt-5 text-sm text-faint italic">{story.note}</p>
+        <p className="mt-5 text-center text-sm text-faint italic">{story.note}</p>
       </div>
     </section>
   );
@@ -170,17 +281,9 @@ function Story() {
 
 function TryIt() {
   return (
-    <section
-      id="try-it"
-      aria-labelledby="try-heading"
-      className="relative overflow-hidden border-t border-line bg-raised"
-    >
+    <section id="try-it" aria-labelledby="try-heading" className="bg-raised">
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(45%_55%_at_80%_40%,rgb(255_90_31/0.14),transparent_70%)]"
-      />
-      <div
-        className={`${container} relative grid items-center gap-14 py-24 sm:py-32 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16`}
+        className={`${container} grid items-center gap-14 py-20 sm:py-28 lg:py-32 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16`}
       >
         <div>
           <SectionIntro
@@ -199,7 +302,8 @@ function TryIt() {
             ))}
           </ul>
         </div>
-        <div className="reveal">
+        {/* The demo is an editor screen, and video editors are dark: a dark window on a light page. */}
+        <div className="reveal theme-dark rounded-[1.5rem] bg-transparent">
           <LazyCutDemo />
         </div>
       </div>
@@ -216,7 +320,7 @@ function FeatureBlock(props: {
   flip?: boolean;
 }) {
   return (
-    <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
+    <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-20">
       <div className={`reveal ${props.flip ? "lg:order-2" : ""}`}>
         <div className="settle">{props.media}</div>
       </div>
@@ -224,7 +328,7 @@ function FeatureBlock(props: {
         <p className="label-mono text-faint tabular-nums">
           <span className="text-accent">0{props.index}</span> / 0{props.total}
         </p>
-        <h3 className="display mt-4 text-3xl leading-[1.05] font-semibold text-balance sm:text-4xl lg:text-5xl">
+        <h3 className="display mt-4 text-3xl leading-[1.02] font-extrabold tracking-[-0.04em] text-balance sm:text-4xl lg:text-5xl">
           {props.title}
         </h3>
         <p className="mt-5 max-w-lg text-lg text-pretty text-muted">{props.body}</p>
@@ -237,16 +341,17 @@ function Features() {
   const { blocks } = features;
   const half = "(min-width: 1024px) 50vw, 100vw";
   return (
-    <section id="features" aria-labelledby="features-heading" className="border-t border-line">
-      <div className={`${container} py-24 sm:py-32`}>
+    <section id="features" aria-labelledby="features-heading">
+      <div className={`${container} py-20 sm:py-28 lg:py-32`}>
         <SectionIntro
+          center
           id="features-heading"
           index={features.index}
           eyebrow={features.eyebrow}
           heading={features.heading}
           lead={features.note}
         />
-        <div className="mt-16 space-y-24 lg:space-y-32">
+        <div className="mt-20 space-y-24 lg:space-y-36">
           <FeatureBlock
             index={1}
             total={4}
@@ -275,7 +380,7 @@ function Features() {
                 sizes={half}
                 className="aspect-[4/3] sm:aspect-video"
               >
-                <span className="pointer-events-none absolute top-3 right-3 font-mono text-[0.65rem] text-white/75">
+                <span className="pointer-events-none absolute top-3 right-3 font-mono text-[0.65rem] text-white/80">
                   {blocks.captions.timecode}
                 </span>
                 <p
@@ -322,27 +427,31 @@ function Features() {
           />
         </div>
 
-        <h3 className="label-mono mt-28 text-faint">{features.extrasHeading}</h3>
+        <h3 className="label-mono mt-32 text-center text-faint">{features.extrasHeading}</h3>
         <ul className="mt-6 grid gap-4 md:grid-cols-3">
-          <li className={`reveal ${card} flex flex-col gap-6 p-6`}>
-            <div className="rounded-xl border border-line bg-bg/70 p-4">
+          <li className="reveal flex flex-col gap-6 rounded-[1.75rem] bg-raised p-6">
+            <div className="rounded-2xl bg-bg p-4 shadow-soft">
               <ChaptersVisual />
             </div>
             <div>
-              <h4 className="display text-xl font-semibold">{features.chapters.title}</h4>
+              <h4 className="display text-xl font-bold tracking-[-0.03em]">
+                {features.chapters.title}
+              </h4>
               <p className="mt-2 text-muted">{features.chapters.body}</p>
             </div>
           </li>
-          <li className={`reveal ${card} flex flex-col gap-6 p-6`}>
-            <div className="rounded-xl border border-line bg-bg/70 p-4">
+          <li className="reveal flex flex-col gap-6 rounded-[1.75rem] bg-raised p-6">
+            <div className="rounded-2xl bg-bg p-4 shadow-soft">
               <ThumbnailsVisual />
             </div>
             <div>
-              <h4 className="display text-xl font-semibold">{features.thumbnails.title}</h4>
+              <h4 className="display text-xl font-bold tracking-[-0.03em]">
+                {features.thumbnails.title}
+              </h4>
               <p className="mt-2 text-muted">{features.thumbnails.body}</p>
             </div>
           </li>
-          <li className={`reveal ${card} flex flex-col justify-center bg-transparent p-6`}>
+          <li className="reveal flex flex-col justify-center rounded-[1.75rem] border border-line p-6">
             <h4 className="label-mono text-faint">{features.notList.heading}</h4>
             <ul className="mt-5 space-y-4">
               {features.notList.items.map((item) => (
@@ -359,125 +468,11 @@ function Features() {
   );
 }
 
-/** Adobe-style "Everything you need" rail, on a rounded sheet that slides over the hero. */
-function Services() {
-  const visuals: Record<string, ReactNode> = {
-    "rough-cut": <CardPhoto src={timelineDetail} alt="" />,
-    captions: <CardPhoto src={talkingPoster} alt="" />,
-    export: <CardPhoto src={footageLocal} alt="" />,
-    review: <CardPhoto src={reviewTogether} alt="" />,
-    audit: (
-      <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgb(126_224_181/0.18),transparent_60%),#0f0e0d] p-4">
-        <div className="origin-center scale-[0.82]">
-          <AuditMini />
-        </div>
-      </div>
-    ),
-    next: (
-      <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_70%_20%,rgb(255_90_31/0.22),transparent_60%),#0f0e0d] p-4">
-        <div className="origin-center scale-[0.82]">
-          <NextMini />
-        </div>
-      </div>
-    ),
-  };
-  return (
-    <section
-      id="product"
-      aria-labelledby="services-heading"
-      className="relative z-10 -mt-6 rounded-t-[2rem] border-t border-line-strong bg-bg shadow-[0_-30px_60px_-20px_rgb(0_0_0/0.6)]"
-    >
-      <div className={`${container} py-24 sm:py-28`}>
-        <SectionIntro
-          id="services-heading"
-          index={services.index}
-          eyebrow={services.eyebrow}
-          heading={services.heading}
-          lead={services.lead}
-        />
-        <ul className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {services.cards.map((item) => (
-            <li key={item.id} className="reveal">
-              <Link
-                href={item.href}
-                className={`${card} group flex h-full flex-col overflow-hidden transition-colors hover:border-line-strong`}
-              >
-                <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
-                  <h3 className="font-semibold">{item.title}</h3>
-                  <StatusPill status={item.status} />
-                </div>
-                <div className="relative aspect-[16/10] overflow-hidden">{visuals[item.id]}</div>
-                <p className="px-5 py-4 text-sm text-muted">
-                  {item.body}{" "}
-                  <span
-                    aria-hidden="true"
-                    className="text-accent transition-transform group-hover:translate-x-0.5"
-                  >
-                    →
-                  </span>
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="reveal mt-14 rounded-[var(--radius)] border border-line bg-raised p-6">
-          <h3 className="label-mono text-faint">{services.loopHeading}</h3>
-          <ol className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-3">
-            {services.loop.map((stage, index) => (
-              <li key={stage.step} className="flex items-center gap-2">
-                <span className="flex flex-col items-start gap-1 rounded-xl border border-line bg-bg px-3.5 py-2.5">
-                  <span className="text-sm font-semibold">{stage.step}</span>
-                  {stage.status ? (
-                    <StatusPill status={stage.status} />
-                  ) : (
-                    <span className="label-mono text-[0.5625rem] text-faint">You</span>
-                  )}
-                </span>
-                {index < services.loop.length - 1 && (
-                  <span aria-hidden="true" className="text-faint">
-                    →
-                  </span>
-                )}
-              </li>
-            ))}
-            <li aria-hidden="true" className="text-accent">
-              ↺
-            </li>
-          </ol>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CardPhoto({ src, alt }: { src: StaticImageData; alt: string }) {
-  return (
-    <>
-      <Image
-        src={src}
-        alt={alt}
-        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-      />
-      <AiCredit className="absolute top-3 left-3" />
-    </>
-  );
-}
-
 function AuditSection() {
   return (
-    <section
-      id="channel-audit"
-      aria-labelledby="audit-heading"
-      className="relative overflow-hidden border-t border-line bg-raised"
-    >
+    <section id="channel-audit" aria-labelledby="audit-heading" className="bg-raised">
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(45%_50%_at_85%_30%,rgb(126_224_181/0.10),transparent_70%)]"
-      />
-      <div
-        className={`${container} relative grid gap-14 py-24 sm:py-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16`}
+        className={`${container} grid gap-14 py-20 sm:py-28 lg:py-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16`}
       >
         <div>
           <SectionIntro
@@ -520,9 +515,9 @@ function AuditSection() {
 
 function NextVideoSection() {
   return (
-    <section id="next-video" aria-labelledby="next-heading" className="border-t border-line">
+    <section id="next-video" aria-labelledby="next-heading">
       <div
-        className={`${container} grid gap-14 py-24 sm:py-32 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16`}
+        className={`${container} grid gap-14 py-20 sm:py-28 lg:py-32 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16`}
       >
         <div className="reveal order-2 lg:order-1">
           <NextVideoPreview />
@@ -549,47 +544,16 @@ function NextVideoSection() {
   );
 }
 
-function Roadmap() {
-  return (
-    <section
-      id="roadmap"
-      aria-labelledby="roadmap-heading"
-      className="border-t border-line bg-raised"
-    >
-      <div className={`${container} py-24 sm:py-28`}>
-        <SectionIntro
-          id="roadmap-heading"
-          index={roadmap.index}
-          eyebrow={roadmap.eyebrow}
-          heading={roadmap.heading}
-          lead={roadmap.lead}
-        />
-        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {roadmap.items.map((item) => (
-            <li key={item.title} className={`reveal ${card} border-dashed bg-bg p-6`}>
-              <StatusPill status="later" />
-              <h3 className="display mt-4 text-xl font-semibold">{item.title}</h3>
-              <p className="mt-2 text-muted">{item.body}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
 function Stories() {
   return (
     // overflow-x-clip: the slider settles from slightly wider than the page; clip, not hidden, so
     // the page (not this section) stays the scroll timeline.
-    <section
-      aria-labelledby="stories-heading"
-      className="overflow-x-clip border-t border-line py-24 sm:py-28"
-    >
+    <section aria-labelledby="stories-heading" className="overflow-x-clip py-20 sm:py-28">
       <div className={container}>
-        <p className="label-mono flex items-center gap-3 text-faint">
+        <p className="label-mono flex items-center justify-center gap-3 text-faint">
           <span aria-hidden="true" className="h-px w-8 bg-line-strong" />
           <span id="stories-heading">{stories.label}</span>
+          <span aria-hidden="true" className="h-px w-8 bg-line-strong" />
         </p>
       </div>
       {/* Full width, edge to edge (adobe.com): the neighbours peek in from the screen's edges. */}
@@ -602,9 +566,10 @@ function Stories() {
 
 function Plans() {
   return (
-    <section id="plans" aria-labelledby="plans-heading" className="theme-paper">
-      <div className={`${container} py-24 sm:py-32`}>
+    <section id="plans" aria-labelledby="plans-heading" className="bg-raised">
+      <div className={`${container} py-20 sm:py-28 lg:py-32`}>
         <SectionIntro
+          center
           id="plans-heading"
           index={plans.index}
           eyebrow={plans.eyebrow}
@@ -615,26 +580,26 @@ function Plans() {
           {plans.items.map((plan) => (
             <li
               key={plan.name}
-              className={`reveal relative flex flex-col overflow-hidden rounded-[1.25rem] border p-6 ${
-                plan.founding
-                  ? "border-accent bg-raised shadow-[0_30px_70px_-35px_rgb(176_57_10/0.5)]"
-                  : "border-line bg-raised"
+              className={`reveal relative flex flex-col overflow-hidden rounded-[1.75rem] p-7 ${
+                plan.founding ? "theme-dark bg-navy shadow-lift" : "bg-bg shadow-soft"
               }`}
             >
               {plan.founding && (
-                <span className="label-mono absolute top-0 right-0 rounded-bl-xl bg-accent px-3 py-1.5 text-[0.5625rem] text-on-accent">
+                <span className="label-mono absolute top-5 right-5 rounded-full bg-accent px-2.5 py-1 text-[0.5625rem] text-on-accent">
                   {plans.founding.badge}
                 </span>
               )}
               <h3 className="font-semibold">{plan.name}</h3>
               <p className="mt-4 flex items-baseline gap-1.5">
-                <span className="display text-5xl font-semibold">{plan.price}</span>
+                <span className="display text-5xl font-extrabold tracking-[-0.04em]">
+                  {plan.price}
+                </span>
                 <span className="text-sm text-muted">{plans.perMonth}</span>
               </p>
               <p className="mt-2 text-sm font-semibold text-accent">
                 {plans.footage(plan.footage)}
               </p>
-              <ul className="mt-6 flex-1 space-y-2.5 border-t border-dashed border-line-strong pt-5">
+              <ul className="mt-6 flex-1 space-y-2.5 border-t border-line pt-5">
                 {plan.points.map((point) => (
                   <li key={point} className="flex gap-2.5 text-sm">
                     <CheckIcon className="mt-0.5 size-4 shrink-0 text-keep" />
@@ -646,7 +611,7 @@ function Plans() {
             </li>
           ))}
         </ul>
-        <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl space-y-1.5 text-sm text-muted">
             <p>{plans.sameFeatures}</p>
             <p>{plans.extra}</p>
@@ -663,9 +628,9 @@ function Plans() {
 
 function Faq() {
   return (
-    <section id="faq" aria-labelledby="faq-heading" className="theme-paper">
+    <section id="faq" aria-labelledby="faq-heading">
       <div
-        className={`${container} grid gap-12 py-24 sm:py-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20`}
+        className={`${container} grid gap-12 py-20 sm:py-28 lg:py-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20`}
       >
         <div className="lg:sticky lg:top-28 lg:self-start">
           <SectionIntro
@@ -687,12 +652,12 @@ function Faq() {
         </div>
         <div className="divide-y divide-line border-y border-line">
           {faq.items.map((item) => (
-            <details key={item.q} className="group py-6">
+            <details key={item.q} className="faq-item group py-6">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-lg font-semibold [&::-webkit-details-marker]:hidden">
                 {item.q}
                 <span
                   aria-hidden="true"
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full border border-line-strong text-accent transition-transform duration-300 group-open:rotate-45"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-raised text-xl text-fg transition-[transform,background-color] duration-300 group-open:rotate-45 group-open:bg-ink group-open:text-on-ink"
                 >
                   +
                 </span>
@@ -706,12 +671,80 @@ function Faq() {
   );
 }
 
+// Staggered parallax in the dark grid (adobe.com "parallax stagger ltr"): each column starts a
+// little lower than the one before it, and they land together as the grid arrives. One column on
+// phones (no lag), two on tablets, three on large screens.
+const tabletLag = ["sm:[--lag:0px]", "sm:[--lag:2.5rem]"];
+const desktopLag = ["lg:[--lag:0px]", "lg:[--lag:2.5rem]", "lg:[--lag:5rem]"];
+
+/** The dark ending starts here: a photo that opens like a garage door, then a black grid. */
+function Roadmap() {
+  return (
+    <section id="roadmap" aria-labelledby="roadmap-heading" className="theme-dark pb-20 sm:pb-32">
+      {/* The window opens out of the white page above it. */}
+      <div className="bg-white">
+        <div className="door relative isolate flex min-h-[36rem] items-end overflow-hidden sm:min-h-[42rem] lg:h-[92svh] lg:max-h-[54rem]">
+          <Image
+            src={nightEdit}
+            alt=""
+            sizes="100vw"
+            placeholder="blur"
+            className="door-media absolute inset-0 -z-10 h-full w-full object-cover"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#000_0%,rgb(0_0_0/0.6)_40%,rgb(0_0_0/0.25)_100%)]"
+          />
+          <div className={`${container} pb-20 sm:pb-28`}>
+            <SectionIntro
+              center
+              id="roadmap-heading"
+              index={roadmap.index}
+              eyebrow={roadmap.eyebrow}
+              heading={roadmap.heading}
+              lead={roadmap.lead}
+            />
+          </div>
+          <AiCredit className="absolute top-5 right-5" />
+        </div>
+      </div>
+      <div className={container}>
+        {/* A list, not a swipe row: these cards hold nothing to focus, so a sideways scroll box
+            could not be scrolled from the keyboard. Compact on phones. */}
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {roadmap.items.map((item, index) => (
+            <li key={item.title} className="reveal">
+              <div className={`lag h-full ${tabletLag[index % 2]} ${desktopLag[index % 3]}`}>
+                <div className="flex h-full flex-col rounded-[1.5rem] bg-raised p-6 transition-colors duration-300 hover:bg-panel sm:min-h-60 sm:p-7">
+                  <div className="flex items-center justify-between gap-3">
+                    <span
+                      aria-hidden="true"
+                      className="flex size-9 items-center justify-center rounded-xl border border-line-strong font-mono text-xs font-semibold text-muted"
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <StatusPill status="later" />
+                  </div>
+                  <h3 className="display mt-auto pt-6 text-2xl font-bold tracking-[-0.03em] sm:pt-12">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-muted">{item.body}</p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
 function Waitlist() {
   return (
     <section
       id="waitlist"
       aria-labelledby="waitlist-heading"
-      className="relative isolate overflow-hidden"
+      className="theme-dark relative isolate overflow-hidden"
     >
       <Image
         src={eveningBack}
@@ -721,21 +754,22 @@ function Waitlist() {
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgb(12_11_10/0.96)_30%,rgb(12_11_10/0.82)_60%,rgb(12_11_10/0.7)_100%)]"
+        className="absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,#000_0%,rgb(0_0_0/0.55)_30%,rgb(0_0_0/0.55)_70%,#000_100%)] lg:bg-[linear-gradient(to_right,#000_20%,rgb(0_0_0/0.8)_55%,rgb(0_0_0/0.5)_100%)]"
       />
       <div
-        className={`${container} grid gap-12 py-24 sm:py-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20`}
+        className={`${container} grid gap-12 py-20 sm:py-28 lg:py-32 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20`}
       >
         <div className="reveal">
           <h2
             id="waitlist-heading"
-            className="display text-5xl leading-[0.98] font-semibold text-balance sm:text-6xl lg:text-7xl"
+            className="display text-5xl leading-[0.96] font-extrabold tracking-[-0.045em] text-balance sm:text-6xl lg:text-7xl"
           >
             {finalCta.heading}
           </h2>
           <p className="mt-6 max-w-md text-lg text-pretty text-muted">{finalCta.lead}</p>
         </div>
-        <div className={`reveal ${card} bg-raised/95 p-6 backdrop-blur sm:p-8`}>
+        {/* A white form card on the dark photo (adobe.com puts forms on white). */}
+        <div className="reveal theme-light rounded-[1.75rem] p-6 shadow-lift sm:p-9">
           <WaitlistForm />
         </div>
       </div>

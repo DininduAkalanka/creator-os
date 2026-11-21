@@ -27,15 +27,18 @@ export const statusLabels: Record<ServiceStatus, string> = {
 export const statusHelp =
   "First release: what early access starts with. Beta: added during the private beta. Later: planned after the beta. Nothing is available yet; join the waitlist to be invited.";
 
-/** Hero slides (Adobe-style swapper). Slide 1 carries the page's main message. */
+/**
+ * Hero slides (Adobe-style swapper), shown on the stage under the page's headline (the headline
+ * itself is in content/home.ts).
+ */
 export const heroSlides = [
   {
     id: "rough-cut",
     tab: "Rough cut",
     status: "first" as ServiceStatus,
     eyebrow: "AI first-pass editing",
-    heading: "", // slide 1 uses the signature headline from content/home.ts
-    lead: "",
+    heading: "Every pause and retake, marked for you.",
+    lead: "Silences, filler words and restarted intros show up as suggested cuts on your transcript. You approve every one, then open the cut in your own editor.",
     cta: { label: "Try the demo", href: "#try-it" },
   },
   {
@@ -249,7 +252,7 @@ export const nextVideo = {
 };
 
 export const roadmap = {
-  index: "07",
+  index: "09",
   eyebrow: "Later",
   heading: "Where it goes after the beta.",
   lead: "Planned, not promised. Each one ships only when it works properly, and the order follows what beta creators ask for.",
@@ -291,7 +294,8 @@ export type MenuItem = {
   href: string;
 };
 
-const serviceMarks: Record<string, string> = {
+/** Two-letter tiles for the services, shared by the Product menu and the services row. */
+export const serviceMarks: Record<string, string> = {
   "rough-cut": "Rc",
   captions: "Cc",
   export: "Ex",
@@ -377,7 +381,7 @@ export const stories = {
 };
 
 export const plans = {
-  index: "08",
+  index: "07",
   eyebrow: "Plans",
   heading: "Priced by hours of raw footage.",
   lead: "Simple to understand: you pay for the footage you bring, not for credits. These are planned prices and may change before launch.",

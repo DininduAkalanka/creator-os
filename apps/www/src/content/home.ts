@@ -187,7 +187,7 @@ export const features = {
 };
 
 export const faq = {
-  index: "09",
+  index: "08",
   eyebrow: "Questions",
   heading: "The questions we'd ask too.",
   lead: "Straight answers, including the uncomfortable ones.",
