@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const PAGES = ["/", "/privacy", "/terms", "/about"] as const;
 
@@ -11,6 +11,38 @@ test.describe("home page", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName(
       "Your raw recording, rough-cut and captioned in minutes.",
     );
+  });
+
+  test("is white by default, and dark only where it is meant to be", async ({ page }) => {
+    await page.goto("/");
+    const background = (locator: Locator) =>
+      locator.evaluate((element) => getComputedStyle(element).backgroundColor);
+    expect(await background(page.locator("body"))).toBe("rgb(255, 255, 255)");
+    // The header is a white bar (adobe.com), not a dark one.
+    expect(await background(page.locator("header > div").first())).toBe("rgb(255, 255, 255)");
+    // Dark sections are the "Later" band and the sign-up at the end, then the footer.
+    const dark = await page
+      .locator("main section.theme-dark")
+      .evaluateAll((sections) => sections.map((section) => section.id));
+    expect(dark).toEqual(["roadmap", "waitlist"]);
+    await expect(page.locator("body > footer")).toHaveClass(/theme-dark/);
+
+    // Long text pages are white too.
+    await page.goto("/privacy");
+    expect(await background(page.locator("body"))).toBe("rgb(255, 255, 255)");
+    await expect(page.locator("main .theme-dark")).toHaveCount(0);
+  });
+
+  test("the struck-out word stays readable after it is cut", async ({ page }) => {
+    // With motion on, "um," fades once it is struck through. The quality gates below run with
+    // reduced motion (no fade), so check the faded state here: it must keep 3:1 on white.
+    await page.goto("/");
+    await page.waitForTimeout(2500); // the strike and fade end at 1.9 s
+    const results = await new AxeBuilder({ page })
+      .include(".hero-cut")
+      .withRules(["color-contrast"])
+      .analyze();
+    expect(results.violations.map((violation) => violation.id)).toEqual([]);
   });
 
   test("cut demo: accept all, keep one, start over", async ({ page }) => {
@@ -89,10 +121,11 @@ test.describe("hero slideshow", () => {
     await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
       timeout: 15_000,
     });
-    // v4 stopped for good here: on a full-screen hero the mouse is nearly always over a slide.
-    const hero = page.locator('section[aria-roledescription="carousel"]');
-    const box = await hero.boundingBox();
-    if (!box) throw new Error("The hero has no size.");
+    // v4 stopped for good here: on a large hero the mouse is nearly always over a slide.
+    const stage = page.locator("[data-hero-stage]");
+    await stage.scrollIntoViewIfNeeded();
+    const box = await stage.boundingBox();
+    if (!box) throw new Error("The hero stage has no size.");
     await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.4);
     await expect(page.getByRole("tab", { name: /Captions/ })).toHaveAttribute(
       "aria-selected",
@@ -121,14 +154,15 @@ test.describe("hero slideshow", () => {
     const pause = page.getByRole("button", { name: "Pause slideshow and video" });
     await expect(pause).toBeVisible({ timeout: 15_000 });
     await pause.click();
-    const hero = page.locator('section[aria-roledescription="carousel"]');
-    const box = await hero.boundingBox();
-    if (!box) throw new Error("The hero has no size.");
+    // Swipes belong to the stage (the media); the message above it is text to read.
+    const stage = page.locator("[data-hero-stage]");
+    const box = await stage.boundingBox();
+    if (!box) throw new Error("The hero stage has no size.");
     const y = box.y + box.height * 0.35;
     const swipe = async (from: number, to: number) => {
       const touch = { pointerId: 1, pointerType: "touch", isPrimary: true, clientY: y };
-      await hero.dispatchEvent("pointerdown", { ...touch, clientX: box.x + box.width * from });
-      await hero.dispatchEvent("pointerup", { ...touch, clientX: box.x + box.width * to });
+      await stage.dispatchEvent("pointerdown", { ...touch, clientX: box.x + box.width * from });
+      await stage.dispatchEvent("pointerup", { ...touch, clientX: box.x + box.width * to });
     };
     await swipe(0.85, 0.15);
     const captions = page.getByRole("tab", { name: /Captions/ });
@@ -163,6 +197,62 @@ test.describe("hero slideshow", () => {
     }
     await expect(page.locator("#channel-audit")).toContainText("Preview with example data");
     await expect(page.locator("#next-video")).toContainText("Example data for illustration");
+  });
+});
+
+test.describe("services row", () => {
+  test("a card opens wide when the mouse rests on it, like adobe.com", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Phones get a row that scrolls sideways instead.");
+    await page.goto("/");
+    const cards = page.locator("#product li[data-open]");
+    await expect(cards).toHaveCount(6);
+    await expect(cards.first()).toHaveAttribute("data-open", "true");
+
+    const audit = cards.filter({ hasText: "Free Channel Audit" });
+    await audit.evaluate((element) =>
+      element.scrollIntoView({ block: "center", behavior: "instant" }),
+    );
+    await audit.hover();
+    await expect(audit).toHaveAttribute("data-open", "true");
+    await expect(cards.first()).toHaveAttribute("data-open", "false");
+    // Really wider, not just marked: an open card is several times a closed one.
+    await expect
+      .poll(async () => {
+        const [open, closed] = await Promise.all([
+          audit.boundingBox(),
+          cards.first().boundingBox(),
+        ]);
+        return (open?.width ?? 0) / (closed?.width ?? 1);
+      })
+      .toBeGreaterThan(2);
+  });
+
+  test("keyboard focus opens a card too", async ({ page, isMobile }) => {
+    test.skip(isMobile, "On phones every card is open.");
+    await page.goto("/");
+    const card = page.locator("#product li[data-open]").filter({ hasText: "Editor review" });
+    await card.getByRole("link").focus();
+    await expect(card).toHaveAttribute("data-open", "true");
+  });
+
+  test("on phones the cards scroll sideways", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "Large screens show the opening row.");
+    await page.goto("/");
+    const row = page.locator("#product li[data-open]").first().locator("xpath=..");
+    expect(await row.evaluate((list) => list.scrollWidth > list.clientWidth)).toBe(true);
+  });
+});
+
+test.describe("questions", () => {
+  test("a question opens to show its answer", async ({ page }) => {
+    await page.goto("/");
+    const question = page.locator("#faq details").first();
+    await question.locator("summary").click();
+    await expect(question).toHaveAttribute("open", "");
+    await expect(question.locator("p")).toBeVisible();
   });
 });
 
@@ -390,6 +480,8 @@ test.describe("reduced motion", () => {
     await page.waitForTimeout(3000);
     await expect(page.locator("video")).toHaveCount(0);
     await expect(page.locator("[data-reveal]")).toHaveCount(0);
+    // The "Later" photo is shown whole; it only opens like a garage door when motion is on.
+    await expect(page.locator("#roadmap .door")).toHaveCSS("clip-path", "none");
   });
 });
 
