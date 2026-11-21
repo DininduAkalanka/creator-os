@@ -283,8 +283,9 @@ export const roadmap = {
 
 export const stories = {
   label: "Who it's for",
-  previous: "Previous",
-  next: "Next",
+  previous: "Previous story",
+  next: "Next story",
+  goTo: (index: number, total: number) => `Story ${index} of ${total}`,
   slides: [
     {
       key: "creator",

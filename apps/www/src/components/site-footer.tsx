@@ -5,6 +5,9 @@ import { LogoMark } from "./logo";
 import { EmailLink, MissingValue } from "./missing-value";
 import { buttonPrimary, container } from "./styles";
 
+/** Average width of one display-font letter at the wordmark's tracking, in ems (measured). */
+const WORDMARK_EM_PER_CHAR = 0.52;
+
 export function SiteFooter() {
   const { footer } = siteCopy;
   return (
@@ -71,6 +74,22 @@ export function SiteFooter() {
           {!BRAND.nameIsFinal && <p>{footer.workingName}</p>}
           <p>{footer.trademarks}</p>
         </div>
+      </div>
+
+      {/*
+       * Closing wordmark (adobe.com-style), sized from the name so any final name fits. It rises
+       * from behind the clipped bottom edge as the page ends (scroll-linked, globals.css).
+       * overflow-clip, not hidden: a hidden box would become the scroll timeline instead of the page.
+       */}
+      <div aria-hidden="true" className={`${container} overflow-clip [container-type:inline-size]`}>
+        <p
+          className="display wordmark-rise -mb-[0.13em] text-center leading-none font-semibold tracking-[-0.045em] whitespace-nowrap text-fg select-none"
+          style={{
+            fontSize: `calc(100cqi / ${(BRAND.name.length * WORDMARK_EM_PER_CHAR).toFixed(2)})`,
+          }}
+        >
+          {BRAND.name}
+        </p>
       </div>
     </footer>
   );

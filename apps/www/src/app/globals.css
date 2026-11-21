@@ -93,16 +93,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Film-grain texture: a tiny SVG noise tile, fixed, never intercepts clicks. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+/*
+ * No film-grain overlay (removed in v5): a fixed full-page layer over the photos made them look
+ * noisy rather than clean, and it had to be composited on every scroll frame.
+ */
 
 ::selection {
   background: var(--accent);
@@ -197,10 +191,6 @@ body::before {
   .hero-cut::after {
     animation: hero-cut-strike 500ms cubic-bezier(0.65, 0, 0.35, 1) 800ms both;
   }
-  .rise {
-    animation: rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-    animation-delay: calc(var(--i, 0) * 90ms);
-  }
 }
 
 @keyframes hero-cut-strike {
@@ -216,6 +206,7 @@ body::before {
     opacity: 0.55;
   }
 }
+/* Used by the hero's .slide-rise (see "Hero slide changes" below). */
 @keyframes rise {
   from {
     opacity: 0;
@@ -234,10 +225,117 @@ body::before {
  */
 
 /*
- * Also not used on purpose: scroll-driven reveal animations (animation-timeline: view()) on
- * sections. Measured on the long v4 page they cost about 3 Lighthouse mobile points (median 88
- * with, 91 without). The `reveal` class stays on elements as a harmless hook.
+ * ---------- Scroll motion (v5, modelled on adobe.com) ----------
+ * Only transform and opacity move. Everything is off for reduced motion, and the page reads the
+ * same without any of it.
+ *
+ * 1. Reveal: <ScrollReveal> marks `.reveal` elements that start below the first screen as
+ *    "wait" and flips them to "in" when they scroll into view. Elements on the first screen are
+ *    never hidden. (v4 tried CSS view() timelines on every section instead: about 3 Lighthouse
+ *    mobile points slower. One IntersectionObserver does no work while scrolling.)
  */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal="wait"] {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  [data-reveal="in"] {
+    transition:
+      opacity 700ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
+      transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+  }
+}
+
+/*
+ * 2. Scroll-linked effects (CSS scroll timelines, run by the browser's compositor; where they are
+ *    not supported, the page is simply static):
+ *    - the hero drifts up at about half speed and dims while the first section slides over it;
+ *    - large media settle from slightly larger to their place as they enter the screen.
+ *    The longhands come after any shorthand on purpose: `animation` resets the timeline.
+ */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-drift,
+    .hero-dim {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+    .hero-drift {
+      animation-name: hero-drift;
+    }
+    .hero-dim {
+      animation-name: hero-dim;
+    }
+    .settle {
+      animation-name: settle;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+    /* Ends at 75% of entry: the wordmark's cropped bottom never fully enters the screen. */
+    .wordmark-rise {
+      animation-name: wordmark-rise;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 75%;
+    }
+  }
+}
+@keyframes hero-drift {
+  to {
+    transform: translateY(45vh);
+  }
+}
+@keyframes hero-dim {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+@keyframes settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes wordmark-rise {
+  from {
+    transform: translateY(65%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/*
+ * 3. Hero slide changes: the incoming slide's text rises in line by line and its picture settles.
+ *    Slide 1's first paint is left exactly as loaded; these run from the first change onwards.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .is-active .slide-rise {
+    animation: rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 90ms);
+  }
+  .is-active .slide-settle {
+    animation: slide-settle 1600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+@keyframes slide-settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: none;
+  }
+}
 
 /* ---------- Interactive cut demo ---------- */
 .demo-segment {

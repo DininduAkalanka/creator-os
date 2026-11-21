@@ -22,6 +22,7 @@ import { CheckIcon, CrossIcon } from "@/components/icons";
 import { LazyCutDemo } from "@/components/lazy-cut-demo";
 import { AiCredit, Photo, VideoPanel } from "@/components/media";
 import { AuditMini, AuditPreview, NextMini, NextVideoPreview } from "@/components/product-previews";
+import { ScrollReveal } from "@/components/scroll-reveal";
 import { SectionIntro } from "@/components/section-intro";
 import { StoryCarousel } from "@/components/story-carousel";
 import { buttonLarge, buttonPrimary, card, container } from "@/components/styles";
@@ -47,10 +48,13 @@ const storyPhotos: Record<string, StaticImageData> = {
 /**
  * Section order follows the product loop. Loading follows adobe.com: the hero's first slide is
  * the only eager media; everything below is lazy (images on approach, demo code on approach).
+ * Motion follows adobe.com too: `.reveal` content rises in on scroll (ScrollReveal) and large
+ * media `.settle` into place (CSS scroll timeline). Both are off for reduced motion.
  */
 export default function HomePage() {
   return (
     <>
+      <ScrollReveal />
       <HeroCarousel />
       <Services />
       <Story />
@@ -213,7 +217,9 @@ function FeatureBlock(props: {
 }) {
   return (
     <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
-      <div className={`reveal ${props.flip ? "lg:order-2" : ""}`}>{props.media}</div>
+      <div className={`reveal ${props.flip ? "lg:order-2" : ""}`}>
+        <div className="settle">{props.media}</div>
+      </div>
       <div className={`reveal ${props.flip ? "lg:order-1" : ""}`}>
         <p className="label-mono text-faint tabular-nums">
           <span className="text-accent">0{props.index}</span> / 0{props.total}
@@ -570,14 +576,19 @@ function Roadmap() {
 
 function Stories() {
   return (
-    <section aria-labelledby="stories-heading" className="border-t border-line py-24 sm:py-28">
+    // overflow-x-clip: the slider settles from slightly wider than the page; clip, not hidden, so
+    // the page (not this section) stays the scroll timeline.
+    <section
+      aria-labelledby="stories-heading"
+      className="overflow-x-clip border-t border-line py-24 sm:py-28"
+    >
       <div className={container}>
         <p className="label-mono flex items-center gap-3 text-faint">
           <span aria-hidden="true" className="h-px w-8 bg-line-strong" />
           <span id="stories-heading">{stories.label}</span>
         </p>
       </div>
-      <div className="mx-auto mt-8 max-w-[90rem]">
+      <div className="settle mx-auto mt-8 max-w-[90rem]">
         <StoryCarousel images={storyPhotos} />
       </div>
     </section>
