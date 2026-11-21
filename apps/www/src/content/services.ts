@@ -136,6 +136,14 @@ export const services = {
       href: "#next-video",
     },
   ],
+  /** The service switcher (a tour of the services, adobe.com-style tabs and stage). */
+  switcher: {
+    label: "Services",
+    pause: "Pause the tour of the services",
+    play: "Play the tour of the services",
+    example: "Example",
+    more: (title: string) => `More about ${title}`,
+  },
   loopHeading: "The loop",
   loop: [
     { step: "Film", status: null },

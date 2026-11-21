@@ -465,6 +465,25 @@ body {
 }
 
 /*
+ * 3b. Service switcher: the new product screen and its caption rise in (the caption a moment
+ *     later) while the backdrop crossfades to the service's colour.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .switch-in {
+    animation: switch-in 560ms var(--ease-out-expo) both;
+  }
+  .switch-in-late {
+    animation: switch-in 560ms var(--ease-out-expo) 90ms both;
+  }
+}
+@keyframes switch-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+
+/*
  * 4. FAQ answers open and close smoothly where the browser can animate to `height: auto`
  *    (interpolate-size); elsewhere they simply open.
  */

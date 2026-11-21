@@ -4,6 +4,28 @@
  */
 import { features } from "@/content/home";
 
+/** Example waveform; the bars in CUT_BARS are the suggested cuts (a pause, a filler, a retake). */
+const WAVE = [
+  5, 8, 12, 7, 10, 14, 9, 6, 3, 2, 2, 3, 11, 15, 10, 8, 12, 6, 4, 2, 2, 2, 9, 13, 11, 7, 10, 12, 8,
+  5,
+];
+const CUT_BARS = new Set([8, 9, 10, 11, 18, 19, 20, 21]);
+
+/** A strip of the clip's waveform with the suggested cuts highlighted. */
+export function CutStripVisual() {
+  return (
+    <div aria-hidden="true" className="flex h-14 items-center gap-[3px] rounded-lg bg-panel px-2.5">
+      {WAVE.map((height, index) => (
+        <span
+          key={index}
+          style={{ height: `${height * 6}%` }}
+          className={`w-full rounded-full ${CUT_BARS.has(index) ? "bg-accent/80" : "bg-fg/35"}`}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function RoughCutVisual() {
   return (
     <div aria-hidden="true" className="space-y-2.5 font-mono text-[0.72rem] leading-6 text-muted">

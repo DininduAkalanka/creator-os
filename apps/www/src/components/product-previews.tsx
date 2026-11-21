@@ -207,37 +207,41 @@ export function NextVideoPreview() {
 const miniCard =
   "theme-dark w-80 rounded-2xl border border-white/15 bg-[#0e0d1c]/85 p-4 text-white shadow-2xl shadow-black/50 backdrop-blur-md";
 
-export function AuditMini() {
-  const p = audit.preview;
-  const insight = p.insights[0];
+/** The inside of the small Audit preview: the baseline chart and the first insight. */
+export function AuditMiniBody() {
+  const insight = audit.preview.insights[0];
   return (
-    <div aria-hidden="true" className={miniCard}>
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">{p.title}</p>
-        <PreviewLabel text={p.shortLabel} />
-      </div>
-      <div className="mt-3">
-        <BaselineChart compact />
-      </div>
+    <>
+      <BaselineChart compact />
       {insight && (
         <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.06] p-3">
           <p className="text-[0.8rem] leading-snug font-semibold">{insight.title}</p>
           <p className="mt-1 text-[0.7rem] text-muted">{insight.evidence}</p>
         </div>
       )}
+    </>
+  );
+}
+
+export function AuditMini() {
+  const p = audit.preview;
+  return (
+    <div aria-hidden="true" className={miniCard}>
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-sm font-semibold">{p.title}</p>
+        <PreviewLabel text={p.shortLabel} />
+      </div>
+      <AuditMiniBody />
     </div>
   );
 }
 
-export function NextMini() {
+/** The inside of the small recommendation preview: the idea, one reason, the actions. */
+export function NextMiniBody() {
   const p = nextVideo.preview;
   return (
-    <div aria-hidden="true" className={miniCard}>
-      <div className="flex items-center justify-between">
-        <p className="label-mono text-accent">{p.kicker}</p>
-        <PreviewLabel text={p.shortLabel} />
-      </div>
-      <p className="display mt-3 text-lg leading-tight font-bold">{p.title}</p>
+    <>
+      <p className="display text-lg leading-tight font-bold">{p.title}</p>
       <p className="mt-2 text-[0.72rem] text-muted">{p.reasons[0]}</p>
       <div className="mt-3 flex gap-2">
         {p.actions.slice(0, 2).map((action, index) => (
@@ -251,13 +255,27 @@ export function NextMini() {
           </span>
         ))}
       </div>
+    </>
+  );
+}
+
+export function NextMini() {
+  const p = nextVideo.preview;
+  return (
+    <div aria-hidden="true" className={miniCard}>
+      <div className="mb-3 flex items-center justify-between">
+        <p className="label-mono text-accent">{p.kicker}</p>
+        <PreviewLabel text={p.shortLabel} />
+      </div>
+      <NextMiniBody />
     </div>
   );
 }
 
-export function ReviewMini() {
+/** An editor's comment on an exact moment, and the approval. */
+export function ReviewThread() {
   return (
-    <div aria-hidden="true" className={`${miniCard} space-y-2.5`}>
+    <div className="space-y-2.5">
       <div className="flex items-start gap-2.5">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-keep-soft font-mono text-[0.6rem] text-keep">
           ED
@@ -273,6 +291,14 @@ export function ReviewMini() {
           Agreed. Approved.
         </p>
       </div>
+    </div>
+  );
+}
+
+export function ReviewMini() {
+  return (
+    <div aria-hidden="true" className={miniCard}>
+      <ReviewThread />
     </div>
   );
 }

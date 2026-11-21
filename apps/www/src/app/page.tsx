@@ -12,6 +12,7 @@ import talkingPoster from "@/assets/media/talking-poster.jpg";
 import timelineDetail from "@/assets/media/timeline-detail.jpg";
 import {
   ChaptersVisual,
+  CutStripVisual,
   HandoffVisual,
   LocalFootageVisual,
   RoughCutVisual,
@@ -22,14 +23,20 @@ import { AppIcon } from "@/components/app-icon";
 import { ArrowRightIcon, CheckIcon, CrossIcon, LoopIcon, PlusIcon } from "@/components/icons";
 import { LazyCutDemo } from "@/components/lazy-cut-demo";
 import { AiCredit, Photo, VideoPanel } from "@/components/media";
-import { AuditMini, AuditPreview, NextMini, NextVideoPreview } from "@/components/product-previews";
+import {
+  AuditMiniBody,
+  AuditPreview,
+  NextMiniBody,
+  NextVideoPreview,
+  ReviewThread,
+} from "@/components/product-previews";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SectionIntro } from "@/components/section-intro";
-import { ServiceRail } from "@/components/service-rail";
+import { ServiceSwitcher } from "@/components/service-switcher";
 import { StoryCarousel } from "@/components/story-carousel";
 import { buttonLarge, buttonPrimary, container } from "@/components/styles";
 import { WaitlistForm } from "@/components/waitlist-form";
-import { faq, features, finalCta, story, tryIt } from "@/content/home";
+import { faq, features, finalCta, hero, story, tryIt } from "@/content/home";
 import {
   audit,
   laterMarks,
@@ -95,27 +102,45 @@ function StatusPill({ status, className = "" }: { status: ServiceStatus; classNa
   );
 }
 
-/** adobe.com's "Everything you need" row: cards that open wide as you point at them. */
+/**
+ * Everything it does, as a guided tour of the services (adobe.com-style feature tabs): a product
+ * screen per service, drawn in code from the same visuals as the rest of the page.
+ */
 function Services() {
   const visuals: Record<string, ReactNode> = {
-    "rough-cut": <CardPhoto src={timelineDetail} alt="" />,
-    captions: <CardPhoto src={talkingPoster} alt="" />,
-    export: <CardPhoto src={footageLocal} alt="" />,
-    review: <CardPhoto src={reviewTogether} alt="" />,
-    audit: (
-      <span className="absolute inset-0 flex items-center justify-center bg-[#0e0d1c] bg-[radial-gradient(circle_at_30%_20%,rgb(126_224_181/0.2),transparent_60%)] p-4">
-        <span className="block origin-center scale-[0.82]">
-          <AuditMini />
-        </span>
-      </span>
+    "rough-cut": (
+      <div className="space-y-4">
+        <CutStripVisual />
+        <RoughCutVisual />
+      </div>
     ),
-    next: (
-      <span className="absolute inset-0 flex items-center justify-center bg-[#0e0d1c] bg-[radial-gradient(circle_at_70%_20%,rgb(254_77_73/0.25),transparent_60%)] p-4">
-        <span className="block origin-center scale-[0.82]">
-          <NextMini />
-        </span>
-      </span>
+    captions: (
+      <div className="space-y-4">
+        <p className="mx-auto w-fit rounded-md bg-black/70 px-3 py-1.5 text-center text-sm text-white">
+          {features.blocks.captions.lines[1]}
+        </p>
+        <ChaptersVisual />
+        <ThumbnailsVisual />
+      </div>
     ),
+    export: (
+      <div className="space-y-3">
+        <HandoffVisual />
+        <p className="flex flex-wrap gap-2">
+          {hero.apps.map((app) => (
+            <span
+              key={app}
+              className="rounded-full border border-white/15 px-2.5 py-1 text-xs font-semibold text-muted"
+            >
+              {app}
+            </span>
+          ))}
+        </p>
+      </div>
+    ),
+    review: <ReviewThread />,
+    audit: <AuditMiniBody />,
+    next: <NextMiniBody />,
   };
   const items = services.cards.map((card) => ({
     ...card,
@@ -136,8 +161,8 @@ function Services() {
           heading={services.heading}
           lead={services.lead}
         />
-        <div className="mt-14">
-          <ServiceRail items={items} />
+        <div className="reveal mt-14">
+          <ServiceSwitcher items={items} />
         </div>
 
         <div className="reveal mt-6 flex flex-col items-center gap-4 rounded-[1.75rem] border border-line p-5 sm:p-6">
@@ -177,21 +202,6 @@ function Services() {
         </div>
       </div>
     </section>
-  );
-}
-
-function CardPhoto({ src, alt }: { src: StaticImageData; alt: string }) {
-  return (
-    <>
-      <Image
-        src={src}
-        alt={alt}
-        sizes="(min-width: 1024px) 40vw, (min-width: 640px) 46vw, 82vw"
-        placeholder="blur"
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-[1.04]"
-      />
-      <AiCredit className="absolute top-3 left-3" />
-    </>
   );
 }
 
