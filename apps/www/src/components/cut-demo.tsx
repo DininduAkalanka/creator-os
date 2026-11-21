@@ -71,7 +71,7 @@ export function CutDemo() {
     <figure
       ref={figureRef}
       aria-labelledby={headingId}
-      className={`${run ? "demo-run " : ""}relative overflow-hidden rounded-[1.25rem] border border-line-strong bg-raised shadow-[0_40px_120px_-40px_rgb(0_0_0/0.9)]`}
+      className={`${run ? "demo-run " : ""}relative overflow-hidden rounded-[1.5rem] border border-line-strong bg-raised shadow-lift`}
     >
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2.5">

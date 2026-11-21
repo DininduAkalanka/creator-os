@@ -5,10 +5,10 @@ import { useEffect, useId, useRef, useState, type FocusEvent, type KeyboardEvent
 import { createPortal } from "react-dom";
 import { productMenu, statusLabels, type MenuItem, type ServiceStatus } from "@/content/services";
 
-// Same colours as the status pills on the page: first release green, beta orange, later neutral.
+// Same colours as the status pills on the page: first release green, beta red, later neutral.
 const markTone: Record<ServiceStatus, string> = {
-  first: "bg-keep text-[#06140e]",
-  beta: "bg-accent text-on-accent",
+  first: "bg-keep-soft text-keep",
+  beta: "bg-accent-soft text-accent",
   later: "border border-line-strong text-muted",
 };
 
@@ -92,7 +92,7 @@ export function ProductMenu() {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={toggle}
-        className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 transition-colors hover:bg-panel hover:text-fg ${open ? "bg-panel text-fg" : "text-fg/80"}`}
+        className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 transition-colors hover:bg-raised hover:text-fg ${open ? "bg-raised text-fg" : "text-fg/85"}`}
       >
         {productMenu.label}
         <svg
@@ -114,7 +114,7 @@ export function ProductMenu() {
       <div
         id={panelId}
         hidden={!open}
-        className="menu-in absolute inset-x-0 top-[calc(100%_+_0.5rem)] z-10 rounded-2xl border border-line-strong bg-raised p-3 text-left shadow-2xl shadow-black/60 sm:p-4"
+        className="menu-in absolute inset-x-0 top-[calc(100%_+_0.5rem)] z-10 rounded-2xl border border-line bg-bg p-3 text-left shadow-lift sm:p-4"
       >
         <div className="grid gap-4 lg:grid-cols-[14rem_1fr]">
           <div className="flex flex-col gap-4 p-1">
@@ -141,7 +141,7 @@ export function ProductMenu() {
                     onClick={() => setArea(index)}
                     onKeyDown={(event) => onAreaKeyDown(event, index)}
                     className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                      selected ? "bg-fg text-bg" : "bg-panel text-fg/85 hover:bg-line-strong"
+                      selected ? "bg-ink text-on-ink" : "bg-raised text-fg/85 hover:bg-panel"
                     }`}
                   >
                     {item.label}
@@ -181,7 +181,7 @@ export function ProductMenu() {
         createPortal(
           <div
             aria-hidden="true"
-            className="menu-dim fixed inset-0 z-30 hidden bg-black/60 lg:block"
+            className="menu-dim fixed inset-0 z-30 hidden bg-black/40 lg:block"
           />,
           document.body,
         )}
@@ -194,7 +194,7 @@ function MenuCard({ item, onNavigate }: { item: MenuItem; onNavigate: () => void
     <Link
       href={item.href}
       onClick={onNavigate}
-      className="group flex h-full min-h-40 flex-col rounded-xl border border-line bg-bg/60 p-4 transition-colors hover:border-line-strong hover:bg-panel"
+      className="group flex h-full min-h-40 flex-col rounded-xl border border-transparent bg-raised p-4 transition-colors hover:border-line hover:bg-panel"
     >
       <span className="flex items-center justify-between gap-3">
         <span

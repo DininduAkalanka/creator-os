@@ -1,21 +1,21 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
 /**
- * Adobe-style header: on the home page it sits transparent over the hero, then turns into a
- * floating, frosted, rounded bar once the page scrolls. On other pages it is solid from the start.
+ * adobe.com-style header: a floating white bar with rounded corners, on every page and from the
+ * first paint (the page is white, so nothing needs to sit transparent over a dark hero). Once
+ * the page scrolls, it turns slightly translucent with a deeper shadow; over a dark section it
+ * reads as frosted glass, like adobe.com's.
  */
 export function HeaderShell({ children }: { children: ReactNode }) {
-  const overlay = usePathname() === "/";
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     let frame = 0;
     const update = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => setScrolled(window.scrollY > 24));
+      frame = requestAnimationFrame(() => setScrolled(window.scrollY > 8));
     };
     update();
     window.addEventListener("scroll", update, { passive: true });
@@ -25,21 +25,14 @@ export function HeaderShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const floating = scrolled;
-  const transparent = overlay && !scrolled;
-
   return (
-    <header
-      className={`sticky top-0 z-40 transition-[padding] duration-300 ${floating ? "px-2 pt-2 sm:px-4" : ""}`}
-    >
+    <header className="sticky top-0 z-40 px-2 pt-2 sm:px-3">
       {/* While a menu is open the bar turns solid (adobe.com), whatever the scroll position. */}
       <div
-        className={`mx-auto transition-all duration-300 has-[[aria-expanded=true]]:bg-bg/95 ${
-          floating
-            ? "max-w-7xl rounded-2xl border border-line-strong bg-bg/75 shadow-2xl shadow-black/40 backdrop-blur-xl backdrop-saturate-150"
-            : transparent
-              ? "border-b border-transparent bg-transparent"
-              : "border-b border-line bg-bg/90 backdrop-blur-xl"
+        className={`mx-auto max-w-[100rem] rounded-2xl border transition-[background-color,box-shadow,border-color] duration-300 has-[[aria-expanded=true]]:bg-bg ${
+          scrolled
+            ? "border-line bg-bg/85 shadow-float backdrop-blur-xl backdrop-saturate-150"
+            : "border-line bg-bg shadow-soft"
         }`}
       >
         {children}

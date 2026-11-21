@@ -4,7 +4,7 @@ import { HeaderShell } from "./header-shell";
 import { Logo } from "./logo";
 import { MobileMenu } from "./mobile-menu";
 import { ProductMenu } from "./product-menu";
-import { buttonPrimary, container } from "./styles";
+import { buttonPrimary } from "./styles";
 
 export function SiteHeader() {
   const { nav } = siteCopy;
@@ -18,28 +18,31 @@ export function SiteHeader() {
   const links = [{ href: "/#product", label: nav.product }, ...sectionLinks];
   return (
     <HeaderShell>
-      <div className={`${container} relative flex h-16 items-center justify-between gap-4`}>
-        {/* The full logo (symbol and name); its accessible name is the brand name. */}
-        <Link href="/" className="flex shrink-0 items-center rounded-md py-1 text-fg">
-          <Logo className="h-7 w-auto sm:h-9" />
-        </Link>
-        <nav aria-label={nav.label} className="hidden lg:block">
-          <ul className="flex items-center gap-1 text-sm">
-            <li>
-              <ProductMenu />
-            </li>
-            {sectionLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="rounded-full px-3.5 py-2 text-fg/80 transition-colors hover:bg-panel hover:text-fg"
-                >
-                  {link.label}
-                </Link>
+      {/* The bar spans the screen (adobe.com): logo at the far left, the call to action at the right. */}
+      <div className="relative flex h-16 items-center justify-between gap-4 px-3 sm:px-5">
+        <div className="flex min-w-0 items-center gap-6">
+          {/* The full logo (symbol and name) in its own navy; its accessible name is the brand name. */}
+          <Link href="/" className="flex shrink-0 items-center rounded-md py-1 text-navy">
+            <Logo className="h-7 w-auto sm:h-8" />
+          </Link>
+          <nav aria-label={nav.label} className="hidden lg:block">
+            <ul className="flex items-center gap-0.5 text-[0.9375rem] font-semibold">
+              <li>
+                <ProductMenu />
               </li>
-            ))}
-          </ul>
-        </nav>
+              {sectionLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="rounded-full px-3.5 py-2 text-fg/85 transition-colors hover:bg-raised hover:text-fg"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
         <div className="flex items-center gap-2">
           {/* Wrapper: the button's own inline-flex would override "hidden". */}
           <div className="hidden sm:block">

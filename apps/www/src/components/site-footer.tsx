@@ -8,10 +8,12 @@ import { buttonPrimary, container } from "./styles";
 export function SiteFooter() {
   const { footer } = siteCopy;
   return (
-    <footer className="mt-auto border-t border-line bg-raised">
-      <div className={`${container} py-16`}>
+    // Black, like adobe.com's footer: the one place every page ends in the dark, with the
+    // closing wordmark. The rest of the site is light.
+    <footer className="theme-dark mt-auto">
+      <div className={`${container} pt-20 pb-16`}>
         <div className="flex flex-col items-start justify-between gap-8 border-b border-line pb-12 lg:flex-row lg:items-end">
-          <p className="display max-w-2xl text-4xl leading-[1.05] font-semibold text-balance sm:text-5xl">
+          <p className="display max-w-2xl text-4xl leading-[1.02] font-extrabold tracking-[-0.04em] text-balance sm:text-6xl">
             {footer.statement}
           </p>
           <Link href="/#waitlist" className={`${buttonPrimary} px-6 py-3.5 text-base`}>

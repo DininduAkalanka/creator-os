@@ -7,7 +7,7 @@ function DemoPlaceholder() {
   return (
     <div
       aria-hidden="true"
-      className="min-h-[34rem] rounded-[1.25rem] border border-line-strong bg-raised sm:min-h-[31rem]"
+      className="min-h-[34rem] rounded-[1.5rem] border border-line-strong bg-raised sm:min-h-[31rem]"
     />
   );
 }

@@ -55,7 +55,7 @@ export function MobileMenu({ links }: { links: Array<{ href: string; label: stri
       <div
         id={panelId}
         hidden={!open}
-        className="absolute inset-x-0 top-full border-b border-line bg-bg px-4 pt-2 pb-6 shadow-2xl shadow-black/60"
+        className="absolute inset-x-0 top-[calc(100%_+_0.5rem)] rounded-2xl border border-line bg-bg px-4 pt-2 pb-6 shadow-lift"
       >
         <ul className="divide-y divide-line">
           {links.map((link) => (

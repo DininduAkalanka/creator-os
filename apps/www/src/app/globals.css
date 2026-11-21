@@ -1,54 +1,82 @@
 @import "tailwindcss";
 
 /*
- * Design system: "the editing suite at night".
- * A warm graphite canvas like a video editor, one hot "cut" accent, a mint "keep" colour, and
- * timecode-style mono labels. Sections can switch to a warm paper theme with .theme-paper.
- * All tokens are semantic, so components work unchanged in both themes.
- * Text tokens meet WCAG AA (4.5:1) on --bg, --raised and --panel in both themes.
+ * Design system v6: "the clean white studio" (light first, adobe.com-grade).
+ * Until v5.1 the whole page was a dark "editing suite at night". The founder asked for a
+ * professional white page (21 Nov 2026), so dark is now used on purpose only, never as the
+ * default. See docs/design/website-design.md §11.
+ *
+ * - The page is white with light-grey cards (adobe.com: a white page, #f5f5f5-like cards).
+ * - The logo's navy carries the buttons; the logo's red carries brand moments (the cut strike,
+ *   progress lines, status dots). A darker, text-safe red is used for small red text.
+ * - Anything marked .theme-dark is dark on purpose: the editor demo (video editors are dark),
+ *   the "Later" band at the end of the page and the footer. Everything inside it follows.
+ * - All tokens are semantic, so components work unchanged in both themes. Text tokens meet WCAG
+ *   AA (4.5:1) on --bg, --raised and --panel in both themes; --brand is for graphics only
+ *   (3.3:1 on white, above the 3:1 WCAG 1.4.11 minimum for non-text).
  */
-:root {
-  color-scheme: dark;
-  --bg: #0c0b0a;
-  --raised: #141210;
-  --panel: #1b1916;
-  --line: rgb(255 244 230 / 0.09);
-  --line-strong: rgb(255 244 230 / 0.18);
-  --fg: #f4efe6;
-  --muted: #a8a095;
-  --faint: #8c8478;
-  --accent: #ff5a1f;
-  --accent-strong: #ff7a45;
-  --accent-soft: rgb(255 90 31 / 0.14);
-  --on-accent: #140904;
-  --keep: #7ee0b5;
-  --keep-soft: rgb(126 224 181 / 0.12);
-  --danger: #ff8f80;
-  --focus: #8ab4ff;
+:root,
+.theme-light {
+  color-scheme: light;
+  --bg: #ffffff;
+  --raised: #f5f5f7;
+  --panel: #ebebf0;
+  --line: rgb(14 13 28 / 0.09);
+  --line-strong: rgb(14 13 28 / 0.18);
+  --fg: #0e0d1c;
+  --muted: #4b4a5e;
+  --faint: #5d5c70;
+  /* Text-safe red: 5.6:1 on white, 4.7:1 on --panel. White text on it: 5.6:1. */
+  --accent: #c8261d;
+  --accent-strong: #a51d15;
+  --accent-soft: #fdeaea;
+  --on-accent: #ffffff;
+  /* The logo's own red, for graphics only. */
+  --brand: #fe4d49;
+  /* Buttons: the logo's navy on light (18:1 with white text), white on dark. */
+  --ink: #0b0a47;
+  --ink-strong: #1b1970;
+  --on-ink: #ffffff;
+  --keep: #0a6e4a;
+  --keep-soft: #dcf2e7;
+  --danger: #b42318;
+  --focus: #2457ff;
+  /* Shadow colour (r g b), so shadows stay soft on white and deep on black. */
+  --shadow: 14 13 28;
   --radius: 1rem;
 }
 
-.theme-paper {
-  color-scheme: light;
-  --bg: #f3ede2;
-  --raised: #fbf8f2;
-  --panel: #ebe3d5;
-  --line: rgb(21 18 15 / 0.12);
-  --line-strong: rgb(21 18 15 / 0.24);
-  --fg: #15120f;
-  --muted: #5f574c;
-  --faint: #6b6256;
-  /* #b0390a: 5.2:1 on paper. (#c2410c measured 4.44:1 in the axe test, below AA.) */
-  --accent: #b0390a;
-  --accent-strong: #8a2c08;
-  --accent-soft: #f8dccb;
-  --on-accent: #ffffff;
-  --keep: #0f7a55;
-  --keep-soft: #d3efe2;
-  --danger: #b42318;
-  --focus: #1d4ed8;
-  background: var(--bg);
-  color: var(--fg);
+.theme-dark {
+  color-scheme: dark;
+  --bg: #000000;
+  --raised: #141418;
+  --panel: #1d1d23;
+  --line: rgb(255 255 255 / 0.1);
+  --line-strong: rgb(255 255 255 / 0.2);
+  --fg: #ffffff;
+  --muted: #b8b7c6;
+  --faint: #9a99ab;
+  --accent: #ff6f69;
+  --accent-strong: #ff8f8a;
+  --accent-soft: rgb(254 77 73 / 0.16);
+  --on-accent: #1a0504;
+  --ink: #ffffff;
+  --ink-strong: #e6e6ee;
+  --on-ink: #0b0a47;
+  --keep: #7ee0b5;
+  --keep-soft: rgb(126 224 181 / 0.14);
+  --danger: #ff8f80;
+  --focus: #8ab4ff;
+  --shadow: 0 0 0;
+}
+
+/* In the base layer, so a utility (e.g. bg-navy on a dark card) can still set the surface. */
+@layer base {
+  .theme-light,
+  .theme-dark {
+    background-color: var(--bg);
+    color: var(--fg);
+  }
 }
 
 @theme inline {
@@ -64,6 +92,10 @@
   --color-accent-strong: var(--accent-strong);
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
+  --color-brand: var(--brand);
+  --color-ink: var(--ink);
+  --color-ink-strong: var(--ink-strong);
+  --color-on-ink: var(--on-ink);
   --color-keep: var(--keep);
   --color-keep-soft: var(--keep-soft);
   --color-danger: var(--danger);
@@ -72,6 +104,14 @@
   --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-bricolage), var(--font-instrument), ui-sans-serif, sans-serif;
   --font-mono: var(--font-martian), ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+@theme {
+  /* The logo's navy as a fixed surface colour (the same in both themes), e.g. highlight cards. */
+  --color-navy: #0b0a47;
+  /* Motion curves: quick start, long soft landing (adobe.com-like), and a symmetric one. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
 }
 
 html {
@@ -93,14 +133,9 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/*
- * No film-grain overlay (removed in v5): a fixed full-page layer over the photos made them look
- * noisy rather than clean, and it had to be composited on every scroll frame.
- */
-
 ::selection {
-  background: var(--accent);
-  color: var(--on-accent);
+  background: var(--ink);
+  color: var(--on-ink);
 }
 
 :focus-visible {
@@ -114,13 +149,31 @@ body {
   scroll-margin-top: 5.5rem;
 }
 
+/* Soft, layered shadows (adobe.com cards): light on white, deeper on black. */
+@utility shadow-soft {
+  box-shadow:
+    0 1px 2px rgb(var(--shadow) / 0.05),
+    0 6px 20px -10px rgb(var(--shadow) / 0.16);
+}
+@utility shadow-float {
+  box-shadow:
+    0 1px 2px rgb(var(--shadow) / 0.06),
+    0 12px 32px -12px rgb(var(--shadow) / 0.24);
+}
+@utility shadow-lift {
+  box-shadow:
+    0 2px 6px rgb(var(--shadow) / 0.06),
+    0 40px 80px -40px rgb(var(--shadow) / 0.45);
+}
+
 /* In the components layer so Tailwind utilities (leading-*, tracking-*) can still override. */
 @layer components {
-  /* Display type: tight, confident, optical sizing on. */
+  /* Display type: heavy, tight and confident (adobe.com headings), optical sizing on. */
   .display {
     font-family: var(--font-display);
     font-optical-sizing: auto;
-    letter-spacing: -0.022em;
+    font-weight: 700;
+    letter-spacing: -0.032em;
     line-height: 1;
   }
 
@@ -144,10 +197,10 @@ body {
     background-repeat: repeat-x;
   }
 
-  /* Native selects with a chevron that matches the theme (form fields are on dark surfaces). */
+  /* Native selects with a neutral chevron that reads on light and dark fields. */
   .select-field {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23a8a095' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%238a8999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.9rem center;
     background-size: 1rem;
@@ -179,7 +232,7 @@ body {
   top: 54%;
   height: 0.09em;
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--brand);
   transform-origin: left center;
   transform: scaleX(1);
 }
@@ -201,9 +254,11 @@ body {
     transform: scaleX(1);
   }
 }
+/* 0.72, not lower: on white the faded red must keep 3:1 for large text (0.72 gives 3.6:1;
+   the v5 value 0.55 gave 2.6:1 on white). */
 @keyframes hero-cut-fade {
   to {
-    opacity: 0.55;
+    opacity: 0.72;
   }
 }
 /* Used by the hero's .slide-rise (see "Hero slide changes" below). */
@@ -225,9 +280,9 @@ body {
  */
 
 /*
- * ---------- Scroll motion (v5, modelled on adobe.com) ----------
- * Only transform and opacity move. Everything is off for reduced motion, and the page reads the
- * same without any of it.
+ * ---------- Scroll motion (v5, extended in v6; modelled on adobe.com) ----------
+ * Only transform and opacity move (plus one clip-path, see 2). Everything is off for reduced
+ * motion, and the page reads the same without any of it.
  *
  * 1. Reveal: <ScrollReveal> marks `.reveal` elements that start below the first screen as
  *    "wait" and flips them to "in" when they scroll into view. Elements on the first screen are
@@ -247,26 +302,28 @@ body {
 }
 
 /*
- * 2. Scroll-linked effects (CSS scroll timelines, run by the browser's compositor; where they are
- *    not supported, the page is simply static):
- *    - the hero drifts up at about half speed and dims while the first section slides over it;
- *    - large media settle from slightly larger to their place as they enter the screen.
- *    The longhands come after any shorthand on purpose: `animation` resets the timeline.
+ * 2. Scroll-linked effects (CSS scroll timelines, run by the browser; where they are not
+ *    supported, the page is simply static). The longhands come after any shorthand on purpose:
+ *    `animation` resets the timeline.
+ *    - Hero (adobe.com "parallax-move-up-fast"): the message moves up faster than the page and
+ *      fades, while the stage below opens from 92% to its full size.
+ *    - Large media settle from slightly larger to their place as they enter the screen.
+ *    - "Garage door" (adobe.com "parallax-garage-door-reveal"): the photo window at the start
+ *      of the "Later" band opens from a rounded inset to the full width while its picture
+ *      settles. The only clip-path animation on the page: one element, cheap to paint.
+ *    - Staggered parallax (adobe.com "parallax stagger ltr"): in the three-column grid, each
+ *      column starts a little lower than the one before and they all land together.
  */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
-    .hero-drift,
-    .hero-dim {
+    .hero-open {
       animation-timing-function: linear;
       animation-fill-mode: both;
       animation-timeline: scroll(root);
-      animation-range: 0 100vh;
     }
-    .hero-drift {
-      animation-name: hero-drift;
-    }
-    .hero-dim {
-      animation-name: hero-dim;
+    .hero-open {
+      animation-name: hero-open;
+      animation-range: 0 60vh;
     }
     .settle {
       animation-name: settle;
@@ -274,6 +331,38 @@ body {
       animation-fill-mode: both;
       animation-timeline: view();
       animation-range: entry 0% entry 100%;
+    }
+    .door {
+      animation-name: door-open;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 45%;
+    }
+    .door-media {
+      animation-name: door-media;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 60%;
+    }
+    .lag {
+      animation-name: lag;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 40%;
+    }
+    /* Phones skip the lift: there the message is tall, and fading it would dim text that is
+       still being read. */
+    @media (min-width: 48rem) {
+      .hero-lift {
+        animation-name: hero-lift;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: scroll(root);
+        animation-range: 0 75vh;
+      }
     }
     /* Ends at 75% of entry: the wordmark's cropped bottom never fully enters the screen. */
     .wordmark-rise {
@@ -285,22 +374,51 @@ body {
     }
   }
 }
-@keyframes hero-drift {
+/* The message keeps full strength until it has mostly left the screen, then fades. */
+@keyframes hero-lift {
+  60% {
+    opacity: 1;
+  }
   to {
-    transform: translateY(45vh);
+    transform: translateY(-16vh);
+    opacity: 0.15;
   }
 }
-@keyframes hero-dim {
+@keyframes hero-open {
   from {
-    opacity: 0;
+    transform: scale(0.92);
   }
   to {
-    opacity: 0.7;
+    transform: none;
   }
 }
 @keyframes settle {
   from {
     transform: scale(1.06);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes door-open {
+  from {
+    clip-path: inset(9% 5% 0 5% round 2.5rem);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 0);
+  }
+}
+@keyframes door-media {
+  from {
+    transform: scale(1.18);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes lag {
+  from {
+    transform: translateY(var(--lag, 0px));
   }
   to {
     transform: none;
@@ -334,6 +452,28 @@ body {
   }
   to {
     transform: none;
+  }
+}
+
+/*
+ * 4. FAQ answers open and close smoothly where the browser can animate to `height: auto`
+ *    (interpolate-size); elsewhere they simply open.
+ */
+@supports (interpolate-size: allow-keywords) {
+  @media (prefers-reduced-motion: no-preference) {
+    .faq-item {
+      interpolate-size: allow-keywords;
+    }
+    .faq-item::details-content {
+      height: 0;
+      overflow: clip;
+      transition:
+        height 450ms var(--ease-out-expo),
+        content-visibility 450ms allow-discrete;
+    }
+    .faq-item[open]::details-content {
+      height: auto;
+    }
   }
 }
 
@@ -396,8 +536,8 @@ body {
   margin-bottom: 0.75rem;
   font-family: var(--font-display);
   font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   line-height: 1.25;
 }
 .prose-doc h3 {
@@ -418,7 +558,7 @@ body {
   margin-top: 0.375rem;
 }
 .prose-doc li::marker {
-  color: var(--accent);
+  color: var(--brand);
 }
 .prose-doc a {
   color: var(--accent);

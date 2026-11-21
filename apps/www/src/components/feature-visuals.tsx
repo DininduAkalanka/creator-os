@@ -89,9 +89,9 @@ export function ChaptersVisual() {
 
 export function ThumbnailsVisual() {
   const backgrounds = [
-    "linear-gradient(135deg,#ff5a1f,#7a1d05)",
-    "linear-gradient(135deg,#2b2925,#55504a)",
-    "linear-gradient(135deg,#7ee0b5,#1f5c46)",
+    "linear-gradient(135deg,#fe4d49,#8c1712)",
+    "linear-gradient(135deg,#0b0a47,#3b3a8f)",
+    "linear-gradient(135deg,#16a36f,#0a4a33)",
   ];
   return (
     <div aria-hidden="true" className="grid grid-cols-3 gap-2">
