@@ -12,7 +12,7 @@ export function PreviewNotice() {
       <div className={`${container} py-2 text-xs`}>
         <details>
           <summary className="cursor-pointer text-fg">
-            <span className="label-mono text-accent">{siteCopy.preview.lead}</span>{" "}
+            <span className="detail text-accent">{siteCopy.preview.lead}</span>{" "}
             <span className="text-muted">{siteCopy.preview.summary(blockers.length)}</span>
           </summary>
           <ul className="mt-2 list-disc space-y-1 ps-5 pb-1 text-muted">

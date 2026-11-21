@@ -26,6 +26,7 @@ export const siteCopy = {
     statement: "Spend your time on the edit, not the first pass.",
     cta: "Join early access",
     tagline: "AI first-pass editing for long-form YouTube creators.",
+    productHeading: "Product",
     legalHeading: "Legal",
     companyHeading: "Company",
     privacy: "Privacy policy",

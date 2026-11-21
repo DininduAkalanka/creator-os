@@ -1,6 +1,6 @@
 # Website design: research, system and quality bar
 
-Status: v2 of the pre-launch site (`apps/www`), 21 Nov 2026. Read this before changing how the site looks or behaves.
+Status: v6.2 of the pre-launch site (`apps/www`), 22 Nov 2026: **light first** (§11), **adobe.com-style type and icons** (§12), **the services as a guided tour** (§13). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11, §11 wins.
 
 ## 1. What we learned from production sites
 
@@ -19,7 +19,9 @@ What we deliberately did **not** copy, because it only works at their scale or w
 
 Supporting research (vendor sources, treat as directional): pages with an interactive demo convert better than static ones, the first screen gets most of the attention, and the primary CTA should be visible without scrolling on every device.
 
-## 2. Design direction: "the editing suite at night"
+## 2. Design direction (v2 to v5.1): "the editing suite at night"
+
+**Superseded in v6 (§11):** the page is now white by default and dark only on purpose. What stays from this direction: timecode labels, the struck-out filler word, and a dark editor screen for the demo (video editors are dark).
 
 The product lives next to Premiere Pro, DaVinci Resolve and Final Cut Pro, which are dark, precise tools. The site borrows that world instead of the generic SaaS look:
 
@@ -33,33 +35,39 @@ The product lives next to Premiere Pro, DaVinci Resolve and Final Cut Pro, which
 
 ### Tokens (`apps/www/src/app/globals.css`)
 
-| Token | Dark (default) | Paper (`.theme-paper`) | Use |
+v6 values (the v2 to v5.1 dark and paper values are gone; see §11 for why).
+
+| Token | Light (default, `:root` and `.theme-light`) | Dark (`.theme-dark`, on purpose only) | Use |
 | --- | --- | --- | --- |
-| `--bg` / `--raised` / `--panel` | #0c0b0a / #141210 / #1b1916 | #f3ede2 / #fbf8f2 / #ebe3d5 | Page, cards, insets |
-| `--fg` / `--muted` / `--faint` | #f4efe6 / #a8a095 / #8c8478 | #15120f / #5f574c / #6b6256 | Text, from strongest to weakest |
-| `--accent` | #ff5a1f | #b0390a | Cuts, CTAs, links |
-| `--keep` | #7ee0b5 | #0f7a55 | Kept content, ticks |
-| `--line` / `--line-strong` | 9% / 18% warm white | 12% / 24% ink | Borders |
+| `--bg` / `--raised` / `--panel` | #ffffff / #f5f5f7 / #ebebf0 | #000000 / #141418 / #1d1d23 | Page, cards, insets |
+| `--fg` / `--muted` / `--faint` | #0e0d1c / #4b4a5e / #5d5c70 | #ffffff / #b8b7c6 / #9a99ab | Text, from strongest to weakest |
+| `--ink` / `--on-ink` | #0b0a47 (logo navy) / #ffffff | #ffffff / #0b0a47 | Buttons (navy pill on light, white pill on dark) |
+| `--accent` | #c8261d (text-safe red) | #ff6f69 | Small red text, beta status, links |
+| `--brand` | #fe4d49 (logo red) | #fe4d49 | Graphics only: the cut strike, progress lines, dots |
+| `--keep` | #0a6e4a | #7ee0b5 | Kept content, first-release status, ticks |
+| `--line` / `--line-strong` | 9% / 18% ink | 10% / 20% white | Borders |
+| `navy` (fixed) | #0b0a47 | #0b0a47 | Highlight cards (the open service card, "with CreatorOS", the founding plan) |
 
-Every text token meets WCAG AA (4.5:1) on `--bg`, `--raised` and `--panel` in both themes; the axe tests check this on every page. (`#c2410c` was rejected for paper: it measured 4.44:1.)
+Every text token meets WCAG AA (4.5:1) on `--bg`, `--raised` and `--panel` in both themes; the axe tests check this on every page. `--brand` is 3.3:1 on white, enough for graphics (WCAG 1.4.11) but not for small text, which uses `--accent`. Shadows (`shadow-soft`, `shadow-float`, `shadow-lift`) take their colour from `--shadow`, so they stay soft on white and deep on black.
 
-### Type (self-hosted, OFL, Latin subset, about 127 KB in total)
+### Type (self-hosted, OFL, Latin subset; since v6.1, see §12)
 
-- **Bricolage Grotesque** (display): headlines, with optical sizing. Class `.display`.
-- **Instrument Sans** (body and UI).
-- **Martian Mono** (labels, timecodes, file names). Class `.label-mono`.
+- **Source Sans 3** for headlines, text and UI: one family, as adobe.com uses one. Weights 200 to 900; headlines 800 (`.display`), the hero and page titles 900. 29 KB upright, 29 KB italic (the italic loads only when italic text is on screen).
+- **Detail labels** (`.detail`): Source Sans 3, 12 px, bold, uppercase, as adobe.com's "detail" text (eyebrows on media, status badges, small labels).
+- **Martian Mono** only inside the product screens (the editor demo, the previews, a video timecode). Class `.label-mono`.
+- Until v6, Bricolage Grotesque (display) and Instrument Sans (text) were used; both are gone.
 
 No requests to Google Fonts or any other third party.
 
 ### Motion
 
 - On load: the headline strike (0.8 s), staggered rise of hero elements, and a one-time playhead sweep that raises the cut flags. All CSS, all under 5 s, all off with `prefers-reduced-motion`.
-- On scroll: see §8 (v5). Content rises in once as it arrives, the hero drifts and dims, large media settle.
+- On scroll: see §8 (v5) and §11 (v6). Content rises in once as it arrives, the hero message lifts while the media stage opens, large media settle, the "Later" band opens like a garage door and its grid lands column by column.
 - Animate only `transform` and `opacity` (the playhead was moved off `left` for this reason).
 
 ### Components
 
-`SectionIntro`, `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (paper theme for long text), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
+`SectionIntro` (optionally centred), `ServiceSwitcher` (client, v6.2; replaced `ServiceRail`), `AppIcon` and the line icons in `icons.tsx` (v6.1), `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (white, one readable column), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
 
 ## 4. Engineering quality bar
 
@@ -221,7 +229,7 @@ Also new: **swipe** between hero slides on touch screens (sideways drags only, s
 
 The traces follow the PNGs faithfully, including their slightly uneven edges (visible only far above any size the site uses). When the designer's original vector files exist, they should replace these traces.
 
-**Colour:** the navy "ink" is drawn in the current text colour, so on the dark site the logo is warm white; the red accent always stays the logo's red. On white (favicon, app icon) the logo keeps its navy.
+**Colour:** the navy "ink" is drawn in the current text colour. Since v6 the header, the 404 page and the social card are white, so the logo appears in its own navy there (`text-navy`); in the black footer it is white. The red accent always stays the logo's red.
 
 **Where it is used, and why**
 
@@ -235,3 +243,101 @@ The traces follow the PNGs faithfully, including their slightly uneven edges (vi
 | Social preview card | Symbol and name, light | 72 px |
 
 Deliberately **not** used: in the hero (the header already shows it), on the AI-generated photos, or inside the product previews. Don't stretch it, don't recolour the red, and keep the full logo at least 24 px tall (the symbol at least 16 px).
+
+## 11. v6: light first, adobe.com's white page (21 Nov 2026)
+
+**Why:** the founder compared the site with adobe.com and asked for a professional white page: a dark page as the default reads badly, and dark should be used on purpose, never as the default. They also asked for more modern motion, loading, scrolling and swapper work.
+
+**Research.** This time adobe.com's homepage could be read as page text (the server's HTML, not a rendered view; no bot check was involved and none was worked around). Its block names and style values match what the founder's screenshots show:
+
+| On adobe.com | Block and style value | Here |
+| --- | --- | --- |
+| White page with light-grey cards; dark only for one band near the end, then a black footer with the giant wordmark | `all-products-card`: `three-up, container, dark, parallax stagger ltr`, `background: #000` | White page. `.theme-dark` only for the "Later" band, the waitlist and the footer, plus media and product screens (the hero stage, the editor demo) |
+| The hero's media moves up faster than the page | `starting-marquee`: `parallax-move-up-fast` (five autoplay videos) | The message on white lifts faster than the page and fades once it has mostly left the screen (`.hero-lift`, tablets and up: on phones the message is tall and still being read); the stage below opens from 92% to its full size (`.hero-open`) |
+| "Tools that work for you." photo band revealed while scrolling | `brand-concierge`: `parallax-garage-door-reveal` | The "Later" band opens out of the white page: a rounded photo window widens to the full width (`.door`, the one clip-path animation) while the picture settles (`.door-media`) |
+| Product grid on black whose columns arrive left to right | `parallax stagger ltr` | Three-column dark grid: each column starts lower than the one before and they land together (`.lag`) |
+| "Everything you need to make anything.": one wide black card, the others narrow with photos | fragment `everything-you-need` | `ServiceRail`: the card the mouse rests on, or keyboard focus reaches, opens wide and turns navy; on phones and tablets a row that swipes sideways with snap points |
+| "Explore what's new.": a large rounded video, pause button inside, floating UI chips | fragment `explore-whats-new` | The hero stage: rounded media with pause and next inside, floating product previews, tab cards underneath |
+| Floating white header bar that looks frosted over dark sections | (screenshots) | White rounded bar on every page; translucent with blur once the page scrolls |
+| Adobe Express: light page, light-grey band (`Background: rgb(248, 248, 248)`), white cards | (page text) | Light-grey bands for the demo, the Audit and the plans |
+
+**Brand:** buttons use the logo's navy, brand moments the logo's red (this answers PROGRESS Q14; the orange `#ff5a1f` is gone). Headings are heavier and tighter (700 to 800, -0.032em to -0.048em), as on adobe.com.
+
+**Page, top to bottom:** hero (white; dark media stage) → everything it does (white) → you know this night (white; the "with CreatorOS" card is navy) → try it (light grey; the demo is a dark editor screen) → what you get (white) → Channel Audit (light grey) → what to film next (white) → who it's for (white; photo slides) → plans (light grey; the founding plan is navy) → questions (white) → **dark from here:** later (garage door, black grid) → waitlist (photo, white form card) → footer (black). The roadmap moved from the middle to just before the sign-up, so the page ends in one dark stretch as adobe.com's does; sections were renumbered.
+
+**Motion added (rules unchanged):** only `transform` and `opacity` move, except the one clip-path above. Everything is off for reduced motion, and without CSS scroll timelines (Firefox today) the page is static. Nothing on the first screen is hidden on load: the headline is the first paint and only the "um," strike animates.
+
+- Hero lift and stage opening (scroll-linked); the slide text rises in and the picture settles on each change (v5).
+- Services row: cards open with a 700 ms `ease-out-expo` on `flex-grow`, after a 90 ms pause so a mouse sweeping across doesn't flick every card open.
+- Garage door and staggered grid (scroll-linked).
+- Story slider: neighbours wash out (a white layer, not a dark scrim, on a white page) and shrink to 94%; they come forward as they reach the centre.
+- FAQ answers open and close smoothly where the browser can animate to `height: auto` (`interpolate-size`, `::details-content`).
+
+**Loading:** photos below the fold show a tiny blurred preview until they arrive (`placeholder="blur"` on static imports). The hero poster stays eager with no placeholder: it competes with nothing.
+
+**Accessibility decisions**
+
+- The services row's opening is visual only: every card is a link with all its text in the page, so assistive technology gets the same list whichever card is open.
+- No sideways-scrolling box without something focusable inside (axe `scrollable-region-focusable`): the services row has links; the loop strip wraps instead, and the "Later" cards stack on phones.
+- The struck-out "um," fades to 72% opacity, not 55%: on white, 55% left 2.6:1, below the 3:1 large text needs; 72% gives 3.6:1.
+
+**Measured (local Lighthouse 13.6, valid runs; three other runs failed with the known `NO_NAVSTART` trace error):** mobile performance 98-99 (v5: median 82), desktop 100, accessibility 100, best practices 100; mobile LCP 1.4 s. CLS is 0.047-0.058, under the 0.1 "good" line: the font swap on the hero text (§8) is counted again now that the text is not inside an animated layer. The fix (fallback-font metrics) is still open.
+
+**Tests:** 72 end-to-end tests pass, 12 skipped by design (device-only). New: white by default with dark only in the marked sections (home and legal pages); the services row opens on hover and on keyboard focus and is several times wider when open; phones scroll it sideways; an FAQ question opens; the garage-door photo is never clipped with reduced motion; the faded "um," keeps its contrast with motion on (written first, and it failed on the build before the fix). The hero's swipe and mouse-rest tests now act on the stage, since the message above it is text to read.
+
+**Lessons**
+
+- A colour inside a Tailwind arbitrary gradient list (`bg-[radial-gradient(...),#0e0d1c]`) is invalid CSS: a colour can't be a background-image layer, so the browser drops the whole declaration. The old dark page hid this; on white the card went see-through. Set the colour and the gradient as two classes.
+- The quality gates run axe with reduced motion, so states that exist only with motion on are not checked there. Lighthouse found the faded word; it now has its own test.
+- On a white page, dark scrims on carousel neighbours look heavy; a white wash plus a slight scale reads as depth.
+
+## 12. v6.1: adobe.com-style type and icons (22 Nov 2026)
+
+**Why:** the founder asked for adobe.com's fonts and icons too, not only its white page.
+
+**Research (adobe.com's public Milo library: `libs/styles/styles.css`, `libs/blocks/marquee/marquee.css`):**
+
+| adobe.com (Milo) | Value |
+| --- | --- |
+| Font | `'Adobe Clean', adobe-clean, 'Trebuchet MS', sans-serif` for everything; there is no separate heading font |
+| Headings | Weight 700 (800 on the newer mobile-web pages); desktop sizes 80 / 44 / 36 / 28 / 24 px; line height about 1.1 to 1.25 |
+| Text | 18 px / 27 px by default; 16 px / 24 px for smaller text |
+| Detail (eyebrow) text | Weight 700, uppercase, 12 to 16 px |
+| Buttons | Pill-shaped (radius 16 to 30 px), 2 px border, weight 700, 15 to 22 px; outline buttons fill with the text colour on hover |
+| Icons | Sizes 16, 24, 32, 40, 56, 64, 80 px; a product icon next to each product name |
+| Colours | Text `#2c2c2c`, greys `#F8F8F8` to `#242424`, accent blue `rgb(59, 99, 251)` |
+
+**What we can't copy:** Adobe Clean is Adobe's own typeface, licensed only to Adobe, and Adobe's product icons are its trademarks. We use their system, not their assets.
+
+**Type:** **Source Sans 3** is Adobe's open-source humanist sans (Paul D. Hunt, Adobe Type; SIL Open Font License), the closest relative of Adobe Clean that anyone may ship. Like adobe.com, the site now uses one family for everything: headlines 800 with slightly tight spacing (-0.025em), the hero and page titles 900 (black), text 18 to 20 px with relaxed line height, the navigation and buttons bold. Section eyebrows are plain sentence-case text above the heading (adobe.com: "Features and Releases" above "Explore what's new."), and sections are no longer numbered. Small labels use `.detail`: bold uppercase, as on adobe.com. The timecode mono font stays only where it belongs: inside the product screens.
+
+**Buttons:** bold pills with a 2 px border. The primary one is navy (our colour where adobe.com uses blue or black); the outline one fills with the text colour on hover, as adobe.com's does.
+
+**App icons (`AppIcon`):** an original family in the spirit of adobe.com's product icons. Each service has a rounded tile in the logo's navy with its two-letter mark in its own colour and a thin inner line of the same colour: Rc (AI rough cut) red, Cc (captions) amber, Ex (export) blue, Rv (editor review) violet, Au (Channel Audit) green, Nx (what to film next) pink. Planned items have quieter grey marks. Every letter colour is at least 6.5:1 on the navy. Sizes follow Milo's scale (16 to 56 px). The icons appear wherever adobe.com shows a product icon: on the services cards, in the Product menu, on the hero tabs and slides, on the "Later" cards, and in a new footer "Product" column (adobe.com's "Featured products"). They are decorative (`aria-hidden`): the name is always written next to them.
+
+**UI icons (`icons.tsx`):** one line family on a 20 px grid with rounded ends (chevrons, arrows, plus, close, menu, loop, play, pause, check, cross). They replace the text characters → › ↺ + and the one-off drawings, so every icon has the same weight in every browser and font. Arrows and chevrons flip in right-to-left text. The video and slideshow pause buttons inside media became rounded squares, like adobe.com's.
+
+**Performance:** the fonts got smaller (one 29 KB file on most pages, instead of 40 KB for the display font plus the text font). Lighthouse on this machine varied a lot this session because Docker was running alongside; alternating runs of the previous build (v6, in Docker) and this build under the same conditions gave v6 82-87 and v6.1 98 (mobile performance), with accessibility and best practices at 100. Several runs failed with the known `NO_NAVSTART` trace error and were discarded.
+
+**Tests:** all 74 end-to-end tests pass (12 skipped by design). New: the footer lists every service, each linked to its section.
+
+## 13. v6.2: the services as a guided tour (22 Nov 2026)
+
+**Why:** the founder judged the v6 services row (§11, adobe.com's opening cards) unprofessional, and was right. adobe.com's version works with five wide cards; ours had six in a narrower container, so the closed cards were about 130 px wide: their titles and descriptions were cut off ("Capt…", "Exp…"), every narrow photo carried its AI label, the Audit and recommendation previews were sliced off, and a status pill repeated on every card.
+
+**Now (`ServiceSwitcher`):** the pattern product sites use for "everything we do", feature tabs with a stage.
+
+- **List:** all six services with their app icon, full name and honest status; nothing is truncated. On phones the list becomes a row of chips above the stage, and it scrolls sideways.
+- **Stage:** the selected service as a product screen (a dark app window, as the product is an editor) on a soft backdrop in the colour of the service's icon, with its full description and a "More about …" link to its section. The screens reuse the page's own visuals (transcript with cuts and a new waveform strip, captions with chapters and thumbnail ideas, export files with the three editors, the review thread, the Audit chart and insight, the recommendation), so the section has no photos and no AI labels.
+- **Swapper:** it moves on by itself every 6.5 s while at least half of it is on screen, with the time shown in the active tab. It holds while the mouse is over it or keyboard focus is inside; choosing a service (click, key, swipe on the stage) stops the tour for good; a pause and play button sits beside the list (WCAG 2.2.2). Nothing moves for reduced-motion or data-saver visitors.
+- **Motion:** the new screen and caption rise in (the caption 90 ms later) while the backdrop crossfades to the new colour.
+- **No layout shift:** every panel sits in the same grid cell and only the selected one is visible, so the stage is always as tall as the tallest panel (measured: 603 px on desktop and 587 px on phones for all six services).
+- **Space used well:** on large screens the existing status explanation (`statusHelp`: what First release, Beta and Later mean) fills the bottom of the list column.
+
+**Accessibility:** WAI-ARIA tabs with automatic activation; arrow keys in either direction, Home and End; one tabpanel, the hidden panels are `inert` and invisible; changes are announced only while the tour is not running; the product screens are decorative.
+
+**Measured:** the switcher costs nothing measurable. Alternating Lighthouse runs (mobile) of the previous build and this one on the same machine: 95, 97, 99 before and 98, 98, 99 after (total blocking time 84-240 ms before, 105-159 ms after). Accessibility 100.
+
+**Tests:** the services-row tests were replaced: every service is listed in full with its status; choosing a service shows it on the stage with its link, and arrow keys move between services; the tour moves on by itself and the pause button stops it; on phones the chips scroll sideways and the stage swipes; with reduced motion no tour control is offered. Because the page now has two tab lists, the hero's tests look up tabs inside the hero only. 78 end-to-end tests pass, 10 skipped by design.
+
+**Lesson:** a pattern that works for adobe.com at its width and item count can break at ours. Check the narrowest state (here, a closed card) at real sizes before adopting it.

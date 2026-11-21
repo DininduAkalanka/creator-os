@@ -13,7 +13,7 @@ export function AiCredit({
 }) {
   return (
     <span
-      className={`label-mono pointer-events-none rounded-full bg-black/65 px-2 py-1 text-[0.5625rem] text-white/80 ${className}`}
+      className={`detail pointer-events-none rounded-full bg-black/65 px-2 py-1 text-[0.5625rem] text-white/85 ${className}`}
     >
       {video ? siteCopy.aiGeneratedVideo : siteCopy.aiGenerated}
     </span>
@@ -35,17 +35,19 @@ export function Photo(props: {
 }) {
   return (
     <figure
-      className={`relative overflow-hidden rounded-[var(--radius)] border border-line bg-panel ${props.className ?? ""}`}
+      className={`relative overflow-hidden rounded-[1.5rem] bg-panel ${props.className ?? ""}`}
     >
+      {/* Below the fold, so a tiny blurred preview shows until the photo arrives. */}
       <Image
         src={props.src}
         alt={props.alt}
         sizes={props.sizes}
+        placeholder="blur"
         className={`h-full w-full object-cover ${props.imageClassName ?? ""}`}
       />
       {props.overlay && (
         <div
-          className={`absolute rounded-xl border border-line-strong bg-raised/90 p-4 shadow-2xl shadow-black/50 backdrop-blur-md ${props.overlayClassName ?? "right-4 bottom-4 left-4 sm:left-auto sm:w-80"}`}
+          className={`absolute rounded-2xl border border-line bg-bg/90 p-4 shadow-float backdrop-blur-md ${props.overlayClassName ?? "right-4 bottom-4 left-4 sm:left-auto sm:w-80"}`}
         >
           {props.overlay}
         </div>
@@ -65,7 +67,7 @@ export function VideoPanel(props: {
 }) {
   return (
     <figure
-      className={`relative overflow-hidden rounded-[var(--radius)] border border-line bg-panel ${props.className ?? ""}`}
+      className={`relative overflow-hidden rounded-[1.5rem] bg-panel ${props.className ?? ""}`}
     >
       <Image
         src={props.poster}

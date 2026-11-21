@@ -65,7 +65,7 @@ export function AuditPreview() {
   return (
     <figure
       aria-hidden="true"
-      className="overflow-hidden rounded-[1.25rem] border border-line-strong bg-raised shadow-[0_40px_120px_-40px_rgb(0_0_0/0.9)]"
+      className="overflow-hidden rounded-[1.5rem] border border-line bg-bg shadow-lift"
     >
       <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
         <p className="flex items-center gap-2.5 text-sm font-semibold">
@@ -91,7 +91,7 @@ export function AuditPreview() {
                 <span
                   key={action}
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    index === 0 ? "bg-accent text-on-accent" : "border border-line-strong text-fg"
+                    index === 0 ? "bg-ink text-on-ink" : "border border-line-strong text-fg"
                   }`}
                 >
                   {action}
@@ -151,7 +151,7 @@ export function NextVideoPreview() {
   return (
     <figure
       aria-hidden="true"
-      className="overflow-hidden rounded-[1.25rem] border border-line-strong bg-raised shadow-[0_40px_120px_-40px_rgb(0_0_0/0.9)]"
+      className="overflow-hidden rounded-[1.5rem] border border-line bg-bg shadow-lift"
     >
       <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
         <p className="label-mono text-accent">{p.kicker}</p>
@@ -183,7 +183,7 @@ export function NextVideoPreview() {
             <span
               key={action}
               className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
-                index === 0 ? "bg-accent text-on-accent" : "border border-line-strong text-fg"
+                index === 0 ? "bg-ink text-on-ink" : "border border-line-strong text-fg"
               }`}
             >
               {action}
@@ -203,28 +203,59 @@ export function NextVideoPreview() {
 
 /* ---------- Small floating versions for the hero slides ---------- */
 
+// Dark glass, because these float over photos in the hero and on the service cards.
 const miniCard =
-  "w-80 rounded-2xl border border-white/15 bg-[#141210]/90 p-4 text-[#f4efe6] shadow-2xl shadow-black/60";
+  "theme-dark w-80 rounded-2xl border border-white/15 bg-[#0e0d1c]/85 p-4 text-white shadow-2xl shadow-black/50 backdrop-blur-md";
+
+/** The inside of the small Audit preview: the baseline chart and the first insight. */
+export function AuditMiniBody() {
+  const insight = audit.preview.insights[0];
+  return (
+    <>
+      <BaselineChart compact />
+      {insight && (
+        <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.06] p-3">
+          <p className="text-[0.8rem] leading-snug font-semibold">{insight.title}</p>
+          <p className="mt-1 text-[0.7rem] text-muted">{insight.evidence}</p>
+        </div>
+      )}
+    </>
+  );
+}
 
 export function AuditMini() {
   const p = audit.preview;
-  const insight = p.insights[0];
   return (
     <div aria-hidden="true" className={miniCard}>
-      <div className="flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <p className="text-sm font-semibold">{p.title}</p>
         <PreviewLabel text={p.shortLabel} />
       </div>
-      <div className="mt-3">
-        <BaselineChart compact />
-      </div>
-      {insight && (
-        <div className="mt-3 rounded-xl border border-white/10 bg-black/30 p-3">
-          <p className="text-[0.8rem] leading-snug font-semibold">{insight.title}</p>
-          <p className="mt-1 text-[0.7rem] text-[#a8a095]">{insight.evidence}</p>
-        </div>
-      )}
+      <AuditMiniBody />
     </div>
+  );
+}
+
+/** The inside of the small recommendation preview: the idea, one reason, the actions. */
+export function NextMiniBody() {
+  const p = nextVideo.preview;
+  return (
+    <>
+      <p className="display text-lg leading-tight font-bold">{p.title}</p>
+      <p className="mt-2 text-[0.72rem] text-muted">{p.reasons[0]}</p>
+      <div className="mt-3 flex gap-2">
+        {p.actions.slice(0, 2).map((action, index) => (
+          <span
+            key={action}
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              index === 0 ? "bg-white text-navy" : "border border-white/25"
+            }`}
+          >
+            {action}
+          </span>
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -232,23 +263,33 @@ export function NextMini() {
   const p = nextVideo.preview;
   return (
     <div aria-hidden="true" className={miniCard}>
-      <div className="flex items-center justify-between">
-        <p className="label-mono text-[#ff8a5c]">{p.kicker}</p>
+      <div className="mb-3 flex items-center justify-between">
+        <p className="label-mono text-accent">{p.kicker}</p>
         <PreviewLabel text={p.shortLabel} />
       </div>
-      <p className="display mt-3 text-lg leading-tight font-semibold">{p.title}</p>
-      <p className="mt-2 text-[0.72rem] text-[#a8a095]">{p.reasons[0]}</p>
-      <div className="mt-3 flex gap-2">
-        {p.actions.slice(0, 2).map((action, index) => (
-          <span
-            key={action}
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              index === 0 ? "bg-[#ff5a1f] text-[#140904]" : "border border-white/20"
-            }`}
-          >
-            {action}
-          </span>
-        ))}
+      <NextMiniBody />
+    </div>
+  );
+}
+
+/** An editor's comment on an exact moment, and the approval. */
+export function ReviewThread() {
+  return (
+    <div className="space-y-2.5">
+      <div className="flex items-start gap-2.5">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-keep-soft font-mono text-[0.6rem] text-keep">
+          ED
+        </span>
+        <p className="rounded-xl rounded-tl-sm bg-white/10 px-3 py-2 text-[0.8rem]">
+          <span className="label-mono block text-muted">Editor · 00:23</span>
+          Keeping the second take here, it&apos;s tighter.
+        </p>
+      </div>
+      <div className="flex justify-end">
+        <p className="rounded-xl rounded-tr-sm bg-brand/25 px-3 py-2 text-[0.8rem]">
+          <span className="label-mono block text-white/75">You</span>
+          Agreed. Approved.
+        </p>
       </div>
     </div>
   );
@@ -256,22 +297,8 @@ export function NextMini() {
 
 export function ReviewMini() {
   return (
-    <div aria-hidden="true" className={`${miniCard} space-y-2.5`}>
-      <div className="flex items-start gap-2.5">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#7ee0b5]/15 font-mono text-[0.6rem] text-[#7ee0b5]">
-          ED
-        </span>
-        <p className="rounded-xl rounded-tl-sm bg-white/10 px-3 py-2 text-[0.8rem]">
-          <span className="label-mono block text-[#a8a095]">Editor · 00:23</span>
-          Keeping the second take here, it&apos;s tighter.
-        </p>
-      </div>
-      <div className="flex justify-end">
-        <p className="rounded-xl rounded-tr-sm bg-[#ff5a1f]/20 px-3 py-2 text-[0.8rem]">
-          <span className="label-mono block text-[#a8a095]">You</span>
-          Agreed. Approved.
-        </p>
-      </div>
+    <div aria-hidden="true" className={miniCard}>
+      <ReviewThread />
     </div>
   );
 }

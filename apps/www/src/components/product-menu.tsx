@@ -4,14 +4,10 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { productMenu, statusLabels, type MenuItem, type ServiceStatus } from "@/content/services";
+import { AppIcon } from "./app-icon";
+import { ChevronDownIcon, ChevronRightIcon } from "./icons";
 
-// Same colours as the status pills on the page: first release green, beta orange, later neutral.
-const markTone: Record<ServiceStatus, string> = {
-  first: "bg-keep text-[#06140e]",
-  beta: "bg-accent text-on-accent",
-  later: "border border-line-strong text-muted",
-};
-
+// Same colours as the status pills on the page: first release green, beta red, later neutral.
 const pillTone: Record<ServiceStatus, string> = {
   first: "border-keep/50 text-keep",
   beta: "border-accent/50 text-accent",
@@ -92,29 +88,18 @@ export function ProductMenu() {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={toggle}
-        className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 transition-colors hover:bg-panel hover:text-fg ${open ? "bg-panel text-fg" : "text-fg/80"}`}
+        className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 transition-colors hover:bg-raised hover:text-fg ${open ? "bg-raised text-fg" : "text-fg/85"}`}
       >
         {productMenu.label}
-        <svg
-          viewBox="0 0 12 12"
-          aria-hidden="true"
-          className={`size-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-          fill="none"
-        >
-          <path
-            d="M3 4.5L6 7.5l3-3"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChevronDownIcon
+          className={`size-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       <div
         id={panelId}
         hidden={!open}
-        className="menu-in absolute inset-x-0 top-[calc(100%_+_0.5rem)] z-10 rounded-2xl border border-line-strong bg-raised p-3 text-left shadow-2xl shadow-black/60 sm:p-4"
+        className="menu-in absolute inset-x-0 top-[calc(100%_+_0.5rem)] z-10 rounded-2xl border border-line bg-bg p-3 text-left font-normal shadow-lift sm:p-4"
       >
         <div className="grid gap-4 lg:grid-cols-[14rem_1fr]">
           <div className="flex flex-col gap-4 p-1">
@@ -140,8 +125,8 @@ export function ProductMenu() {
                     tabIndex={selected ? 0 : -1}
                     onClick={() => setArea(index)}
                     onKeyDown={(event) => onAreaKeyDown(event, index)}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                      selected ? "bg-fg text-bg" : "bg-panel text-fg/85 hover:bg-line-strong"
+                    className={`rounded-full px-4 py-2 text-[0.9375rem] font-bold transition-colors ${
+                      selected ? "bg-ink text-on-ink" : "bg-raised text-fg/85 hover:bg-panel"
                     }`}
                   >
                     {item.label}
@@ -152,10 +137,10 @@ export function ProductMenu() {
             <Link
               href={productMenu.all.href}
               onClick={() => setOpen(false)}
-              className="inline-flex items-center gap-1 px-4 text-sm font-semibold text-fg hover:text-accent"
+              className="inline-flex items-center gap-1 px-4 text-[0.9375rem] font-bold text-fg hover:text-accent"
             >
               {productMenu.all.label}
-              <span aria-hidden="true">›</span>
+              <ChevronRightIcon className="size-4" />
             </Link>
           </div>
 
@@ -181,7 +166,7 @@ export function ProductMenu() {
         createPortal(
           <div
             aria-hidden="true"
-            className="menu-dim fixed inset-0 z-30 hidden bg-black/60 lg:block"
+            className="menu-dim fixed inset-0 z-30 hidden bg-black/40 lg:block"
           />,
           document.body,
         )}
@@ -194,22 +179,17 @@ function MenuCard({ item, onNavigate }: { item: MenuItem; onNavigate: () => void
     <Link
       href={item.href}
       onClick={onNavigate}
-      className="group flex h-full min-h-40 flex-col rounded-xl border border-line bg-bg/60 p-4 transition-colors hover:border-line-strong hover:bg-panel"
+      className="group flex h-full min-h-40 flex-col rounded-xl border border-transparent bg-raised p-4 transition-colors hover:border-line hover:bg-panel"
     >
       <span className="flex items-center justify-between gap-3">
+        <AppIcon mark={item.mark} size="lg" />
         <span
-          aria-hidden="true"
-          className={`flex size-8 items-center justify-center rounded-lg font-mono text-xs font-semibold ${markTone[item.status]}`}
-        >
-          {item.mark}
-        </span>
-        <span
-          className={`label-mono rounded-full border px-2 py-0.5 text-[0.5625rem] ${pillTone[item.status]}`}
+          className={`detail rounded-full border px-2 py-0.5 text-[0.625rem] ${pillTone[item.status]}`}
         >
           {statusLabels[item.status]}
         </span>
       </span>
-      <span className="mt-auto block pt-6 font-semibold text-fg">{item.title}</span>
+      <span className="mt-auto block pt-6 text-[1.0625rem] font-bold text-fg">{item.title}</span>
       <span className="mt-1 line-clamp-2 block text-sm text-muted">{item.body}</span>
     </Link>
   );

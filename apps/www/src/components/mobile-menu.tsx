@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { siteCopy } from "@/content/site";
+import { CloseIcon, MenuIcon } from "./icons";
 import { buttonPrimary } from "./styles";
 
 /** Small-screen navigation: a disclosure button that opens the links below the header. */
@@ -34,28 +35,12 @@ export function MobileMenu({ links }: { links: Array<{ href: string; label: stri
         className="flex size-10 items-center justify-center rounded-full border border-line-strong text-fg"
       >
         <span className="sr-only">{open ? siteCopy.nav.closeMenu : siteCopy.nav.openMenu}</span>
-        <svg viewBox="0 0 20 20" className="size-5" aria-hidden="true" fill="none">
-          {open ? (
-            <path
-              d="M5 5l10 10M15 5L5 15"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-          ) : (
-            <path
-              d="M3 7h14M3 13h14"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-          )}
-        </svg>
+        {open ? <CloseIcon className="size-5" /> : <MenuIcon className="size-5" />}
       </button>
       <div
         id={panelId}
         hidden={!open}
-        className="absolute inset-x-0 top-full border-b border-line bg-bg px-4 pt-2 pb-6 shadow-2xl shadow-black/60"
+        className="absolute inset-x-0 top-[calc(100%_+_0.5rem)] rounded-2xl border border-line bg-bg px-4 pt-2 pb-6 shadow-lift"
       >
         <ul className="divide-y divide-line">
           {links.map((link) => (
@@ -63,7 +48,7 @@ export function MobileMenu({ links }: { links: Array<{ href: string; label: stri
               <Link
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="display block py-4 text-2xl font-medium"
+                className="display block py-4 text-2xl font-bold tracking-[-0.015em]"
               >
                 {link.label}
               </Link>

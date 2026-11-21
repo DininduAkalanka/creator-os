@@ -20,11 +20,19 @@ import personaEducator from "@/assets/media/persona-educator.jpg";
 import reviewTogether from "@/assets/media/review-together.jpg";
 import talkingPoster from "@/assets/media/talking-poster.jpg";
 import { hero } from "@/content/home";
-import { carouselCopy, heroSlides, statusLabels } from "@/content/services";
+import {
+  carouselCopy,
+  heroSlides,
+  serviceMarks,
+  statusLabels,
+  type ServiceStatus,
+} from "@/content/services";
 import { siteCopy } from "@/content/site";
 import { swipeStep } from "@/lib/motion";
+import { AppIcon } from "./app-icon";
+import { ArrowRightIcon, ChevronRightIcon, PauseIcon, PlayIcon } from "./icons";
 import { AuditMini, NextMini, ReviewMini } from "./product-previews";
-import { buttonLarge, buttonPrimary, buttonSecondary } from "./styles";
+import { buttonLarge, buttonPrimary, buttonSecondary, container } from "./styles";
 
 const SLIDE_MS = 8000;
 
@@ -49,7 +57,7 @@ const SLIDE_MEDIA: Array<{ media: Media; overlay?: ReactNode }> = [
     overlay: (
       <p
         aria-hidden="true"
-        className="rounded-md bg-black/85 px-4 py-2 text-center text-lg text-white shadow-2xl"
+        className="rounded-lg bg-black/85 px-4 py-2 text-center text-lg text-white shadow-2xl"
       >
         The trick is to batch your ideas first.
       </p>
@@ -60,17 +68,25 @@ const SLIDE_MEDIA: Array<{ media: Media; overlay?: ReactNode }> = [
   { media: { kind: "photo", image: personaEducator }, overlay: <NextMini /> },
 ];
 
+/** Status colour of the small label in each tab (the active tab is navy, so it uses white). */
+const tabStatusTone: Record<ServiceStatus, string> = {
+  first: "text-keep",
+  beta: "text-accent",
+  later: "text-faint",
+};
+
 const order = (index: number) => ({ "--i": index }) as CSSProperties;
 
 /**
- * Hero "swapper" modelled on adobe.com: full-bleed slides, a row of tab cards along the bottom
- * (active one turns white, with a progress line), auto-advance, an arrow to move on, and swipe on
- * touch screens. The incoming slide's text rises in and its picture settles. While the page
- * scrolls, the hero drifts up at half speed and dims under the next section (CSS, globals.css).
+ * Hero, light (v6, adobe.com's white homepage): the page's message on white, then a large rounded
+ * "stage" with the service swapper, and a row of tab cards under it (the active one turns navy,
+ * with a progress line). While the page scrolls, the message moves up faster than the page and
+ * the stage opens to its full size (CSS scroll timelines, globals.css).
  *
- * Rotation keeps going while the mouse rests on the slide (as on adobe.com: on a full-screen hero
- * the mouse is nearly always there). It holds while the pointer is on the tab bar and while
- * keyboard focus is inside, then continues where it stopped. The progress line shows this.
+ * The swapper: auto-advance, an arrow to move on, swipe on touch screens; the incoming slide's
+ * text rises in and its picture settles. Rotation keeps going while the mouse rests on the stage
+ * (as on adobe.com). It holds while the pointer is on the tab bar and while keyboard focus is
+ * inside, then continues where it stopped. The progress line shows this.
  *
  * Accessibility (WAI-ARIA APG tabbed carousel): tabs with roving focus and arrow keys; inactive
  * slides are inert; slide changes are announced only while rotation is off; one button pauses
@@ -185,10 +201,9 @@ export function HeroCarousel() {
     if (!event.currentTarget.contains(event.relatedTarget)) setFocusHold(false);
   }
 
-  // Touch swipe. The tab bar scrolls sideways on phones, so drags that start there are its own.
+  // Touch swipe on the stage (not on the message above it, which is text to read).
   function onPointerDown(event: PointerEvent<HTMLElement>) {
     if (event.pointerType === "mouse") return;
-    if (event.target instanceof Element && event.target.closest('[role="tablist"]')) return;
     swipeStart.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
   }
 
@@ -208,240 +223,226 @@ export function HeroCarousel() {
       aria-label={carouselCopy.label}
       onFocus={onFocus}
       onBlur={onBlur}
-      onPointerDown={onPointerDown}
-      onPointerUp={onPointerUp}
-      onPointerCancel={() => {
-        swipeStart.current = null;
-      }}
-      className="relative isolate -mt-16 flex min-h-[max(40rem,calc(100svh-2.5rem))] touch-pan-y flex-col overflow-hidden bg-[#0c0b0a] text-white"
+      className="relative isolate overflow-x-clip pt-10 pb-6 sm:pt-14"
     >
-      {/* The page's h1 (slide 1's message), read once by screen readers. */}
+      {/* The page's h1, read once by screen readers (the visible one draws the cut). */}
       <h1 className="sr-only">{hero.headline}</h1>
 
-      <div className="hero-drift absolute inset-0">
-        {/* Slides: stacked, crossfading. Announced only while rotation is off (APG). */}
-        <div aria-live={rotating ? "off" : "polite"} className="absolute inset-0">
-          {heroSlides.map((slide, index) => {
-            const isActive = index === active;
-            const config = SLIDE_MEDIA[index];
-            if (!config) return null;
-            return (
-              <div
-                key={slide.id}
-                id={`${baseId}-panel-${index}`}
-                role="tabpanel"
-                aria-labelledby={`${baseId}-tab-${index}`}
-                aria-roledescription="slide"
-                aria-label={carouselCopy.slideOf(index + 1, total)}
-                inert={!isActive}
-                className={`absolute inset-0 transition-opacity duration-700 ${isActive ? "is-active z-10 opacity-100" : "z-0 opacity-0"}`}
-              >
-                <div className={`absolute inset-0 ${changed ? "slide-settle" : ""}`}>
-                  <SlideMedia
-                    index={index}
-                    media={config.media}
-                    mounted={index === 0 || mediaReady}
-                    videoAllowed={mediaReady && motionAllowed}
-                    shown={shown.has(index)}
-                  />
-                </div>
-                {/* Legibility gradients. */}
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 bg-[linear-gradient(to_top,#0c0b0a_6%,rgb(12_11_10/0.85)_40%,rgb(12_11_10/0.2)_100%)] md:bg-[linear-gradient(to_right,rgb(12_11_10/0.94)_22%,rgb(12_11_10/0.55)_55%,rgb(12_11_10/0.05)_100%)]"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#0c0b0a] to-transparent"
-                />
-                {config.overlay && (
-                  <div className="absolute top-1/2 right-[6%] hidden -translate-y-1/2 lg:block">
-                    <div style={order(3)} className="slide-rise">
-                      {config.overlay}
-                    </div>
-                  </div>
-                )}
+      {/* The message on white. It moves up faster than the page and fades as the stage opens
+          (adobe.com "parallax-move-up-fast"). Never hidden on load: it is the first paint. */}
+      <div className={`${container} hero-lift text-center`}>
+        <p className="detail inline-flex items-center gap-2 text-faint">
+          <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />
+          {hero.eyebrow}
+        </p>
+        <p
+          aria-hidden="true"
+          className="display mx-auto mt-5 max-w-[21ch] text-[clamp(2.75rem,5.8vw,5.5rem)] leading-[0.98] font-black tracking-[-0.03em] text-balance"
+        >
+          {hero.headlineBefore} <span className="hero-cut">{hero.headlineCut}</span>{" "}
+          {hero.headlineAfter}
+        </p>
+        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-pretty text-muted sm:text-xl">
+          {hero.lead}
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link href="#waitlist" className={`${buttonPrimary} ${buttonLarge}`}>
+            {hero.primaryCta}
+          </Link>
+          <Link href="#try-it" className={`${buttonSecondary} ${buttonLarge}`}>
+            {hero.secondaryCta}
+          </Link>
+        </div>
+        <p className="mt-3 text-sm text-faint">{hero.status}</p>
+      </div>
 
-                <div className="relative mx-auto flex h-full w-full max-w-7xl flex-col justify-end px-4 pt-28 pb-44 sm:px-6 md:justify-center md:pb-40 lg:px-8">
-                  <div className="max-w-2xl">
-                    <p
-                      style={order(0)}
-                      className="slide-rise label-mono inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-white/85"
-                    >
-                      <span className="size-1.5 rounded-full bg-[#ff5a1f]" aria-hidden="true" />
-                      {index === 0 ? hero.eyebrow : slide.eyebrow}
-                      <span className="hidden text-white/50 sm:inline" aria-hidden="true">
-                        ·
-                      </span>
-                      <span className="hidden text-[#ff8a5c] sm:inline">
-                        {statusLabels[slide.status]}
-                      </span>
-                    </p>
-                    {index === 0 ? (
-                      <>
-                        <p
-                          aria-hidden="true"
-                          style={order(1)}
-                          className={`${changed ? "slide-rise " : ""}display mt-6 text-[clamp(2.4rem,5.2vw,4.6rem)] leading-[0.98] font-semibold text-balance`}
-                        >
-                          {hero.headlineBefore} <span className="hero-cut">{hero.headlineCut}</span>{" "}
-                          {hero.headlineAfter}
-                        </p>
-                        <p
-                          style={order(2)}
-                          className="slide-rise mt-6 max-w-xl text-base text-pretty text-white/80 sm:text-xl"
-                        >
-                          {hero.lead}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <h2
-                          style={order(1)}
-                          className="slide-rise display mt-6 text-[clamp(2.3rem,5vw,4.4rem)] leading-[0.98] font-semibold text-balance"
-                        >
-                          {slide.heading}
-                        </h2>
-                        <p
-                          style={order(2)}
-                          className="slide-rise mt-6 max-w-xl text-base text-pretty text-white/80 sm:text-xl"
-                        >
-                          {slide.lead}
-                        </p>
-                      </>
-                    )}
-                    <div
-                      style={order(3)}
-                      className="slide-rise mt-8 flex flex-wrap items-center gap-3"
-                    >
-                      <Link href="#waitlist" className={`${buttonPrimary} ${buttonLarge}`}>
-                        {hero.primaryCta}
-                      </Link>
-                      <Link
-                        href={slide.cta.href}
-                        className={`${buttonSecondary} ${buttonLarge} border-white/30 bg-black/45 text-white hover:bg-black/60`}
+      <div className="mt-12 px-2 sm:mt-14 sm:px-3">
+        {/* The stage: dark because it is media (video and photos), not page background. */}
+        <div
+          data-hero-stage=""
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => {
+            swipeStart.current = null;
+          }}
+          className="hero-open theme-dark relative mx-auto h-[clamp(32rem,80svh,48rem)] max-w-[100rem] touch-pan-y overflow-hidden rounded-[1.75rem] bg-[#0e0d1c] sm:rounded-[2.25rem]"
+        >
+          {/* Slides: stacked, crossfading. Announced only while rotation is off (APG). */}
+          <div aria-live={rotating ? "off" : "polite"} className="absolute inset-0">
+            {heroSlides.map((slide, index) => {
+              const isActive = index === active;
+              const config = SLIDE_MEDIA[index];
+              if (!config) return null;
+              return (
+                <div
+                  key={slide.id}
+                  id={`${baseId}-panel-${index}`}
+                  role="tabpanel"
+                  aria-labelledby={`${baseId}-tab-${index}`}
+                  aria-roledescription="slide"
+                  aria-label={carouselCopy.slideOf(index + 1, total)}
+                  inert={!isActive}
+                  className={`absolute inset-0 transition-opacity duration-700 ${isActive ? "is-active z-10 opacity-100" : "z-0 opacity-0"}`}
+                >
+                  <div className={`absolute inset-0 ${changed ? "slide-settle" : ""}`}>
+                    <SlideMedia
+                      index={index}
+                      media={config.media}
+                      mounted={index === 0 || mediaReady}
+                      videoAllowed={mediaReady && motionAllowed}
+                      shown={shown.has(index)}
+                    />
+                  </div>
+                  {/* Legibility: dark at the bottom (phones) and at the left (large screens). */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-[linear-gradient(to_top,rgb(6_6_14/0.92)_0%,rgb(6_6_14/0.6)_38%,rgb(6_6_14/0)_70%)] lg:bg-[linear-gradient(to_right,rgb(6_6_14/0.88)_0%,rgb(6_6_14/0.5)_40%,rgb(6_6_14/0)_68%)]"
+                  />
+                  {config.overlay && (
+                    <div className="absolute top-1/2 right-[6%] hidden -translate-y-1/2 lg:block">
+                      <div style={order(3)} className="slide-rise">
+                        {config.overlay}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="absolute inset-x-0 bottom-0 px-5 pb-20 sm:px-10 sm:pb-24 lg:inset-y-0 lg:flex lg:items-center lg:px-16 lg:pb-0">
+                    <div className="max-w-xl lg:max-w-[34rem]">
+                      <p
+                        style={order(0)}
+                        className="slide-rise detail flex flex-wrap items-center gap-x-2 gap-y-1 text-white/85"
                       >
-                        {slide.cta.label}
-                      </Link>
+                        <AppIcon mark={serviceMarks[slide.id] ?? "··"} size="md" className="me-1" />
+                        {slide.eyebrow}
+                        <span className="hidden text-white/45 sm:inline" aria-hidden="true">
+                          ·
+                        </span>
+                        <span className="hidden text-accent sm:inline">
+                          {statusLabels[slide.status]}
+                        </span>
+                      </p>
+                      <h2
+                        style={order(1)}
+                        className="slide-rise display mt-5 text-[clamp(2rem,3.8vw,3.6rem)] leading-[1] font-black tracking-[-0.025em] text-balance"
+                      >
+                        {slide.heading}
+                      </h2>
+                      <p
+                        style={order(2)}
+                        className="slide-rise mt-4 hidden max-w-md leading-relaxed text-pretty text-white/80 sm:block sm:text-lg"
+                      >
+                        {slide.lead}
+                      </p>
+                      <div style={order(3)} className="slide-rise mt-6">
+                        <Link
+                          href={slide.cta.href}
+                          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[0.9375rem] font-bold text-navy transition-[background-color,transform] duration-200 hover:bg-white/90 active:scale-[0.98]"
+                        >
+                          {slide.cta.label}
+                          <ArrowRightIcon className="size-4" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          <span className="detail pointer-events-none absolute top-4 left-4 z-20 rounded-full bg-black/60 px-2 py-1 text-[0.625rem] text-white/85 sm:top-6 sm:left-6">
+            {SLIDE_MEDIA[active]?.media.kind === "video"
+              ? siteCopy.aiGeneratedVideo
+              : siteCopy.aiGenerated}
+          </span>
+
+          {/* Pause and next, inside the stage (adobe.com puts its pause button there too). */}
+          <div className="absolute right-4 bottom-4 z-20 flex gap-2 sm:right-6 sm:bottom-6">
+            {motionAllowed && (
+              <button
+                type="button"
+                onClick={() => setPlaying((value) => !value)}
+                aria-label={playing ? carouselCopy.pause : carouselCopy.play}
+                className="flex size-11 items-center justify-center rounded-xl border border-white/20 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/80"
+              >
+                {playing ? <PauseIcon className="size-4" /> : <PlayIcon className="size-4" />}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => go(active + 1)}
+              aria-label={carouselCopy.next}
+              className="hidden size-11 items-center justify-center rounded-xl border border-white/20 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/80 sm:flex"
+            >
+              <ChevronRightIcon className="size-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Tab cards along the bottom (Adobe-style), with pause and next controls. */}
-        <div className="absolute inset-x-0 bottom-0 z-20">
+        {/* Tab cards under the stage, with the time to the next slide in the active one. */}
+        <div
+          onPointerEnter={(event) => {
+            if (event.pointerType === "mouse") setPointerHold(true);
+          }}
+          onPointerLeave={() => setPointerHold(false)}
+          className="mx-auto mt-3 max-w-[100rem]"
+        >
           <div
-            onPointerEnter={(event) => {
-              if (event.pointerType === "mouse") setPointerHold(true);
-            }}
-            onPointerLeave={() => setPointerHold(false)}
-            className="mx-auto flex w-full max-w-7xl items-end gap-2 px-4 pb-5 sm:px-6 lg:px-8"
+            role="tablist"
+            aria-label={carouselCopy.label}
+            className="flex snap-x gap-2 overflow-x-auto [scrollbar-width:none] lg:grid lg:grid-cols-5 [&::-webkit-scrollbar]:hidden"
           >
-            <div
-              role="tablist"
-              aria-label={carouselCopy.label}
-              className="flex min-w-0 flex-1 snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {heroSlides.map((slide, index) => {
-                const isActive = index === active;
-                return (
-                  <button
-                    key={slide.id}
-                    ref={(element) => {
-                      tabRefs.current[index] = element;
-                    }}
-                    id={`${baseId}-tab-${index}`}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-controls={`${baseId}-panel-${index}`}
-                    tabIndex={isActive ? 0 : -1}
-                    onClick={() => go(index)}
-                    onKeyDown={(event) => onTabKeyDown(event, index)}
-                    className={`relative flex min-w-[11.5rem] flex-1 snap-start items-center justify-between gap-3 overflow-hidden rounded-xl border px-4 py-3.5 text-left text-sm font-semibold transition-colors duration-300 ${
-                      isActive
-                        ? "border-white bg-white text-[#0c0b0a]"
-                        : "border-white/15 bg-black/55 text-white hover:border-white/35 hover:bg-black/75"
-                    }`}
-                  >
+            {heroSlides.map((slide, index) => {
+              const isActive = index === active;
+              return (
+                <button
+                  key={slide.id}
+                  ref={(element) => {
+                    tabRefs.current[index] = element;
+                  }}
+                  id={`${baseId}-tab-${index}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls={`${baseId}-panel-${index}`}
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => go(index)}
+                  onKeyDown={(event) => onTabKeyDown(event, index)}
+                  className={`relative flex min-w-[14rem] shrink-0 snap-start items-center justify-between gap-3 overflow-hidden rounded-2xl py-3.5 ps-3.5 pe-4 text-left text-[0.9375rem] font-bold transition-colors duration-300 lg:min-w-0 ${
+                    isActive ? "bg-ink text-on-ink" : "bg-raised text-fg hover:bg-panel"
+                  }`}
+                >
+                  <span className="flex min-w-0 items-center gap-3">
+                    <AppIcon mark={serviceMarks[slide.id] ?? "··"} size="sm" />
                     <span className="flex flex-col gap-0.5">
                       <span
-                        className={`label-mono text-[0.5625rem] ${isActive ? "text-[#b0390a]" : "text-white/60"}`}
+                        className={`detail text-[0.625rem] ${isActive ? "text-white/70" : tabStatusTone[slide.status]}`}
                       >
                         {statusLabels[slide.status]}
                       </span>
                       {slide.tab}
                     </span>
-                    <span aria-hidden="true">›</span>
-                    {isActive && motionAllowed && (
-                      <span
-                        key={`progress-${active}`}
-                        aria-hidden="true"
-                        onAnimationEnd={() => go(active + 1)}
-                        style={{
-                          animationDuration: `${SLIDE_MS}ms`,
-                          animationPlayState: rotating ? "running" : "paused",
-                        }}
-                        className="tab-progress absolute inset-x-0 bottom-0 h-[3px] bg-[#ff5a1f]"
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="flex shrink-0 gap-2 pb-1">
-              {motionAllowed && (
-                <button
-                  type="button"
-                  onClick={() => setPlaying((value) => !value)}
-                  aria-label={playing ? carouselCopy.pause : carouselCopy.play}
-                  className="flex size-12 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white transition-colors hover:bg-black/80"
-                >
-                  <svg
-                    viewBox="0 0 16 16"
-                    className="size-4"
-                    aria-hidden="true"
-                    fill="currentColor"
-                  >
-                    {playing ? <path d="M4 3h3v10H4zM9 3h3v10H9z" /> : <path d="M5 3l8 5-8 5z" />}
-                  </svg>
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => go(active + 1)}
-                aria-label={carouselCopy.next}
-                className="hidden size-12 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white transition-colors hover:bg-black/80 sm:flex"
-              >
-                <svg viewBox="0 0 16 16" className="size-4" aria-hidden="true" fill="none">
-                  <path
-                    d="M6 3l5 5-5 5"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  </span>
+                  <ChevronRightIcon
+                    className={`size-4 shrink-0 ${isActive ? "text-white/70" : "text-faint"}`}
                   />
-                </svg>
-              </button>
-            </div>
+                  {isActive && motionAllowed && (
+                    <span
+                      key={`progress-${active}`}
+                      aria-hidden="true"
+                      onAnimationEnd={() => go(active + 1)}
+                      style={{
+                        animationDuration: `${SLIDE_MS}ms`,
+                        animationPlayState: rotating ? "running" : "paused",
+                      }}
+                      className="tab-progress absolute inset-x-0 bottom-0 h-[3px] bg-brand"
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
-
-        <span className="label-mono pointer-events-none absolute top-20 right-4 z-20 rounded-full bg-black/65 px-2 py-1 text-[0.5625rem] text-white/80 sm:right-6">
-          {SLIDE_MEDIA[active]?.media.kind === "video"
-            ? siteCopy.aiGeneratedVideo
-            : siteCopy.aiGenerated}
-        </span>
       </div>
-
-      {/* Darkens as the next section slides over the hero (scroll-linked, globals.css). */}
-      <div
-        aria-hidden="true"
-        className="hero-dim pointer-events-none absolute inset-0 z-30 bg-[#0c0b0a] opacity-0"
-      />
     </section>
   );
 }
@@ -495,7 +496,7 @@ function SlideMedia(props: {
   );
 }
 
-/** Slide 1's poster: the LCP element. Art-directed (vertical crop on phones), eager, high priority. */
+/** Slide 1's poster: art-directed (vertical crop on phones), eager, high priority. */
 function FirstPoster() {
   const common = {
     alt: "",
