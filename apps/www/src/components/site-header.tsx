@@ -4,17 +4,19 @@ import { siteCopy } from "@/content/site";
 import { HeaderShell } from "./header-shell";
 import { LogoMark } from "./logo";
 import { MobileMenu } from "./mobile-menu";
+import { ProductMenu } from "./product-menu";
 import { buttonPrimary, container } from "./styles";
 
 export function SiteHeader() {
   const { nav } = siteCopy;
-  const links = [
-    { href: "/#product", label: nav.product },
+  const sectionLinks = [
     { href: "/#try-it", label: nav.tryIt },
     { href: "/#channel-audit", label: nav.audit },
     { href: "/#plans", label: nav.plans },
     { href: "/#faq", label: nav.faq },
   ];
+  // Phones get a plain list; on large screens "Product" opens the adobe.com-style menu instead.
+  const links = [{ href: "/#product", label: nav.product }, ...sectionLinks];
   return (
     <HeaderShell>
       <div className={`${container} relative flex h-16 items-center justify-between gap-4`}>
@@ -27,7 +29,10 @@ export function SiteHeader() {
         </Link>
         <nav aria-label={nav.label} className="hidden lg:block">
           <ul className="flex items-center gap-1 text-sm">
-            {links.map((link) => (
+            <li>
+              <ProductMenu />
+            </li>
+            {sectionLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}

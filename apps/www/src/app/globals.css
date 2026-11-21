@@ -434,7 +434,28 @@ body {
   font-weight: 600;
 }
 
-/* ---------- Hero carousel: progress line on the active tab ---------- */
+/* ---------- Header "Product" menu: panel drops in, page behind dims ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .menu-in {
+    animation: menu-in 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .menu-dim {
+    animation: menu-dim 220ms ease-out both;
+  }
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes menu-dim {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- Progress line: active hero tab and story dot ---------- */
 @keyframes tab-progress {
   from {
     transform: scaleX(0);

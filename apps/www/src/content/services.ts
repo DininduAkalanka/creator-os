@@ -281,11 +281,76 @@ export const roadmap = {
   ],
 };
 
+export type MenuItem = {
+  id: string;
+  /** Two-letter tile, in the spirit of app icons. */
+  mark: string;
+  title: string;
+  body: string;
+  status: ServiceStatus;
+  href: string;
+};
+
+const serviceMarks: Record<string, string> = {
+  "rough-cut": "Rc",
+  captions: "Cc",
+  export: "Ex",
+  review: "Rv",
+  audit: "Au",
+  next: "Nx",
+};
+
+const laterMarks = ["Pu", "Sh", "Br", "Ot", "Cm", "Cr"];
+
+function serviceItem(id: string): MenuItem {
+  const card = services.cards.find((item) => item.id === id);
+  if (!card) throw new Error(`Product menu: unknown service "${id}"`);
+  return { ...card, mark: serviceMarks[id] ?? "··", href: `/${card.href}` };
+}
+
+/**
+ * Header "Product" menu, laid out like adobe.com's Products menu: areas on the left, cards on the
+ * right. It lists only the services and roadmap items above, each with its honest status.
+ */
+export const productMenu = {
+  label: "Product",
+  areasLabel: "Product areas",
+  all: { label: "See everything", href: "/#product" },
+  areas: [
+    {
+      id: "featured",
+      label: "Featured",
+      items: ["rough-cut", "captions", "export", "review", "audit", "next"].map(serviceItem),
+    },
+    {
+      id: "edit",
+      label: "Edit faster",
+      items: ["rough-cut", "captions", "export"].map(serviceItem),
+    },
+    { id: "team", label: "Work with your editor", items: ["review", "export"].map(serviceItem) },
+    { id: "grow", label: "Grow your channel", items: ["audit", "next"].map(serviceItem) },
+    {
+      id: "later",
+      label: "Coming later",
+      items: roadmap.items.map((item, index): MenuItem => ({
+        id: `later-${index}`,
+        mark: laterMarks[index] ?? "··",
+        title: item.title,
+        body: item.body,
+        status: "later",
+        href: "/#roadmap",
+      })),
+    },
+  ],
+};
+
 export const stories = {
   label: "Who it's for",
   previous: "Previous story",
   next: "Next story",
   goTo: (index: number, total: number) => `Story ${index} of ${total}`,
+  pause: "Pause stories",
+  play: "Play stories",
   slides: [
     {
       key: "creator",

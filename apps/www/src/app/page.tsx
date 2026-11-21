@@ -551,7 +551,11 @@ function NextVideoSection() {
 
 function Roadmap() {
   return (
-    <section aria-labelledby="roadmap-heading" className="border-t border-line bg-raised">
+    <section
+      id="roadmap"
+      aria-labelledby="roadmap-heading"
+      className="border-t border-line bg-raised"
+    >
       <div className={`${container} py-24 sm:py-28`}>
         <SectionIntro
           id="roadmap-heading"
@@ -588,7 +592,8 @@ function Stories() {
           <span id="stories-heading">{stories.label}</span>
         </p>
       </div>
-      <div className="settle mx-auto mt-8 max-w-[90rem]">
+      {/* Full width, edge to edge (adobe.com): the neighbours peek in from the screen's edges. */}
+      <div className="settle mt-8">
         <StoryCarousel images={storyPhotos} />
       </div>
     </section>

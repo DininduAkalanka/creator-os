@@ -32,8 +32,9 @@ export function HeaderShell({ children }: { children: ReactNode }) {
     <header
       className={`sticky top-0 z-40 transition-[padding] duration-300 ${floating ? "px-2 pt-2 sm:px-4" : ""}`}
     >
+      {/* While a menu is open the bar turns solid (adobe.com), whatever the scroll position. */}
       <div
-        className={`mx-auto transition-all duration-300 ${
+        className={`mx-auto transition-all duration-300 has-[[aria-expanded=true]]:bg-bg/95 ${
           floating
             ? "max-w-7xl rounded-2xl border border-line-strong bg-bg/75 shadow-2xl shadow-black/40 backdrop-blur-xl backdrop-saturate-150"
             : transparent
