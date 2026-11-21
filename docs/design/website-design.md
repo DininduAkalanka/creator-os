@@ -1,6 +1,6 @@
 # Website design: research, system and quality bar
 
-Status: v2 of the pre-launch site (`apps/www`), 21 Nov 2026. Read this before changing how the site looks or behaves.
+Status: v6 of the pre-launch site (`apps/www`), 21 Nov 2026: **light first** (§11). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11, §11 wins.
 
 ## 1. What we learned from production sites
 
@@ -19,7 +19,9 @@ What we deliberately did **not** copy, because it only works at their scale or w
 
 Supporting research (vendor sources, treat as directional): pages with an interactive demo convert better than static ones, the first screen gets most of the attention, and the primary CTA should be visible without scrolling on every device.
 
-## 2. Design direction: "the editing suite at night"
+## 2. Design direction (v2 to v5.1): "the editing suite at night"
+
+**Superseded in v6 (§11):** the page is now white by default and dark only on purpose. What stays from this direction: timecode labels, the struck-out filler word, and a dark editor screen for the demo (video editors are dark).
 
 The product lives next to Premiere Pro, DaVinci Resolve and Final Cut Pro, which are dark, precise tools. The site borrows that world instead of the generic SaaS look:
 
@@ -33,15 +35,20 @@ The product lives next to Premiere Pro, DaVinci Resolve and Final Cut Pro, which
 
 ### Tokens (`apps/www/src/app/globals.css`)
 
-| Token | Dark (default) | Paper (`.theme-paper`) | Use |
-| --- | --- | --- | --- |
-| `--bg` / `--raised` / `--panel` | #0c0b0a / #141210 / #1b1916 | #f3ede2 / #fbf8f2 / #ebe3d5 | Page, cards, insets |
-| `--fg` / `--muted` / `--faint` | #f4efe6 / #a8a095 / #8c8478 | #15120f / #5f574c / #6b6256 | Text, from strongest to weakest |
-| `--accent` | #ff5a1f | #b0390a | Cuts, CTAs, links |
-| `--keep` | #7ee0b5 | #0f7a55 | Kept content, ticks |
-| `--line` / `--line-strong` | 9% / 18% warm white | 12% / 24% ink | Borders |
+v6 values (the v2 to v5.1 dark and paper values are gone; see §11 for why).
 
-Every text token meets WCAG AA (4.5:1) on `--bg`, `--raised` and `--panel` in both themes; the axe tests check this on every page. (`#c2410c` was rejected for paper: it measured 4.44:1.)
+| Token | Light (default, `:root` and `.theme-light`) | Dark (`.theme-dark`, on purpose only) | Use |
+| --- | --- | --- | --- |
+| `--bg` / `--raised` / `--panel` | #ffffff / #f5f5f7 / #ebebf0 | #000000 / #141418 / #1d1d23 | Page, cards, insets |
+| `--fg` / `--muted` / `--faint` | #0e0d1c / #4b4a5e / #5d5c70 | #ffffff / #b8b7c6 / #9a99ab | Text, from strongest to weakest |
+| `--ink` / `--on-ink` | #0b0a47 (logo navy) / #ffffff | #ffffff / #0b0a47 | Buttons (navy pill on light, white pill on dark) |
+| `--accent` | #c8261d (text-safe red) | #ff6f69 | Small red text, beta status, links |
+| `--brand` | #fe4d49 (logo red) | #fe4d49 | Graphics only: the cut strike, progress lines, dots |
+| `--keep` | #0a6e4a | #7ee0b5 | Kept content, first-release status, ticks |
+| `--line` / `--line-strong` | 9% / 18% ink | 10% / 20% white | Borders |
+| `navy` (fixed) | #0b0a47 | #0b0a47 | Highlight cards (the open service card, "with CreatorOS", the founding plan) |
+
+Every text token meets WCAG AA (4.5:1) on `--bg`, `--raised` and `--panel` in both themes; the axe tests check this on every page. `--brand` is 3.3:1 on white, enough for graphics (WCAG 1.4.11) but not for small text, which uses `--accent`. Shadows (`shadow-soft`, `shadow-float`, `shadow-lift`) take their colour from `--shadow`, so they stay soft on white and deep on black.
 
 ### Type (self-hosted, OFL, Latin subset, about 127 KB in total)
 
@@ -54,12 +61,12 @@ No requests to Google Fonts or any other third party.
 ### Motion
 
 - On load: the headline strike (0.8 s), staggered rise of hero elements, and a one-time playhead sweep that raises the cut flags. All CSS, all under 5 s, all off with `prefers-reduced-motion`.
-- On scroll: see §8 (v5). Content rises in once as it arrives, the hero drifts and dims, large media settle.
+- On scroll: see §8 (v5) and §11 (v6). Content rises in once as it arrives, the hero message lifts while the media stage opens, large media settle, the "Later" band opens like a garage door and its grid lands column by column.
 - Animate only `transform` and `opacity` (the playhead was moved off `left` for this reason).
 
 ### Components
 
-`SectionIntro`, `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (paper theme for long text), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
+`SectionIntro` (optionally centred), `ServiceRail` (client, v6), `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (white, one readable column), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
 
 ## 4. Engineering quality bar
 
@@ -221,7 +228,7 @@ Also new: **swipe** between hero slides on touch screens (sideways drags only, s
 
 The traces follow the PNGs faithfully, including their slightly uneven edges (visible only far above any size the site uses). When the designer's original vector files exist, they should replace these traces.
 
-**Colour:** the navy "ink" is drawn in the current text colour, so on the dark site the logo is warm white; the red accent always stays the logo's red. On white (favicon, app icon) the logo keeps its navy.
+**Colour:** the navy "ink" is drawn in the current text colour. Since v6 the header, the 404 page and the social card are white, so the logo appears in its own navy there (`text-navy`); in the black footer it is white. The red accent always stays the logo's red.
 
 **Where it is used, and why**
 
@@ -235,3 +242,50 @@ The traces follow the PNGs faithfully, including their slightly uneven edges (vi
 | Social preview card | Symbol and name, light | 72 px |
 
 Deliberately **not** used: in the hero (the header already shows it), on the AI-generated photos, or inside the product previews. Don't stretch it, don't recolour the red, and keep the full logo at least 24 px tall (the symbol at least 16 px).
+
+## 11. v6: light first, adobe.com's white page (21 Nov 2026)
+
+**Why:** the founder compared the site with adobe.com and asked for a professional white page: a dark page as the default reads badly, and dark should be used on purpose, never as the default. They also asked for more modern motion, loading, scrolling and swapper work.
+
+**Research.** This time adobe.com's homepage could be read as page text (the server's HTML, not a rendered view; no bot check was involved and none was worked around). Its block names and style values match what the founder's screenshots show:
+
+| On adobe.com | Block and style value | Here |
+| --- | --- | --- |
+| White page with light-grey cards; dark only for one band near the end, then a black footer with the giant wordmark | `all-products-card`: `three-up, container, dark, parallax stagger ltr`, `background: #000` | White page. `.theme-dark` only for the "Later" band, the waitlist and the footer, plus media and product screens (the hero stage, the editor demo) |
+| The hero's media moves up faster than the page | `starting-marquee`: `parallax-move-up-fast` (five autoplay videos) | The message on white lifts faster than the page and fades once it has mostly left the screen (`.hero-lift`, tablets and up: on phones the message is tall and still being read); the stage below opens from 92% to its full size (`.hero-open`) |
+| "Tools that work for you." photo band revealed while scrolling | `brand-concierge`: `parallax-garage-door-reveal` | The "Later" band opens out of the white page: a rounded photo window widens to the full width (`.door`, the one clip-path animation) while the picture settles (`.door-media`) |
+| Product grid on black whose columns arrive left to right | `parallax stagger ltr` | Three-column dark grid: each column starts lower than the one before and they land together (`.lag`) |
+| "Everything you need to make anything.": one wide black card, the others narrow with photos | fragment `everything-you-need` | `ServiceRail`: the card the mouse rests on, or keyboard focus reaches, opens wide and turns navy; on phones and tablets a row that swipes sideways with snap points |
+| "Explore what's new.": a large rounded video, pause button inside, floating UI chips | fragment `explore-whats-new` | The hero stage: rounded media with pause and next inside, floating product previews, tab cards underneath |
+| Floating white header bar that looks frosted over dark sections | (screenshots) | White rounded bar on every page; translucent with blur once the page scrolls |
+| Adobe Express: light page, light-grey band (`Background: rgb(248, 248, 248)`), white cards | (page text) | Light-grey bands for the demo, the Audit and the plans |
+
+**Brand:** buttons use the logo's navy, brand moments the logo's red (this answers PROGRESS Q14; the orange `#ff5a1f` is gone). Headings are heavier and tighter (700 to 800, -0.032em to -0.048em), as on adobe.com.
+
+**Page, top to bottom:** hero (white; dark media stage) → everything it does (white) → you know this night (white; the "with CreatorOS" card is navy) → try it (light grey; the demo is a dark editor screen) → what you get (white) → Channel Audit (light grey) → what to film next (white) → who it's for (white; photo slides) → plans (light grey; the founding plan is navy) → questions (white) → **dark from here:** later (garage door, black grid) → waitlist (photo, white form card) → footer (black). The roadmap moved from the middle to just before the sign-up, so the page ends in one dark stretch as adobe.com's does; sections were renumbered.
+
+**Motion added (rules unchanged):** only `transform` and `opacity` move, except the one clip-path above. Everything is off for reduced motion, and without CSS scroll timelines (Firefox today) the page is static. Nothing on the first screen is hidden on load: the headline is the first paint and only the "um," strike animates.
+
+- Hero lift and stage opening (scroll-linked); the slide text rises in and the picture settles on each change (v5).
+- Services row: cards open with a 700 ms `ease-out-expo` on `flex-grow`, after a 90 ms pause so a mouse sweeping across doesn't flick every card open.
+- Garage door and staggered grid (scroll-linked).
+- Story slider: neighbours wash out (a white layer, not a dark scrim, on a white page) and shrink to 94%; they come forward as they reach the centre.
+- FAQ answers open and close smoothly where the browser can animate to `height: auto` (`interpolate-size`, `::details-content`).
+
+**Loading:** photos below the fold show a tiny blurred preview until they arrive (`placeholder="blur"` on static imports). The hero poster stays eager with no placeholder: it competes with nothing.
+
+**Accessibility decisions**
+
+- The services row's opening is visual only: every card is a link with all its text in the page, so assistive technology gets the same list whichever card is open.
+- No sideways-scrolling box without something focusable inside (axe `scrollable-region-focusable`): the services row has links; the loop strip wraps instead, and the "Later" cards stack on phones.
+- The struck-out "um," fades to 72% opacity, not 55%: on white, 55% left 2.6:1, below the 3:1 large text needs; 72% gives 3.6:1.
+
+**Measured (local Lighthouse 13.6, valid runs; three other runs failed with the known `NO_NAVSTART` trace error):** mobile performance 98-99 (v5: median 82), desktop 100, accessibility 100, best practices 100; mobile LCP 1.4 s. CLS is 0.047-0.058, under the 0.1 "good" line: the font swap on the hero text (§8) is counted again now that the text is not inside an animated layer. The fix (fallback-font metrics) is still open.
+
+**Tests:** 72 end-to-end tests pass, 12 skipped by design (device-only). New: white by default with dark only in the marked sections (home and legal pages); the services row opens on hover and on keyboard focus and is several times wider when open; phones scroll it sideways; an FAQ question opens; the garage-door photo is never clipped with reduced motion; the faded "um," keeps its contrast with motion on (written first, and it failed on the build before the fix). The hero's swipe and mouse-rest tests now act on the stage, since the message above it is text to read.
+
+**Lessons**
+
+- A colour inside a Tailwind arbitrary gradient list (`bg-[radial-gradient(...),#0e0d1c]`) is invalid CSS: a colour can't be a background-image layer, so the browser drops the whole declaration. The old dark page hid this; on white the card went see-through. Set the colour and the gradient as two classes.
+- The quality gates run axe with reduced motion, so states that exist only with motion on are not checked there. Lighthouse found the faded word; it now has its own test.
+- On a white page, dark scrims on carousel neighbours look heavy; a white wash plus a slight scale reads as depth.
