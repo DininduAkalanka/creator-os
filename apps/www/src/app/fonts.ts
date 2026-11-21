@@ -6,12 +6,14 @@ import localFont from "next/font/local";
  * scripts fall back to the system font. next/font adds a size-matched fallback to avoid layout shift.
  */
 
-/** Display: headlines. Optical sizes give it more character at large sizes. */
+/** Display: headlines. Weight-only file (40 KB) instead of optical sizes (75 KB): faster LCP. */
 export const displayFont = localFont({
-  src: "../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-opsz-normal.woff2",
+  src: "../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2",
   variable: "--font-bricolage",
   weight: "200 800",
   display: "swap",
+  // Not preloaded (adobe.com rule): fonts must not compete with the hero image before LCP.
+  preload: false,
 });
 
 /** Body text and UI. */
@@ -20,6 +22,8 @@ export const sansFont = localFont({
   variable: "--font-instrument",
   weight: "400 700",
   display: "swap",
+  // Not preloaded (adobe.com rule): fonts must not compete with the hero image before LCP.
+  preload: false,
 });
 
 /** Timecodes, labels and file names: the editing-suite detail. */
@@ -28,4 +32,6 @@ export const monoFont = localFont({
   variable: "--font-martian",
   weight: "100 800",
   display: "swap",
+  // Not preloaded (adobe.com rule): fonts must not compete with the hero image before LCP.
+  preload: false,
 });

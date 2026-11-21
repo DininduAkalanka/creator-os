@@ -11,6 +11,7 @@ export const siteCopy = {
   nav: {
     label: "Main",
     howItWorks: "How it works",
+    tryIt: "Try it",
     features: "Features",
     offer: "Founding offer",
     faq: "Questions",
@@ -40,6 +41,13 @@ export const siteCopy = {
     body: "This text has not yet been reviewed by a lawyer. Details shown as [to be added] are still missing.",
   },
   missing: "[to be added]",
+  video: {
+    pause: "Pause background video",
+    play: "Play background video",
+  },
+  /** Shown on every AI-generated photo or video (EU AI Act Art. 50 transparency; honesty). */
+  aiGenerated: "AI-generated image",
+  aiGeneratedVideo: "AI-generated video",
   notFound: {
     heading: "Page not found",
     body: "The page you're looking for doesn't exist or has moved.",

@@ -1,51 +1,8 @@
 /**
- * Small illustrations for the feature cards and the problem section. Pure HTML/SVG and CSS:
- * no images to download. Decorative (aria-hidden): each card's text says the same thing.
+ * Small UI illustrations layered over the photos and used in the extras cards. Pure HTML/SVG and
+ * CSS: nothing to download. Decorative (aria-hidden): each card's text says the same thing.
  */
-import { features, problem } from "@/content/home";
-import { waveform, waveformPath } from "@/lib/demo";
-
-/** A long raw clip with many hand-cut marks: the problem, drawn. */
-export function ProblemTimeline() {
-  const bars = waveform("raw-hour", 120, "speech");
-  // Every few bars, a mark that someone would have to find and cut.
-  const marked = new Set([
-    4, 5, 13, 21, 22, 23, 30, 38, 46, 47, 55, 63, 64, 71, 80, 88, 89, 97, 105, 113,
-  ]);
-  return (
-    <figure className="reveal">
-      <div
-        aria-hidden="true"
-        className="rounded-[var(--radius)] border border-line bg-raised p-4 sm:p-6"
-      >
-        <div className="ruler h-3 opacity-70" />
-        {/* Two paths (kept and marked bars) instead of one element per bar. */}
-        <svg
-          viewBox={`0 0 ${bars.length} 100`}
-          preserveAspectRatio="none"
-          className="mt-3 h-24 w-full sm:h-32"
-        >
-          <path
-            d={waveformPath(bars, { width: 0.7, minHeight: 6, only: (i) => !marked.has(i) })}
-            className="fill-fg/25"
-          />
-          <path
-            d={waveformPath(bars, { width: 0.7, minHeight: 6, only: (i) => marked.has(i) })}
-            className="fill-accent"
-          />
-        </svg>
-        <div className="mt-3 flex justify-between font-mono text-[0.625rem] text-faint">
-          <span>00:00</span>
-          <span>15:00</span>
-          <span>30:00</span>
-          <span>45:00</span>
-          <span>58:40</span>
-        </div>
-      </div>
-      <figcaption className="mt-3 text-sm text-faint italic">{problem.timelineCaption}</figcaption>
-    </figure>
-  );
-}
+import { features } from "@/content/home";
 
 export function RoughCutVisual() {
   return (
@@ -75,10 +32,10 @@ export function RoughCutVisual() {
 export function HandoffVisual() {
   return (
     <ul aria-hidden="true" className="grid gap-2">
-      {features.handoff.files.map((file) => (
+      {features.blocks.handoff.files.map((file) => (
         <li
           key={file}
-          className="flex items-center gap-2 rounded-lg border border-line bg-panel px-2.5 py-2 font-mono text-[0.68rem] text-fg"
+          className="flex items-center gap-2 rounded-lg border border-line bg-panel/90 px-2.5 py-2 font-mono text-[0.68rem] text-fg"
         >
           <svg viewBox="0 0 16 16" className="size-3.5 shrink-0 text-accent" fill="none">
             <path d="M3 1.5h6.5L13 5v9.5H3z" stroke="currentColor" strokeWidth="1.3" />
@@ -91,18 +48,28 @@ export function HandoffVisual() {
   );
 }
 
-export function CaptionsVisual() {
+export function LocalFootageVisual() {
+  const local = features.blocks.local;
   return (
-    <div
-      aria-hidden="true"
-      className="relative aspect-video overflow-hidden rounded-lg border border-line bg-[radial-gradient(120%_90%_at_30%_20%,rgb(255_90_31/0.25),transparent_60%),linear-gradient(160deg,#2a2622,#0f0e0d)]"
-    >
-      <span className="absolute top-2 left-2 font-mono text-[0.6rem] text-white/70">
-        {features.captions.timecode}
-      </span>
-      <span className="absolute inset-x-3 bottom-3 mx-auto w-fit rounded bg-black/80 px-2 py-1 text-center text-[0.72rem] leading-snug text-white">
-        {features.captions.sample}
-      </span>
+    <div aria-hidden="true" className="grid gap-2 text-[0.78rem]">
+      <p className="flex items-center gap-2.5 rounded-lg border border-line bg-panel/90 px-3 py-2">
+        <span className="flex size-6 items-center justify-center rounded-full bg-keep-soft text-keep">
+          ●
+        </span>
+        <span>
+          <span className="font-semibold text-fg">{local.stays}</span>{" "}
+          <span className="text-muted">{local.staysNote}</span>
+        </span>
+      </p>
+      <p className="flex items-center gap-2.5 rounded-lg border border-line bg-panel/90 px-3 py-2">
+        <span className="flex size-6 items-center justify-center rounded-full bg-accent-soft text-accent">
+          ↑
+        </span>
+        <span>
+          <span className="font-semibold text-fg">{local.goes}</span>{" "}
+          <span className="text-muted">{local.goesNote}</span>
+        </span>
+      </p>
     </div>
   );
 }
@@ -139,29 +106,6 @@ export function ThumbnailsVisual() {
           </span>
         </div>
       ))}
-    </div>
-  );
-}
-
-export function ReviewVisual() {
-  const { comment, reply } = features.review;
-  return (
-    <div aria-hidden="true" className="space-y-2.5 text-[0.8rem]">
-      <div className="flex items-start gap-2.5">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-keep-soft font-mono text-[0.6rem] text-keep">
-          ED
-        </span>
-        <p className="rounded-xl rounded-tl-sm bg-panel px-3 py-2 text-fg">
-          <span className="label-mono block text-faint">{comment.role} · 00:23</span>
-          {comment.text}
-        </p>
-      </div>
-      <div className="flex items-start justify-end gap-2.5">
-        <p className="rounded-xl rounded-tr-sm bg-accent-soft px-3 py-2 text-fg">
-          <span className="label-mono block text-faint">{reply.role}</span>
-          {reply.text}
-        </p>
-      </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@ export function SiteHeader() {
   const { nav } = siteCopy;
   const links = [
     { href: "/#how-it-works", label: nav.howItWorks },
+    { href: "/#try-it", label: nav.tryIt },
     { href: "/#features", label: nav.features },
     { href: "/#offer", label: nav.offer },
     { href: "/#faq", label: nav.faq },

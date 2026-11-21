@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type CSSProperties } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { demo } from "@/content/home";
 import {
   formatClipTime,
@@ -35,6 +35,24 @@ const waves = new Map(
 export function CutDemo() {
   const headingId = useId();
   const [accepted, setAccepted] = useState<ReadonlySet<string>>(() => new Set());
+  // Run the playhead sweep once, when the demo first scrolls into view.
+  const figureRef = useRef<HTMLElement>(null);
+  const [run, setRun] = useState(false);
+  useEffect(() => {
+    const figure = figureRef.current;
+    if (!figure) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setRun(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.4 },
+    );
+    observer.observe(figure);
+    return () => observer.disconnect();
+  }, []);
 
   const length = keptSeconds(segments, accepted);
   const removed = Math.round((total - length) * 10) / 10;
@@ -51,8 +69,9 @@ export function CutDemo() {
 
   return (
     <figure
+      ref={figureRef}
       aria-labelledby={headingId}
-      className="relative overflow-hidden rounded-[1.25rem] border border-line-strong bg-raised shadow-[0_40px_120px_-40px_rgb(0_0_0/0.9)]"
+      className={`${run ? "demo-run " : ""}relative overflow-hidden rounded-[1.25rem] border border-line-strong bg-raised shadow-[0_40px_120px_-40px_rgb(0_0_0/0.9)]`}
     >
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2.5">
