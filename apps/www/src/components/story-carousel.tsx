@@ -15,6 +15,7 @@ import {
 import { stories } from "@/content/services";
 import { siteCopy } from "@/content/site";
 import { swipeStep } from "@/lib/motion";
+import { ChevronLeftIcon, ChevronRightIcon, PauseIcon, PlayIcon } from "./icons";
 
 const STORY_MS = 7000;
 /** Slides drawn on each side of the current one, so moving never shows an empty edge. */
@@ -237,20 +238,20 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
                 className="absolute inset-0 bg-[linear-gradient(to_top,rgb(6_6_14/0.95)_15%,rgb(6_6_14/0.4)_60%,transparent)] md:bg-[linear-gradient(to_right,rgb(6_6_14/0.9)_25%,rgb(6_6_14/0.45)_60%,transparent)]"
               />
               <div className="relative flex h-full max-w-3xl flex-col justify-end p-6 pb-20 text-white sm:p-10 sm:pb-20 md:justify-center md:p-16 lg:p-20">
-                <p className="label-mono text-[#ff9b96]">{slide.eyebrow}</p>
-                <h3 className="display mt-4 text-3xl leading-[1] font-extrabold tracking-[-0.042em] text-balance sm:text-5xl lg:text-6xl">
+                <p className="detail text-[#ff9b96]">{slide.eyebrow}</p>
+                <h3 className="display mt-4 text-3xl leading-[1.02] font-black tracking-[-0.025em] text-balance sm:text-5xl lg:text-6xl">
                   {slide.heading}
                 </h3>
-                <p className="mt-5 max-w-md text-lg text-white/80">{slide.body}</p>
+                <p className="mt-5 max-w-md text-lg leading-relaxed text-white/80">{slide.body}</p>
                 <Link
                   href="#waitlist"
                   draggable={false}
-                  className="mt-8 inline-flex w-fit items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy transition-colors hover:bg-white/85"
+                  className="mt-8 inline-flex w-fit items-center rounded-full bg-white px-5 py-2.5 text-[0.9375rem] font-bold text-navy transition-colors hover:bg-white/85"
                 >
                   {siteCopy.nav.cta}
                 </Link>
               </div>
-              <span className="label-mono pointer-events-none absolute top-4 right-4 rounded-full bg-black/65 px-2 py-1 text-[0.5625rem] text-white/80">
+              <span className="detail pointer-events-none absolute top-4 right-4 rounded-full bg-black/65 px-2 py-1 text-[0.625rem] text-white/85">
                 {siteCopy.aiGenerated}
               </span>
               {/* Neighbours are washed out and a little smaller (on a white page), so the eye goes to the
@@ -272,15 +273,7 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
         {...holdOnHover}
         className="absolute top-1/2 left-[max(0.5rem,calc(var(--peek)_-_1.375rem))] z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-navy shadow-float transition-transform hover:scale-105 sm:flex"
       >
-        <svg viewBox="0 0 16 16" className="size-4 rtl:rotate-180" aria-hidden="true" fill="none">
-          <path
-            d="M10 3L5 8l5 5"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChevronLeftIcon className="size-5" />
       </button>
       <button
         type="button"
@@ -289,15 +282,7 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
         {...holdOnHover}
         className="absolute top-1/2 right-[max(0.5rem,calc(var(--peek)_-_1.375rem))] z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white text-navy shadow-float transition-transform hover:scale-105 sm:flex"
       >
-        <svg viewBox="0 0 16 16" className="size-4 rtl:rotate-180" aria-hidden="true" fill="none">
-          <path
-            d="M6 3l5 5-5 5"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChevronRightIcon className="size-5" />
       </button>
 
       {/* Dots inside the bottom of the current story, with the time to the next one in the
@@ -348,9 +333,7 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
               aria-label={playing ? stories.pause : stories.play}
               className="flex size-6 items-center justify-center text-white"
             >
-              <svg viewBox="0 0 16 16" className="size-3" aria-hidden="true" fill="currentColor">
-                {playing ? <path d="M4 3h3v10H4zM9 3h3v10H9z" /> : <path d="M5 3l8 5-8 5z" />}
-              </svg>
+              {playing ? <PauseIcon className="size-3.5" /> : <PlayIcon className="size-3.5" />}
             </button>
           )}
         </div>

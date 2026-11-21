@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { BRAND, COMPANY } from "@/config/site";
+import { serviceMarks, services } from "@/content/services";
 import { siteCopy } from "@/content/site";
+import { AppIcon } from "./app-icon";
 import { Logo, Wordmark } from "./logo";
 import { EmailLink, MissingValue } from "./missing-value";
 import { buttonPrimary, container } from "./styles";
@@ -13,7 +15,7 @@ export function SiteFooter() {
     <footer className="theme-dark mt-auto">
       <div className={`${container} pt-20 pb-16`}>
         <div className="flex flex-col items-start justify-between gap-8 border-b border-line pb-12 lg:flex-row lg:items-end">
-          <p className="display max-w-2xl text-4xl leading-[1.02] font-extrabold tracking-[-0.04em] text-balance sm:text-6xl">
+          <p className="display max-w-2xl text-4xl leading-[1.02] font-black tracking-[-0.025em] text-balance sm:text-6xl">
             {footer.statement}
           </p>
           <Link href="/#waitlist" className={`${buttonPrimary} px-6 py-3.5 text-base`}>
@@ -21,7 +23,7 @@ export function SiteFooter() {
           </Link>
         </div>
 
-        <div className="grid gap-10 pt-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-10 pt-12 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <p className="text-fg">
               <Logo className="h-9 w-auto" />
@@ -29,8 +31,28 @@ export function SiteFooter() {
             <p className="mt-4 max-w-sm text-sm text-muted">{footer.tagline}</p>
           </div>
 
+          {/* Every service with its icon, as adobe.com's footer lists its featured products. */}
+          <nav aria-labelledby="footer-product">
+            <h2 id="footer-product" className="text-sm font-bold text-fg">
+              {footer.productHeading}
+            </h2>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              {services.cards.map((card) => (
+                <li key={card.id}>
+                  <Link
+                    href={`/${card.href}`}
+                    className="inline-flex items-center gap-2.5 text-muted transition-colors hover:text-fg"
+                  >
+                    <AppIcon mark={serviceMarks[card.id] ?? "··"} size="xs" />
+                    {card.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
           <nav aria-labelledby="footer-legal">
-            <h2 id="footer-legal" className="label-mono text-faint">
+            <h2 id="footer-legal" className="text-sm font-bold text-fg">
               {footer.legalHeading}
             </h2>
             <ul className="mt-4 space-y-2.5 text-sm">
@@ -53,7 +75,7 @@ export function SiteFooter() {
           </nav>
 
           <div>
-            <h2 className="label-mono text-faint">{footer.companyHeading}</h2>
+            <h2 className="text-sm font-bold text-fg">{footer.companyHeading}</h2>
             <address className="mt-4 space-y-1.5 text-sm text-muted not-italic">
               <p>
                 <MissingValue value={COMPANY.legalName} />

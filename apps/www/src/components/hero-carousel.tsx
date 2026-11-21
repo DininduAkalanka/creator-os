@@ -20,9 +20,17 @@ import personaEducator from "@/assets/media/persona-educator.jpg";
 import reviewTogether from "@/assets/media/review-together.jpg";
 import talkingPoster from "@/assets/media/talking-poster.jpg";
 import { hero } from "@/content/home";
-import { carouselCopy, heroSlides, statusLabels, type ServiceStatus } from "@/content/services";
+import {
+  carouselCopy,
+  heroSlides,
+  serviceMarks,
+  statusLabels,
+  type ServiceStatus,
+} from "@/content/services";
 import { siteCopy } from "@/content/site";
 import { swipeStep } from "@/lib/motion";
+import { AppIcon } from "./app-icon";
+import { ArrowRightIcon, ChevronRightIcon, PauseIcon, PlayIcon } from "./icons";
 import { AuditMini, NextMini, ReviewMini } from "./product-previews";
 import { buttonLarge, buttonPrimary, buttonSecondary, container } from "./styles";
 
@@ -223,18 +231,18 @@ export function HeroCarousel() {
       {/* The message on white. It moves up faster than the page and fades as the stage opens
           (adobe.com "parallax-move-up-fast"). Never hidden on load: it is the first paint. */}
       <div className={`${container} hero-lift text-center`}>
-        <p className="label-mono inline-flex items-center gap-2 rounded-full border border-line bg-raised px-3 py-1.5 text-[0.625rem] text-faint sm:text-[0.6875rem]">
+        <p className="detail inline-flex items-center gap-2 text-faint">
           <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />
           {hero.eyebrow}
         </p>
         <p
           aria-hidden="true"
-          className="display mx-auto mt-6 max-w-[15ch] text-[clamp(2.75rem,6.6vw,6.25rem)] leading-[0.93] font-extrabold tracking-[-0.048em] text-balance"
+          className="display mx-auto mt-5 max-w-[21ch] text-[clamp(2.75rem,5.8vw,5.5rem)] leading-[0.98] font-black tracking-[-0.03em] text-balance"
         >
           {hero.headlineBefore} <span className="hero-cut">{hero.headlineCut}</span>{" "}
           {hero.headlineAfter}
         </p>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-pretty text-muted sm:text-xl">
+        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-pretty text-muted sm:text-xl">
           {hero.lead}
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -302,9 +310,9 @@ export function HeroCarousel() {
                     <div className="max-w-xl lg:max-w-[34rem]">
                       <p
                         style={order(0)}
-                        className="slide-rise label-mono inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-3 py-1.5 text-white/85 backdrop-blur-sm"
+                        className="slide-rise detail flex flex-wrap items-center gap-x-2 gap-y-1 text-white/85"
                       >
-                        <span className="size-1.5 rounded-full bg-brand" aria-hidden="true" />
+                        <AppIcon mark={serviceMarks[slide.id] ?? "··"} size="md" className="me-1" />
                         {slide.eyebrow}
                         <span className="hidden text-white/45 sm:inline" aria-hidden="true">
                           ·
@@ -315,23 +323,23 @@ export function HeroCarousel() {
                       </p>
                       <h2
                         style={order(1)}
-                        className="slide-rise display mt-5 text-[clamp(2rem,3.8vw,3.6rem)] leading-[0.98] font-extrabold tracking-[-0.04em] text-balance"
+                        className="slide-rise display mt-5 text-[clamp(2rem,3.8vw,3.6rem)] leading-[1] font-black tracking-[-0.025em] text-balance"
                       >
                         {slide.heading}
                       </h2>
                       <p
                         style={order(2)}
-                        className="slide-rise mt-4 hidden max-w-md text-pretty text-white/80 sm:block sm:text-lg"
+                        className="slide-rise mt-4 hidden max-w-md leading-relaxed text-pretty text-white/80 sm:block sm:text-lg"
                       >
                         {slide.lead}
                       </p>
                       <div style={order(3)} className="slide-rise mt-6">
                         <Link
                           href={slide.cta.href}
-                          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy transition-[background-color,transform] duration-200 hover:bg-white/90 active:scale-[0.98]"
+                          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[0.9375rem] font-bold text-navy transition-[background-color,transform] duration-200 hover:bg-white/90 active:scale-[0.98]"
                         >
                           {slide.cta.label}
-                          <span aria-hidden="true">→</span>
+                          <ArrowRightIcon className="size-4" />
                         </Link>
                       </div>
                     </div>
@@ -341,7 +349,7 @@ export function HeroCarousel() {
             })}
           </div>
 
-          <span className="label-mono pointer-events-none absolute top-4 left-4 z-20 rounded-full bg-black/60 px-2 py-1 text-[0.5625rem] text-white/85 sm:top-6 sm:left-6">
+          <span className="detail pointer-events-none absolute top-4 left-4 z-20 rounded-full bg-black/60 px-2 py-1 text-[0.625rem] text-white/85 sm:top-6 sm:left-6">
             {SLIDE_MEDIA[active]?.media.kind === "video"
               ? siteCopy.aiGeneratedVideo
               : siteCopy.aiGenerated}
@@ -354,28 +362,18 @@ export function HeroCarousel() {
                 type="button"
                 onClick={() => setPlaying((value) => !value)}
                 aria-label={playing ? carouselCopy.pause : carouselCopy.play}
-                className="flex size-11 items-center justify-center rounded-full border border-white/25 bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/75"
+                className="flex size-11 items-center justify-center rounded-xl border border-white/20 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/80"
               >
-                <svg viewBox="0 0 16 16" className="size-4" aria-hidden="true" fill="currentColor">
-                  {playing ? <path d="M4 3h3v10H4zM9 3h3v10H9z" /> : <path d="M5 3l8 5-8 5z" />}
-                </svg>
+                {playing ? <PauseIcon className="size-4" /> : <PlayIcon className="size-4" />}
               </button>
             )}
             <button
               type="button"
               onClick={() => go(active + 1)}
               aria-label={carouselCopy.next}
-              className="hidden size-11 items-center justify-center rounded-full border border-white/25 bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/75 sm:flex"
+              className="hidden size-11 items-center justify-center rounded-xl border border-white/20 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/80 sm:flex"
             >
-              <svg viewBox="0 0 16 16" className="size-4" aria-hidden="true" fill="none">
-                <path
-                  d="M6 3l5 5-5 5"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <ChevronRightIcon className="size-5" />
             </button>
           </div>
         </div>
@@ -409,21 +407,24 @@ export function HeroCarousel() {
                   tabIndex={isActive ? 0 : -1}
                   onClick={() => go(index)}
                   onKeyDown={(event) => onTabKeyDown(event, index)}
-                  className={`relative flex min-w-[12.5rem] shrink-0 snap-start items-center justify-between gap-3 overflow-hidden rounded-2xl px-5 py-4 text-left text-[0.9375rem] font-semibold transition-colors duration-300 lg:min-w-0 ${
+                  className={`relative flex min-w-[14rem] shrink-0 snap-start items-center justify-between gap-3 overflow-hidden rounded-2xl py-3.5 ps-3.5 pe-4 text-left text-[0.9375rem] font-bold transition-colors duration-300 lg:min-w-0 ${
                     isActive ? "bg-ink text-on-ink" : "bg-raised text-fg hover:bg-panel"
                   }`}
                 >
-                  <span className="flex flex-col gap-1">
-                    <span
-                      className={`label-mono text-[0.5625rem] ${isActive ? "text-white/70" : tabStatusTone[slide.status]}`}
-                    >
-                      {statusLabels[slide.status]}
+                  <span className="flex min-w-0 items-center gap-3">
+                    <AppIcon mark={serviceMarks[slide.id] ?? "··"} size="sm" />
+                    <span className="flex flex-col gap-0.5">
+                      <span
+                        className={`detail text-[0.625rem] ${isActive ? "text-white/70" : tabStatusTone[slide.status]}`}
+                      >
+                        {statusLabels[slide.status]}
+                      </span>
+                      {slide.tab}
                     </span>
-                    {slide.tab}
                   </span>
-                  <span aria-hidden="true" className={isActive ? "text-white/70" : "text-faint"}>
-                    ›
-                  </span>
+                  <ChevronRightIcon
+                    className={`size-4 shrink-0 ${isActive ? "text-white/70" : "text-faint"}`}
+                  />
                   {isActive && motionAllowed && (
                     <span
                       key={`progress-${active}`}

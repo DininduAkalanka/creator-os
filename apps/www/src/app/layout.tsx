@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { BRAND, SITE_INDEXABLE, SITE_URL } from "@/config/site";
 import { siteCopy } from "@/content/site";
-import { displayFont, monoFont, sansFont } from "./fonts";
+import { monoFont, sansFont } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -30,10 +30,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${displayFont.variable} ${sansFont.variable} ${monoFont.variable} h-full`}
-    >
+    <html lang="en" className={`${sansFont.variable} ${monoFont.variable} h-full`}>
       <body className="flex min-h-full flex-col antialiased">
         <a
           href="#main"

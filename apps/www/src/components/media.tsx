@@ -13,7 +13,7 @@ export function AiCredit({
 }) {
   return (
     <span
-      className={`label-mono pointer-events-none rounded-full bg-black/65 px-2 py-1 text-[0.5625rem] text-white/80 ${className}`}
+      className={`detail pointer-events-none rounded-full bg-black/65 px-2 py-1 text-[0.5625rem] text-white/85 ${className}`}
     >
       {video ? siteCopy.aiGeneratedVideo : siteCopy.aiGenerated}
     </span>

@@ -101,8 +101,9 @@
   --color-danger: var(--danger);
   --color-focus: var(--focus);
 
-  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-bricolage), var(--font-instrument), ui-sans-serif, sans-serif;
+  /* One family for headings and text, like adobe.com (see fonts.ts). */
+  --font-sans: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-martian), ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 
@@ -129,7 +130,6 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans);
-  font-feature-settings: "ss01";
   text-rendering: optimizeLegibility;
 }
 
@@ -168,16 +168,25 @@ body {
 
 /* In the components layer so Tailwind utilities (leading-*, tracking-*) can still override. */
 @layer components {
-  /* Display type: heavy, tight and confident (adobe.com headings), optical sizing on. */
+  /* Display type: heavy and tight, like adobe.com's headings (Milo: weight 700 to 800). */
   .display {
     font-family: var(--font-display);
-    font-optical-sizing: auto;
-    font-weight: 700;
-    letter-spacing: -0.032em;
+    font-weight: 800;
+    letter-spacing: -0.02em;
     line-height: 1;
   }
 
-  /* Timecode-style label used for section markers and metadata. */
+  /* adobe.com "detail" text (Milo: weight 700, uppercase): eyebrows, badges, status labels. */
+  .detail {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Timecode-style label, only inside the product screens (the editor demo, the previews). */
   .label-mono {
     font-family: var(--font-mono);
     font-size: 0.6875rem;

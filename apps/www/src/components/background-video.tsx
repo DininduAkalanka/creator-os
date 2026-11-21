@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { siteCopy } from "@/content/site";
+import { PauseIcon, PlayIcon } from "./icons";
 
 type Status = "waiting" | "playing" | "paused";
 
@@ -132,15 +133,13 @@ export function BackgroundVideo(props: {
           type="button"
           onClick={toggle}
           aria-label={label}
-          className={`flex size-10 items-center justify-center rounded-full border border-white/30 bg-black/50 text-white backdrop-blur transition-colors hover:bg-black/70 ${props.buttonClassName ?? ""}`}
+          className={`flex size-10 items-center justify-center rounded-xl border border-white/20 bg-black/60 text-white backdrop-blur transition-colors hover:bg-black/80 ${props.buttonClassName ?? ""}`}
         >
-          <svg viewBox="0 0 16 16" className="size-4" aria-hidden="true" fill="currentColor">
-            {status === "playing" ? (
-              <path d="M4 3h3v10H4zM9 3h3v10H9z" />
-            ) : (
-              <path d="M5 3l8 5-8 5z" />
-            )}
-          </svg>
+          {status === "playing" ? (
+            <PauseIcon className="size-4" />
+          ) : (
+            <PlayIcon className="size-4" />
+          )}
         </button>
       )}
     </>

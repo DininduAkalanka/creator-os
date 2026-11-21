@@ -304,7 +304,8 @@ export const serviceMarks: Record<string, string> = {
   next: "Nx",
 };
 
-const laterMarks = ["Pu", "Sh", "Br", "Ot", "Cm", "Cr"];
+/** Two-letter tiles for the roadmap items, in the same order as roadmap.items. */
+export const laterMarks = ["Pu", "Sh", "Br", "Ot", "Cm", "Cr"];
 
 function serviceItem(id: string): MenuItem {
   const card = services.cards.find((item) => item.id === id);

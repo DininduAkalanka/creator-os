@@ -14,11 +14,11 @@ export function DocPage(props: {
   return (
     <div>
       <article className={`${container} max-w-3xl py-16 sm:py-24`}>
-        {props.eyebrow && <p className="label-mono text-accent">{props.eyebrow}</p>}
-        <h1 className="display mt-4 text-5xl leading-[1.02] font-extrabold tracking-[-0.04em] sm:text-6xl">
+        {props.eyebrow && <p className="text-lg font-semibold text-muted">{props.eyebrow}</p>}
+        <h1 className="display mt-3 text-5xl leading-[1.02] font-black tracking-[-0.025em] sm:text-6xl">
           {props.title}
         </h1>
-        {props.updated && <p className="label-mono mt-5 text-faint">{props.updated}</p>}
+        {props.updated && <p className="detail mt-5 text-faint">{props.updated}</p>}
         {props.legal && (
           <div className="mt-8">
             <DraftNotice />

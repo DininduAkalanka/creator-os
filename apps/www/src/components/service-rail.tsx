@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { statusLabels, type ServiceStatus } from "@/content/services";
+import { AppIcon } from "./app-icon";
+import { ChevronRightIcon } from "./icons";
 
 export type RailItem = {
   id: string;
@@ -16,12 +18,6 @@ export type RailItem = {
 };
 
 // Same colours as the status pills elsewhere: first release green, beta red, later neutral.
-const markTone: Record<ServiceStatus, string> = {
-  first: "bg-keep-soft text-keep",
-  beta: "bg-accent-soft text-accent",
-  later: "border border-line-strong text-muted",
-};
-
 const pillTone: Record<ServiceStatus, string> = {
   first: "border-keep/50 text-keep",
   beta: "border-accent/50 text-accent",
@@ -73,12 +69,7 @@ export function ServiceRail({ items }: { items: RailItem[] }) {
               }`}
             >
               <div className="flex items-center gap-3 px-3 pt-3 pb-4">
-                <span
-                  aria-hidden="true"
-                  className={`flex size-9 shrink-0 items-center justify-center rounded-xl font-mono text-xs font-semibold ${markTone[item.status]}`}
-                >
-                  {item.mark}
-                </span>
+                <AppIcon mark={item.mark} size="md" />
                 <h3 className="min-w-0 text-[1.0625rem] leading-tight font-bold lg:truncate">
                   {item.title}
                 </h3>
@@ -89,11 +80,13 @@ export function ServiceRail({ items }: { items: RailItem[] }) {
               <div className="flex items-end justify-between gap-4 px-3 pt-4 pb-3">
                 <div className="min-w-0">
                   <span
-                    className={`label-mono inline-block rounded-full border px-2 py-0.5 text-[0.5625rem] whitespace-nowrap ${pillTone[item.status]}`}
+                    className={`detail inline-block rounded-full border px-2 py-0.5 text-[0.625rem] whitespace-nowrap ${pillTone[item.status]}`}
                   >
                     {statusLabels[item.status]}
                   </span>
-                  <p className="mt-2 line-clamp-2 text-sm text-muted">{item.body}</p>
+                  <p className="mt-2 line-clamp-2 text-[0.9375rem] leading-snug text-muted">
+                    {item.body}
+                  </p>
                 </div>
                 <span
                   aria-hidden="true"
@@ -101,7 +94,7 @@ export function ServiceRail({ items }: { items: RailItem[] }) {
                     isOpen ? "" : "lg:hidden"
                   }`}
                 >
-                  →
+                  <ChevronRightIcon className="size-5" />
                 </span>
               </div>
             </Link>

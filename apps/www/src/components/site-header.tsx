@@ -26,7 +26,7 @@ export function SiteHeader() {
             <Logo className="h-7 w-auto sm:h-8" />
           </Link>
           <nav aria-label={nav.label} className="hidden lg:block">
-            <ul className="flex items-center gap-0.5 text-[0.9375rem] font-semibold">
+            <ul className="flex items-center gap-0.5 text-[0.9375rem] font-bold">
               <li>
                 <ProductMenu />
               </li>

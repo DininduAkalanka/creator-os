@@ -18,7 +18,8 @@ import {
   ThumbnailsVisual,
 } from "@/components/feature-visuals";
 import { HeroCarousel } from "@/components/hero-carousel";
-import { CheckIcon, CrossIcon } from "@/components/icons";
+import { AppIcon } from "@/components/app-icon";
+import { ArrowRightIcon, CheckIcon, CrossIcon, LoopIcon, PlusIcon } from "@/components/icons";
 import { LazyCutDemo } from "@/components/lazy-cut-demo";
 import { AiCredit, Photo, VideoPanel } from "@/components/media";
 import { AuditMini, AuditPreview, NextMini, NextVideoPreview } from "@/components/product-previews";
@@ -31,6 +32,7 @@ import { WaitlistForm } from "@/components/waitlist-form";
 import { faq, features, finalCta, story, tryIt } from "@/content/home";
 import {
   audit,
+  laterMarks,
   nextVideo,
   plans,
   roadmap,
@@ -87,25 +89,9 @@ function StatusPill({ status, className = "" }: { status: ServiceStatus; classNa
         ? "border-accent/50 text-accent"
         : "border-line-strong text-faint";
   return (
-    <span
-      className={`label-mono rounded-full border px-2 py-0.5 text-[0.5625rem] ${tone} ${className}`}
-    >
+    <span className={`detail rounded-full border px-2 py-0.5 text-[0.625rem] ${tone} ${className}`}>
       {statusLabels[status]}
     </span>
-  );
-}
-
-function Arrow() {
-  return (
-    <svg viewBox="0 0 16 16" className="size-4" aria-hidden="true" fill="none">
-      <path
-        d="M3 8h10M9 4l4 4-4 4"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 
@@ -146,7 +132,6 @@ function Services() {
         <SectionIntro
           center
           id="services-heading"
-          index={services.index}
           eyebrow={services.eyebrow}
           heading={services.heading}
           lead={services.lead}
@@ -156,7 +141,7 @@ function Services() {
         </div>
 
         <div className="reveal mt-6 flex flex-col items-center gap-4 rounded-[1.75rem] border border-line p-5 sm:p-6">
-          <h3 className="label-mono text-faint">{services.loopHeading}</h3>
+          <h3 className="detail text-faint">{services.loopHeading}</h3>
           {/* Wraps and centres. No sideways scrolling: a scroll box with nothing to focus in it
               can't be scrolled from the keyboard (axe: scrollable-region-focusable). */}
           <ol className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-2.5">
@@ -176,19 +161,17 @@ function Services() {
                     }`}
                   />
                   <span className="text-sm font-semibold">{stage.step}</span>
-                  <span className="label-mono text-[0.5625rem] text-faint">
+                  <span className="detail text-[0.625rem] text-faint">
                     {stage.status ? statusLabels[stage.status] : "You"}
                   </span>
                 </span>
                 {index < services.loop.length - 1 && (
-                  <span aria-hidden="true" className="hidden text-faint sm:inline">
-                    →
-                  </span>
+                  <ArrowRightIcon className="hidden size-4 text-faint sm:block" />
                 )}
               </li>
             ))}
-            <li aria-hidden="true" className="shrink-0 ps-1 text-lg text-brand">
-              ↺
+            <li aria-hidden="true" className="shrink-0 ps-1 text-brand">
+              <LoopIcon className="size-5" />
             </li>
           </ol>
         </div>
@@ -216,13 +199,7 @@ function Story() {
   return (
     <section id="how-it-works" aria-labelledby="story-heading">
       <div className={`${container} py-20 sm:py-28 lg:py-32`}>
-        <SectionIntro
-          center
-          id="story-heading"
-          index={story.index}
-          eyebrow={story.eyebrow}
-          heading={story.heading}
-        />
+        <SectionIntro center id="story-heading" eyebrow={story.eyebrow} heading={story.heading} />
         <div className="mt-14 grid gap-4 lg:grid-cols-2">
           <article className="reveal overflow-hidden rounded-[2rem] bg-raised">
             <Photo
@@ -232,14 +209,16 @@ function Story() {
               className="aspect-[16/9] rounded-none"
             />
             <div className="p-6 sm:p-10">
-              <p className="label-mono text-faint">{story.before.label}</p>
-              <h3 className="display mt-3 text-2xl leading-tight font-bold tracking-[-0.03em] sm:text-3xl">
+              <p className="detail text-faint">{story.before.label}</p>
+              <h3 className="display mt-3 text-2xl leading-tight font-bold tracking-[-0.015em] sm:text-3xl">
                 {story.before.title}
               </h3>
               <ol className="mt-6 space-y-4">
                 {story.before.beats.map((beat) => (
                   <li key={beat.time} className="grid grid-cols-[5.5rem_1fr] gap-3">
-                    <span className="font-mono text-sm text-faint tabular-nums">{beat.time}</span>
+                    <span className="text-sm font-semibold text-faint tabular-nums">
+                      {beat.time}
+                    </span>
                     <span className="text-muted">{beat.text}</span>
                   </li>
                 ))}
@@ -256,14 +235,14 @@ function Story() {
               className="aspect-[16/9] rounded-none"
             />
             <div className="p-6 sm:p-10">
-              <p className="label-mono text-accent">{story.after.label}</p>
-              <h3 className="display mt-3 text-2xl leading-tight font-bold tracking-[-0.03em] sm:text-3xl">
+              <p className="detail text-accent">{story.after.label}</p>
+              <h3 className="display mt-3 text-2xl leading-tight font-bold tracking-[-0.015em] sm:text-3xl">
                 {story.after.title}
               </h3>
               <ol className="mt-6 space-y-4">
                 {story.after.beats.map((beat) => (
                   <li key={beat.tag} className="grid grid-cols-[5.5rem_1fr] items-start gap-3">
-                    <span className="label-mono w-fit rounded-full border border-accent px-2.5 py-1 text-accent">
+                    <span className="detail w-fit rounded-full border border-accent px-2.5 py-1 text-[0.6875rem] text-accent">
                       {beat.tag}
                     </span>
                     <span className="text-fg">{beat.text}</span>
@@ -288,7 +267,6 @@ function TryIt() {
         <div>
           <SectionIntro
             id="try-heading"
-            index={tryIt.index}
             eyebrow={tryIt.eyebrow}
             heading={tryIt.heading}
             lead={tryIt.lead}
@@ -325,10 +303,10 @@ function FeatureBlock(props: {
         <div className="settle">{props.media}</div>
       </div>
       <div className={`reveal ${props.flip ? "lg:order-1" : ""}`}>
-        <p className="label-mono text-faint tabular-nums">
+        <p className="detail text-faint tabular-nums">
           <span className="text-accent">0{props.index}</span> / 0{props.total}
         </p>
-        <h3 className="display mt-4 text-3xl leading-[1.02] font-extrabold tracking-[-0.04em] text-balance sm:text-4xl lg:text-5xl">
+        <h3 className="display mt-4 text-3xl leading-[1.02] font-extrabold tracking-[-0.025em] text-balance sm:text-4xl lg:text-5xl">
           {props.title}
         </h3>
         <p className="mt-5 max-w-lg text-lg text-pretty text-muted">{props.body}</p>
@@ -346,7 +324,6 @@ function Features() {
         <SectionIntro
           center
           id="features-heading"
-          index={features.index}
           eyebrow={features.eyebrow}
           heading={features.heading}
           lead={features.note}
@@ -427,14 +404,14 @@ function Features() {
           />
         </div>
 
-        <h3 className="label-mono mt-32 text-center text-faint">{features.extrasHeading}</h3>
+        <h3 className="detail mt-32 text-center text-faint">{features.extrasHeading}</h3>
         <ul className="mt-6 grid gap-4 md:grid-cols-3">
           <li className="reveal flex flex-col gap-6 rounded-[1.75rem] bg-raised p-6">
             <div className="rounded-2xl bg-bg p-4 shadow-soft">
               <ChaptersVisual />
             </div>
             <div>
-              <h4 className="display text-xl font-bold tracking-[-0.03em]">
+              <h4 className="display text-xl font-bold tracking-[-0.015em]">
                 {features.chapters.title}
               </h4>
               <p className="mt-2 text-muted">{features.chapters.body}</p>
@@ -445,14 +422,14 @@ function Features() {
               <ThumbnailsVisual />
             </div>
             <div>
-              <h4 className="display text-xl font-bold tracking-[-0.03em]">
+              <h4 className="display text-xl font-bold tracking-[-0.015em]">
                 {features.thumbnails.title}
               </h4>
               <p className="mt-2 text-muted">{features.thumbnails.body}</p>
             </div>
           </li>
           <li className="reveal flex flex-col justify-center rounded-[1.75rem] border border-line p-6">
-            <h4 className="label-mono text-faint">{features.notList.heading}</h4>
+            <h4 className="detail text-faint">{features.notList.heading}</h4>
             <ul className="mt-5 space-y-4">
               {features.notList.items.map((item) => (
                 <li key={item} className="flex gap-3 text-muted">
@@ -477,7 +454,6 @@ function AuditSection() {
         <div>
           <SectionIntro
             id="audit-heading"
-            index={audit.index}
             eyebrow={audit.eyebrow}
             heading={audit.heading}
             lead={audit.lead}
@@ -485,7 +461,7 @@ function AuditSection() {
           <ol className="mt-10 space-y-6">
             {audit.steps.map((step, index) => (
               <li key={step.title} className="reveal grid grid-cols-[2.25rem_1fr] gap-4">
-                <span className="flex size-9 items-center justify-center rounded-full bg-keep-soft font-mono text-sm text-keep">
+                <span className="flex size-9 items-center justify-center rounded-full bg-keep-soft text-sm font-bold text-keep">
                   {index + 1}
                 </span>
                 <div>
@@ -525,7 +501,6 @@ function NextVideoSection() {
         <div className="order-1 lg:order-2">
           <SectionIntro
             id="next-heading"
-            index={nextVideo.index}
             eyebrow={nextVideo.eyebrow}
             heading={nextVideo.heading}
             lead={nextVideo.lead}
@@ -550,10 +525,8 @@ function Stories() {
     // the page (not this section) stays the scroll timeline.
     <section aria-labelledby="stories-heading" className="overflow-x-clip py-20 sm:py-28">
       <div className={container}>
-        <p className="label-mono flex items-center justify-center gap-3 text-faint">
-          <span aria-hidden="true" className="h-px w-8 bg-line-strong" />
-          <span id="stories-heading">{stories.label}</span>
-          <span aria-hidden="true" className="h-px w-8 bg-line-strong" />
+        <p id="stories-heading" className="text-center text-lg font-semibold text-muted">
+          {stories.label}
         </p>
       </div>
       {/* Full width, edge to edge (adobe.com): the neighbours peek in from the screen's edges. */}
@@ -571,7 +544,6 @@ function Plans() {
         <SectionIntro
           center
           id="plans-heading"
-          index={plans.index}
           eyebrow={plans.eyebrow}
           heading={plans.heading}
           lead={plans.lead}
@@ -585,13 +557,13 @@ function Plans() {
               }`}
             >
               {plan.founding && (
-                <span className="label-mono absolute top-5 right-5 rounded-full bg-accent px-2.5 py-1 text-[0.5625rem] text-on-accent">
+                <span className="detail absolute top-5 right-5 rounded-full bg-accent px-2.5 py-1 text-[0.625rem] text-on-accent">
                   {plans.founding.badge}
                 </span>
               )}
               <h3 className="font-semibold">{plan.name}</h3>
               <p className="mt-4 flex items-baseline gap-1.5">
-                <span className="display text-5xl font-extrabold tracking-[-0.04em]">
+                <span className="display text-5xl font-extrabold tracking-[-0.025em]">
                   {plan.price}
                 </span>
                 <span className="text-sm text-muted">{plans.perMonth}</span>
@@ -635,7 +607,6 @@ function Faq() {
         <div className="lg:sticky lg:top-28 lg:self-start">
           <SectionIntro
             id="faq-heading"
-            index={faq.index}
             eyebrow={faq.eyebrow}
             heading={faq.heading}
             lead={faq.lead}
@@ -646,7 +617,7 @@ function Faq() {
               className="inline-flex items-center gap-2 text-sm font-semibold text-accent underline decoration-accent/40 underline-offset-4 hover:decoration-accent"
             >
               {faq.privacyLink}
-              <Arrow />
+              <ArrowRightIcon className="size-4" />
             </Link>
           </p>
         </div>
@@ -657,9 +628,9 @@ function Faq() {
                 {item.q}
                 <span
                   aria-hidden="true"
-                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-raised text-xl text-fg transition-[transform,background-color] duration-300 group-open:rotate-45 group-open:bg-ink group-open:text-on-ink"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-raised text-fg transition-[transform,background-color] duration-300 group-open:rotate-45 group-open:bg-ink group-open:text-on-ink"
                 >
-                  +
+                  <PlusIcon className="size-4" />
                 </span>
               </summary>
               <p className="mt-3 max-w-2xl text-muted">{item.a}</p>
@@ -699,7 +670,6 @@ function Roadmap() {
             <SectionIntro
               center
               id="roadmap-heading"
-              index={roadmap.index}
               eyebrow={roadmap.eyebrow}
               heading={roadmap.heading}
               lead={roadmap.lead}
@@ -717,15 +687,10 @@ function Roadmap() {
               <div className={`lag h-full ${tabletLag[index % 2]} ${desktopLag[index % 3]}`}>
                 <div className="flex h-full flex-col rounded-[1.5rem] bg-raised p-6 transition-colors duration-300 hover:bg-panel sm:min-h-60 sm:p-7">
                   <div className="flex items-center justify-between gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="flex size-9 items-center justify-center rounded-xl border border-line-strong font-mono text-xs font-semibold text-muted"
-                    >
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
+                    <AppIcon mark={laterMarks[index] ?? "··"} size="md" />
                     <StatusPill status="later" />
                   </div>
-                  <h3 className="display mt-auto pt-6 text-2xl font-bold tracking-[-0.03em] sm:pt-12">
+                  <h3 className="display mt-auto pt-6 text-2xl font-bold tracking-[-0.015em] sm:pt-12">
                     {item.title}
                   </h3>
                   <p className="mt-2 text-muted">{item.body}</p>
@@ -762,7 +727,7 @@ function Waitlist() {
         <div className="reveal">
           <h2
             id="waitlist-heading"
-            className="display text-5xl leading-[0.96] font-extrabold tracking-[-0.045em] text-balance sm:text-6xl lg:text-7xl"
+            className="display text-5xl leading-[0.96] font-extrabold tracking-[-0.03em] text-balance sm:text-6xl lg:text-7xl"
           >
             {finalCta.heading}
           </h2>
