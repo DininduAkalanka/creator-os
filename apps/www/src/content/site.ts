@@ -11,7 +11,10 @@ export const siteCopy = {
   nav: {
     label: "Main",
     howItWorks: "How it works",
+    product: "Product",
     tryIt: "Try it",
+    audit: "Channel Audit",
+    plans: "Plans",
     features: "Features",
     offer: "Founding offer",
     faq: "Questions",

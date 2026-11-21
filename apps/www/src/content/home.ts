@@ -9,11 +9,9 @@
  * Photos and videos are AI-generated and labelled on the page.
  */
 import { BRAND } from "@/config/site";
-import { FOUNDING_OFFER } from "@/config/offer";
 import type { DemoSegment } from "@/lib/demo";
 
 const name = BRAND.name;
-const offer = FOUNDING_OFFER;
 
 export const hero = {
   eyebrow: "For creators still editing at midnight",
@@ -33,7 +31,7 @@ export const hero = {
 };
 
 export const story = {
-  index: "01",
+  index: "02",
   eyebrow: "How it works",
   heading: "You know this night.",
   note: "An illustration of a typical evening. The times are an example, not a measured result.",
@@ -99,7 +97,7 @@ const demoSegments: DemoSegment[] = [
 ];
 
 export const tryIt = {
-  index: "02",
+  index: "03",
   eyebrow: "Try it",
   heading: "This is the part you'd normally do by hand.",
   lead: "Here's a short clip with the cuts already suggested. Accept them all, or click any one to keep it. Nothing is gone until you say so.",
@@ -128,7 +126,7 @@ export const demo = {
 };
 
 export const features = {
-  index: "03",
+  index: "04",
   eyebrow: "What you get",
   heading: "Everything the first pass needs.",
   note: "Planned for the first release. We'll confirm the final list before early access opens. On-screen examples are illustrations.",
@@ -188,56 +186,8 @@ export const features = {
   },
 };
 
-export const audiences = {
-  index: "04",
-  eyebrow: "Who it's for",
-  heading: "Built for long videos with one voice and one camera.",
-  lead: "Talking-head videos, tutorials, screen recordings and podcasts.",
-  items: [
-    {
-      key: "creator",
-      title: "You film and edit your own videos",
-      body: "You're the host, the camera operator and the editor. Get the slowest part of the edit off your plate.",
-      imageAlt: "A creator recording a talking-head video in a home studio",
-    },
-    {
-      key: "educator",
-      title: "You teach on camera",
-      body: 'Tutorials, courses and screen recordings with a lot of "let me try that again". Keep the explanation, lose the restarts.',
-      imageAlt: "An educator recording a tutorial at a desk with a microphone",
-    },
-    {
-      key: "editor",
-      title: "You edit for creators",
-      body: "Start every client project from a clean first pass instead of hours of raw footage, and spend your time on the work you're hired for.",
-      imageAlt: "A freelance video editor working with headphones on",
-    },
-  ],
-};
-
-export const foundingOffer = {
-  index: "05",
-  eyebrow: "Founding creator offer",
-  heading: "Be one of the first fifty.",
-  badge: "Planned",
-  passLabel: "Founding pass",
-  seats: `${offer.foundingSpots} seats`,
-  planLabel: `${offer.planName} plan`,
-  price: `$${offer.priceUsdPerMonth}`,
-  pricePeriod: "per month",
-  points: [
-    `${offer.footageHoursPerMonth} hours of raw footage a month`,
-    `Price locked for ${offer.priceLockMonths} months`,
-    `For the first ${offer.foundingSpots} founding creators`,
-    "Every feature in the first release",
-  ],
-  disclaimer:
-    "Pre-orders aren't open yet. Join the waitlist and we'll email you when they open. The refund terms will be published before you can pay anything.",
-  cta: "Join the waitlist",
-};
-
 export const faq = {
-  index: "06",
+  index: "09",
   eyebrow: "Questions",
   heading: "The questions we'd ask too.",
   lead: "Straight answers, including the uncomfortable ones.",
@@ -260,8 +210,20 @@ export const faq = {
       a: "No, that's the point. You export a timeline that opens in the editor you already use, linked to your original files.",
     },
     {
+      q: "What is the Channel Audit, and is it free?",
+      a: "It's a read-only look at your own channel: your recent videos compared with your channel's usual results, grouped by topic, with a handful of insights and the evidence behind each one. It's planned for the beta and included in the Free plan.",
+    },
+    {
+      q: "Do you compare me with other creators?",
+      a: "No. Insights compare your videos with your own channel's usual results. We don't build benchmarks from other creators' private analytics.",
+    },
+    {
+      q: "Will it publish to YouTube for me?",
+      a: "Not at first. Publishing comes after Google's API audit passes, and even then videos go up private or scheduled by default, never public without your confirmation.",
+    },
+    {
       q: "Do I need to connect my YouTube channel?",
-      a: "No. The editor works with files from your computer. Connecting YouTube will be optional and read-only, and you can remove access at any time in your Google Account settings.",
+      a: "Only for the Channel Audit and recommendations. The editor works with files from your computer. The connection is read-only, and you can remove access at any time in your Google Account settings.",
     },
     {
       q: "Which languages does it support?",

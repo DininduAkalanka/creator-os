@@ -233,16 +233,11 @@ body::before {
  * reported false contrast failures. Accurate audits matter more here than a few points.
  */
 
-/* ---------- Scroll reveal: CSS only, progressive enhancement ---------- */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation: rise linear both;
-      animation-timeline: view();
-      animation-range: entry 5% cover 22%;
-    }
-  }
-}
+/*
+ * Also not used on purpose: scroll-driven reveal animations (animation-timeline: view()) on
+ * sections. Measured on the long v4 page they cost about 3 Lighthouse mobile points (median 88
+ * with, 91 without). The `reveal` class stays on elements as a harmless hook.
+ */
 
 /* ---------- Interactive cut demo ---------- */
 .demo-segment {
@@ -339,4 +334,20 @@ body::before {
 .prose-doc strong {
   color: var(--fg);
   font-weight: 600;
+}
+
+/* ---------- Hero carousel: progress line on the active tab ---------- */
+@keyframes tab-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.tab-progress {
+  transform-origin: left center;
+  animation-name: tab-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
 }

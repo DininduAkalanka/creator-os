@@ -1,10 +1,8 @@
-import Image, { getImageProps, type StaticImageData } from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import eveningBack from "@/assets/media/evening-back.jpg";
 import footageLocal from "@/assets/media/footage-stays-local.jpg";
-import heroPoster from "@/assets/media/hero-poster.jpg";
-import heroPosterVertical from "@/assets/media/hero-poster-vertical.jpg";
 import nightEdit from "@/assets/media/night-edit.jpg";
 import personaCreator from "@/assets/media/persona-creator.jpg";
 import personaEditor from "@/assets/media/persona-editor.jpg";
@@ -12,8 +10,6 @@ import personaEducator from "@/assets/media/persona-educator.jpg";
 import reviewTogether from "@/assets/media/review-together.jpg";
 import talkingPoster from "@/assets/media/talking-poster.jpg";
 import timelineDetail from "@/assets/media/timeline-detail.jpg";
-import { BackgroundVideo } from "@/components/background-video";
-import { CutDemo } from "@/components/cut-demo";
 import {
   ChaptersVisual,
   HandoffVisual,
@@ -21,43 +17,69 @@ import {
   RoughCutVisual,
   ThumbnailsVisual,
 } from "@/components/feature-visuals";
+import { HeroCarousel } from "@/components/hero-carousel";
 import { CheckIcon, CrossIcon } from "@/components/icons";
+import { LazyCutDemo } from "@/components/lazy-cut-demo";
 import { AiCredit, Photo, VideoPanel } from "@/components/media";
+import { AuditMini, AuditPreview, NextMini, NextVideoPreview } from "@/components/product-previews";
 import { SectionIntro } from "@/components/section-intro";
-import { buttonLarge, buttonPrimary, buttonSecondary, card, container } from "@/components/styles";
+import { StoryCarousel } from "@/components/story-carousel";
+import { buttonLarge, buttonPrimary, card, container } from "@/components/styles";
 import { WaitlistForm } from "@/components/waitlist-form";
+import { faq, features, finalCta, story, tryIt } from "@/content/home";
 import {
-  audiences,
-  faq,
-  features,
-  finalCta,
-  foundingOffer,
-  hero,
-  story,
-  tryIt,
-} from "@/content/home";
+  audit,
+  nextVideo,
+  plans,
+  roadmap,
+  services,
+  statusLabels,
+  stories,
+  type ServiceStatus,
+} from "@/content/services";
 
-/** Stagger index for the load-in animation (globals.css .rise). */
-const order = (index: number) => ({ "--i": index }) as CSSProperties;
-
-const personaPhotos: Record<string, StaticImageData> = {
+const storyPhotos: Record<string, StaticImageData> = {
   creator: personaCreator,
   educator: personaEducator,
   editor: personaEditor,
 };
 
+/**
+ * Section order follows the product loop. Loading follows adobe.com: the hero's first slide is
+ * the only eager media; everything below is lazy (images on approach, demo code on approach).
+ */
 export default function HomePage() {
   return (
     <>
-      <Hero />
+      <HeroCarousel />
+      <Services />
       <Story />
       <TryIt />
       <Features />
-      <Audiences />
-      <FoundingOffer />
+      <AuditSection />
+      <NextVideoSection />
+      <Roadmap />
+      <Stories />
+      <Plans />
       <Faq />
       <Waitlist />
     </>
+  );
+}
+
+function StatusPill({ status, className = "" }: { status: ServiceStatus; className?: string }) {
+  const tone =
+    status === "first"
+      ? "border-keep/50 text-keep"
+      : status === "beta"
+        ? "border-accent/50 text-accent"
+        : "border-line-strong text-faint";
+  return (
+    <span
+      className={`label-mono rounded-full border px-2 py-0.5 text-[0.5625rem] ${tone} ${className}`}
+    >
+      {statusLabels[status]}
+    </span>
   );
 }
 
@@ -72,122 +94,6 @@ function Arrow() {
         strokeLinejoin="round"
       />
     </svg>
-  );
-}
-
-/**
- * Hero: a full-bleed video over its first frame. The poster is a responsive <picture> (vertical
- * crop on phones) and is the first thing painted; the video loads only after the page has
- * loaded (see BackgroundVideo). No preload hints, following adobe.com's measured guidance.
- */
-function HeroPoster() {
-  const common = {
-    alt: "",
-    sizes: "100vw",
-    loading: "eager" as const,
-    // The poster is the LCP element: fetch it ahead of scripts (fonts are not preloaded).
-    fetchPriority: "high" as const,
-  };
-  const {
-    props: { srcSet: desktop },
-  } = getImageProps({ ...common, src: heroPoster });
-  const {
-    props: { srcSet: mobile, ...rest },
-  } = getImageProps({ ...common, src: heroPosterVertical });
-  return (
-    <picture>
-      <source media="(min-width: 768px)" srcSet={desktop} />
-      <source media="(max-width: 767px)" srcSet={mobile} />
-      {/* eslint-disable-next-line jsx-a11y/alt-text -- art-directed poster from getImageProps; alt="" (decorative) is in `rest` */}
-      <img {...rest} className="absolute inset-0 h-full w-full object-cover" />
-    </picture>
-  );
-}
-
-function Hero() {
-  return (
-    <section
-      aria-labelledby="hero-heading"
-      className="relative isolate flex min-h-[calc(100svh-6rem)] items-end overflow-hidden md:items-center"
-    >
-      <div aria-hidden="true" className="absolute inset-0 -z-10">
-        <HeroPoster />
-      </div>
-      <BackgroundVideo
-        start="load"
-        sources={[
-          { src: "/videos/hero-loop-vertical.mp4", media: "(max-width: 767px)" },
-          { src: "/videos/hero-loop.mp4" },
-        ]}
-        className="absolute inset-0 -z-10 h-full w-full object-cover"
-        buttonClassName="absolute right-4 bottom-4 z-20 sm:right-6 sm:bottom-6"
-      />
-      {/* Legibility: dark from the text side (bottom on phones, left on larger screens). */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,var(--bg)_8%,rgb(12_11_10/0.85)_45%,rgb(12_11_10/0.15)_100%)] md:bg-[linear-gradient(to_right,rgb(12_11_10/0.95)_25%,rgb(12_11_10/0.6)_55%,rgb(12_11_10/0.1)_100%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-bg to-transparent"
-      />
-
-      <div className={`${container} py-16 sm:py-20`}>
-        <div className="max-w-2xl">
-          <p
-            style={order(0)}
-            className="rise label-mono inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/55 px-3 py-1.5 text-white/80"
-          >
-            <span aria-hidden="true" className="size-1.5 rounded-full bg-accent" />
-            {hero.eyebrow}
-          </p>
-          {/* Not animated: the headline must paint at once. */}
-          <h1
-            id="hero-heading"
-            className="display mt-6 text-[clamp(2.6rem,6vw,5.25rem)] leading-[0.98] font-semibold text-balance text-white"
-          >
-            <span className="sr-only">{hero.headline}</span>
-            <span aria-hidden="true">
-              {hero.headlineBefore} <span className="hero-cut">{hero.headlineCut}</span>{" "}
-              {hero.headlineAfter}
-            </span>
-          </h1>
-          <p
-            style={order(2)}
-            className="rise mt-6 max-w-xl text-lg text-pretty text-white/80 sm:text-xl"
-          >
-            {hero.lead}
-          </p>
-          <div style={order(3)} className="rise mt-8 flex flex-wrap items-center gap-3">
-            <Link href="#waitlist" className={`${buttonPrimary} ${buttonLarge}`}>
-              {hero.primaryCta}
-              <Arrow />
-            </Link>
-            <Link
-              href="#try-it"
-              className={`${buttonSecondary} ${buttonLarge} border-white/30 bg-black/45 text-white hover:bg-black/50`}
-            >
-              {hero.secondaryCta}
-            </Link>
-          </div>
-          <p style={order(4)} className="rise mt-4 text-sm text-white/65">
-            {hero.status}
-          </p>
-          <div style={order(5)} className="rise mt-8 flex flex-wrap items-center gap-x-3 gap-y-2">
-            <span className="label-mono text-white/65">{hero.exportsLabel}</span>
-            {hero.apps.map((app) => (
-              <span
-                key={app}
-                className="rounded-full border border-white/20 bg-black/45 px-3 py-1 text-sm text-white/80"
-              >
-                {app}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-      <AiCredit video className="absolute top-4 right-4 sm:top-6 sm:right-6" />
-    </section>
   );
 }
 
@@ -290,7 +196,7 @@ function TryIt() {
           </ul>
         </div>
         <div className="reveal">
-          <CutDemo />
+          <LazyCutDemo />
         </div>
       </div>
     </section>
@@ -447,100 +353,292 @@ function Features() {
   );
 }
 
-function Audiences() {
+/** Adobe-style "Everything you need" rail, on a rounded sheet that slides over the hero. */
+function Services() {
+  const visuals: Record<string, ReactNode> = {
+    "rough-cut": <CardPhoto src={timelineDetail} alt="" />,
+    captions: <CardPhoto src={talkingPoster} alt="" />,
+    export: <CardPhoto src={footageLocal} alt="" />,
+    review: <CardPhoto src={reviewTogether} alt="" />,
+    audit: (
+      <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgb(126_224_181/0.18),transparent_60%),#0f0e0d] p-4">
+        <div className="origin-center scale-[0.82]">
+          <AuditMini />
+        </div>
+      </div>
+    ),
+    next: (
+      <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_70%_20%,rgb(255_90_31/0.22),transparent_60%),#0f0e0d] p-4">
+        <div className="origin-center scale-[0.82]">
+          <NextMini />
+        </div>
+      </div>
+    ),
+  };
   return (
-    <section aria-labelledby="audiences-heading" className="theme-paper">
-      <div className={`${container} py-24 sm:py-32`}>
+    <section
+      id="product"
+      aria-labelledby="services-heading"
+      className="relative z-10 -mt-6 rounded-t-[2rem] border-t border-line-strong bg-bg shadow-[0_-30px_60px_-20px_rgb(0_0_0/0.6)]"
+    >
+      <div className={`${container} py-24 sm:py-28`}>
         <SectionIntro
-          id="audiences-heading"
-          index={audiences.index}
-          eyebrow={audiences.eyebrow}
-          heading={audiences.heading}
-          lead={audiences.lead}
+          id="services-heading"
+          index={services.index}
+          eyebrow={services.eyebrow}
+          heading={services.heading}
+          lead={services.lead}
         />
-        <ul className="mt-14 grid gap-5 lg:grid-cols-3">
-          {audiences.items.map((audience) => {
-            const photo = personaPhotos[audience.key];
-            return (
-              <li key={audience.key} className={`reveal ${card} overflow-hidden`}>
-                {photo && (
-                  <Photo
-                    src={photo}
-                    alt={audience.imageAlt}
-                    sizes="(min-width: 1024px) 33vw, 100vw"
-                    className="aspect-[4/3] rounded-none border-0"
-                  />
+        <ul className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {services.cards.map((item) => (
+            <li key={item.id} className="reveal">
+              <Link
+                href={item.href}
+                className={`${card} group flex h-full flex-col overflow-hidden transition-colors hover:border-line-strong`}
+              >
+                <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
+                  <h3 className="font-semibold">{item.title}</h3>
+                  <StatusPill status={item.status} />
+                </div>
+                <div className="relative aspect-[16/10] overflow-hidden">{visuals[item.id]}</div>
+                <p className="px-5 py-4 text-sm text-muted">
+                  {item.body}{" "}
+                  <span
+                    aria-hidden="true"
+                    className="text-accent transition-transform group-hover:translate-x-0.5"
+                  >
+                    →
+                  </span>
+                </p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="reveal mt-14 rounded-[var(--radius)] border border-line bg-raised p-6">
+          <h3 className="label-mono text-faint">{services.loopHeading}</h3>
+          <ol className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-3">
+            {services.loop.map((stage, index) => (
+              <li key={stage.step} className="flex items-center gap-2">
+                <span className="flex flex-col items-start gap-1 rounded-xl border border-line bg-bg px-3.5 py-2.5">
+                  <span className="text-sm font-semibold">{stage.step}</span>
+                  {stage.status ? (
+                    <StatusPill status={stage.status} />
+                  ) : (
+                    <span className="label-mono text-[0.5625rem] text-faint">You</span>
+                  )}
+                </span>
+                {index < services.loop.length - 1 && (
+                  <span aria-hidden="true" className="text-faint">
+                    →
+                  </span>
                 )}
-                <div className="p-6 sm:p-7">
-                  <h3 className="display text-2xl leading-tight font-semibold">{audience.title}</h3>
-                  <p className="mt-3 text-muted">{audience.body}</p>
+              </li>
+            ))}
+            <li aria-hidden="true" className="text-accent">
+              ↺
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CardPhoto({ src, alt }: { src: StaticImageData; alt: string }) {
+  return (
+    <>
+      <Image
+        src={src}
+        alt={alt}
+        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+      />
+      <AiCredit className="absolute top-3 left-3" />
+    </>
+  );
+}
+
+function AuditSection() {
+  return (
+    <section
+      id="channel-audit"
+      aria-labelledby="audit-heading"
+      className="relative overflow-hidden border-t border-line bg-raised"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(45%_50%_at_85%_30%,rgb(126_224_181/0.10),transparent_70%)]"
+      />
+      <div
+        className={`${container} relative grid gap-14 py-24 sm:py-32 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16`}
+      >
+        <div>
+          <SectionIntro
+            id="audit-heading"
+            index={audit.index}
+            eyebrow={audit.eyebrow}
+            heading={audit.heading}
+            lead={audit.lead}
+          />
+          <ol className="mt-10 space-y-6">
+            {audit.steps.map((step, index) => (
+              <li key={step.title} className="reveal grid grid-cols-[2.25rem_1fr] gap-4">
+                <span className="flex size-9 items-center justify-center rounded-full bg-keep-soft font-mono text-sm text-keep">
+                  {index + 1}
+                </span>
+                <div>
+                  <h3 className="font-semibold">{step.title}</h3>
+                  <p className="mt-1 text-muted">{step.body}</p>
                 </div>
               </li>
-            );
-          })}
+            ))}
+          </ol>
+          <p className="mt-8 font-semibold text-keep">{audit.free}</p>
+          <ul className="mt-6 space-y-2.5">
+            {audit.notItems.map((item) => (
+              <li key={item} className="flex gap-3 text-sm text-muted">
+                <CrossIcon className="mt-0.5 size-4 shrink-0 text-accent" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="reveal lg:pt-24">
+          <AuditPreview />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function NextVideoSection() {
+  return (
+    <section id="next-video" aria-labelledby="next-heading" className="border-t border-line">
+      <div
+        className={`${container} grid gap-14 py-24 sm:py-32 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16`}
+      >
+        <div className="reveal order-2 lg:order-1">
+          <NextVideoPreview />
+        </div>
+        <div className="order-1 lg:order-2">
+          <SectionIntro
+            id="next-heading"
+            index={nextVideo.index}
+            eyebrow={nextVideo.eyebrow}
+            heading={nextVideo.heading}
+            lead={nextVideo.lead}
+          />
+          <ul className="mt-8 space-y-3">
+            {nextVideo.points.map((point) => (
+              <li key={point} className="reveal flex gap-3 text-muted">
+                <CheckIcon className="mt-0.5 size-5 shrink-0 text-keep" />
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Roadmap() {
+  return (
+    <section aria-labelledby="roadmap-heading" className="border-t border-line bg-raised">
+      <div className={`${container} py-24 sm:py-28`}>
+        <SectionIntro
+          id="roadmap-heading"
+          index={roadmap.index}
+          eyebrow={roadmap.eyebrow}
+          heading={roadmap.heading}
+          lead={roadmap.lead}
+        />
+        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {roadmap.items.map((item) => (
+            <li key={item.title} className={`reveal ${card} border-dashed bg-bg p-6`}>
+              <StatusPill status="later" />
+              <h3 className="display mt-4 text-xl font-semibold">{item.title}</h3>
+              <p className="mt-2 text-muted">{item.body}</p>
+            </li>
+          ))}
         </ul>
       </div>
     </section>
   );
 }
 
-function FoundingOffer() {
+function Stories() {
   return (
-    <section id="offer" aria-labelledby="offer-heading" className="relative overflow-hidden">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(45%_55%_at_75%_50%,rgb(255_90_31/0.16),transparent_70%)]"
-      />
-      <div
-        className={`${container} relative grid gap-14 py-24 sm:py-32 lg:grid-cols-2 lg:items-center lg:gap-20`}
-      >
+    <section aria-labelledby="stories-heading" className="border-t border-line py-24 sm:py-28">
+      <div className={container}>
+        <p className="label-mono flex items-center gap-3 text-faint">
+          <span aria-hidden="true" className="h-px w-8 bg-line-strong" />
+          <span id="stories-heading">{stories.label}</span>
+        </p>
+      </div>
+      <div className="mx-auto mt-8 max-w-[90rem]">
+        <StoryCarousel images={storyPhotos} />
+      </div>
+    </section>
+  );
+}
+
+function Plans() {
+  return (
+    <section id="plans" aria-labelledby="plans-heading" className="theme-paper">
+      <div className={`${container} py-24 sm:py-32`}>
         <SectionIntro
-          id="offer-heading"
-          index={foundingOffer.index}
-          eyebrow={foundingOffer.eyebrow}
-          heading={foundingOffer.heading}
-          lead={foundingOffer.disclaimer}
+          id="plans-heading"
+          index={plans.index}
+          eyebrow={plans.eyebrow}
+          heading={plans.heading}
+          lead={plans.lead}
         />
-        <div className="reveal relative mx-auto w-full max-w-md">
-          <div className="relative overflow-hidden rounded-[1.5rem] border border-line-strong bg-panel">
-            <div className="flex items-center justify-between gap-3 border-b border-dashed border-line-strong px-7 py-4">
-              <span className="label-mono text-accent">{foundingOffer.passLabel}</span>
-              <span className="label-mono rounded-full border border-line-strong px-2.5 py-1 text-muted">
-                {foundingOffer.badge}
-              </span>
-            </div>
-            {/* Ticket notches on the perforation line. */}
-            <span
-              aria-hidden="true"
-              className="absolute top-[2.65rem] -left-3 size-6 rounded-full bg-bg"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute top-[2.65rem] -right-3 size-6 rounded-full bg-bg"
-            />
-            <div className="px-7 pt-7 pb-8">
-              <div className="flex items-baseline justify-between gap-3">
-                <p className="text-sm font-semibold text-muted">{foundingOffer.planLabel}</p>
-                <p className="label-mono text-faint">{foundingOffer.seats}</p>
-              </div>
-              <p className="mt-3 flex items-baseline gap-2">
-                <span className="display text-7xl font-semibold">{foundingOffer.price}</span>
-                <span className="text-muted">{foundingOffer.pricePeriod}</span>
+        <ul className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {plans.items.map((plan) => (
+            <li
+              key={plan.name}
+              className={`reveal relative flex flex-col overflow-hidden rounded-[1.25rem] border p-6 ${
+                plan.founding
+                  ? "border-accent bg-raised shadow-[0_30px_70px_-35px_rgb(176_57_10/0.5)]"
+                  : "border-line bg-raised"
+              }`}
+            >
+              {plan.founding && (
+                <span className="label-mono absolute top-0 right-0 rounded-bl-xl bg-accent px-3 py-1.5 text-[0.5625rem] text-on-accent">
+                  {plans.founding.badge}
+                </span>
+              )}
+              <h3 className="font-semibold">{plan.name}</h3>
+              <p className="mt-4 flex items-baseline gap-1.5">
+                <span className="display text-5xl font-semibold">{plan.price}</span>
+                <span className="text-sm text-muted">{plans.perMonth}</span>
               </p>
-              <ul className="mt-8 space-y-3.5">
-                {foundingOffer.points.map((point) => (
-                  <li key={point} className="flex gap-3">
-                    <CheckIcon className="mt-0.5 size-5 shrink-0 text-keep" />
+              <p className="mt-2 text-sm font-semibold text-accent">
+                {plans.footage(plan.footage)}
+              </p>
+              <ul className="mt-6 flex-1 space-y-2.5 border-t border-dashed border-line-strong pt-5">
+                {plan.points.map((point) => (
+                  <li key={point} className="flex gap-2.5 text-sm">
+                    <CheckIcon className="mt-0.5 size-4 shrink-0 text-keep" />
                     {point}
                   </li>
                 ))}
               </ul>
-              <Link href="#waitlist" className={`${buttonPrimary} ${buttonLarge} mt-9 w-full`}>
-                {foundingOffer.cta}
-                <Arrow />
-              </Link>
-            </div>
+              {plan.founding && <p className="mt-5 text-xs text-muted">{plans.founding.note}</p>}
+            </li>
+          ))}
+        </ul>
+        <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl space-y-1.5 text-sm text-muted">
+            <p>{plans.sameFeatures}</p>
+            <p>{plans.extra}</p>
+            <p>{plans.disclaimer}</p>
           </div>
+          <Link href="#waitlist" className={`${buttonPrimary} ${buttonLarge} shrink-0`}>
+            {plans.cta}
+          </Link>
         </div>
       </div>
     </section>
