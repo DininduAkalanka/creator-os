@@ -1,0 +1,22 @@
+# Hand-written docs and prompts are reviewed by people; don't reformat them.
+docs/
+prompts/
+AGENTS.md
+CLAUDE.md
+README.md
+**/AGENTS.md
+
+# Generated or vendored
+pnpm-lock.yaml
+**/.next/
+**/.turbo/
+**/coverage/
+**/dist/
+**/next-env.d.ts
+**/test-results/
+**/playwright-report/
+**/blob-report/
+
+# Logo paths written by apps/www/scripts/prepare-logo.mjs
+apps/www/src/components/brand-paths.ts
+apps/www/src/app/icon.svg

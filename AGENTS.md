@@ -137,17 +137,31 @@ tools/
 
 ## 6. Commands
 
-Fill these in during M1. Keep them accurate whenever scripts change.
+Keep these accurate whenever scripts change.
 
 ```bash
-pnpm install
-docker compose up -d          # postgres+pgvector, redis, minio
-pnpm db:migrate               # apply migrations
-pnpm dev                      # web + api + worker
-pnpm lint && pnpm typecheck && pnpm test && pnpm build   # the local gate
-pnpm test:int                 # integration tests (Testcontainers)
-pnpm test:e2e                 # Playwright
+pnpm install                  # Node 26.13.1 (.nvmrc), pnpm from "packageManager"
+pnpm dev                      # every app in watch mode (today: apps/www on http://localhost:3000)
+pnpm --filter @creatoros/www dev   # one app only
+pnpm format                   # fix formatting (Prettier)
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # the local gate (CI runs the same)
+pnpm audit --prod --audit-level high   # dependency audit (CI runs it too)
+pnpm test:e2e                 # Playwright end-to-end + axe accessibility tests (builds first; uses installed Edge locally)
+pnpm --filter @creatoros/www media   # photos/posters in apps/www/media-src/ -> web-ready JPEGs
+pnpm --filter @creatoros/www logo    # logo PNGs in apps/www/media-src/brand/ -> SVG paths, favicon, app icon
+pnpm docker:www               # website production image in Docker -> http://localhost:3000
+pnpm docker:down              # stop it
 ```
+
+Not available yet (added in later milestones):
+
+```bash
+docker compose up -d          # postgres+pgvector, redis, local S3 (P-03)
+pnpm db:migrate               # apply migrations
+pnpm test:int                 # integration tests (Testcontainers)
+```
+
+Website look and behaviour: follow `docs/design/website-design.md` (tokens, type, motion, quality bar).
 
 ---
 

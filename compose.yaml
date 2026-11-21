@@ -1,0 +1,26 @@
+# Local containers. Start the website with:
+#   docker compose up --build --detach www      ->  http://localhost:3000
+# The "www" service sits in a profile so that, once the database and other services are added
+# here, a plain "docker compose up" starts only those and doesn't clash with "pnpm dev".
+name: creatoros
+
+services:
+  www:
+    profiles: [site]
+    build:
+      context: .
+      dockerfile: apps/www/Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        SITE_INDEXABLE: "false"
+    image: creatoros-www:local
+    ports:
+      - "${WWW_PORT:-3000}:3000"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/apps/www/.next/cache:uid=1000,gid=1000
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]

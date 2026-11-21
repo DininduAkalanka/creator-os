@@ -1,0 +1,472 @@
+@import "tailwindcss";
+
+/*
+ * Design system: "the editing suite at night".
+ * A warm graphite canvas like a video editor, one hot "cut" accent, a mint "keep" colour, and
+ * timecode-style mono labels. Sections can switch to a warm paper theme with .theme-paper.
+ * All tokens are semantic, so components work unchanged in both themes.
+ * Text tokens meet WCAG AA (4.5:1) on --bg, --raised and --panel in both themes.
+ */
+:root {
+  color-scheme: dark;
+  --bg: #0c0b0a;
+  --raised: #141210;
+  --panel: #1b1916;
+  --line: rgb(255 244 230 / 0.09);
+  --line-strong: rgb(255 244 230 / 0.18);
+  --fg: #f4efe6;
+  --muted: #a8a095;
+  --faint: #8c8478;
+  --accent: #ff5a1f;
+  --accent-strong: #ff7a45;
+  --accent-soft: rgb(255 90 31 / 0.14);
+  --on-accent: #140904;
+  --keep: #7ee0b5;
+  --keep-soft: rgb(126 224 181 / 0.12);
+  --danger: #ff8f80;
+  --focus: #8ab4ff;
+  --radius: 1rem;
+}
+
+.theme-paper {
+  color-scheme: light;
+  --bg: #f3ede2;
+  --raised: #fbf8f2;
+  --panel: #ebe3d5;
+  --line: rgb(21 18 15 / 0.12);
+  --line-strong: rgb(21 18 15 / 0.24);
+  --fg: #15120f;
+  --muted: #5f574c;
+  --faint: #6b6256;
+  /* #b0390a: 5.2:1 on paper. (#c2410c measured 4.44:1 in the axe test, below AA.) */
+  --accent: #b0390a;
+  --accent-strong: #8a2c08;
+  --accent-soft: #f8dccb;
+  --on-accent: #ffffff;
+  --keep: #0f7a55;
+  --keep-soft: #d3efe2;
+  --danger: #b42318;
+  --focus: #1d4ed8;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-raised: var(--raised);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-keep: var(--keep);
+  --color-keep-soft: var(--keep-soft);
+  --color-danger: var(--danger);
+  --color-focus: var(--focus);
+
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-instrument), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-martian), ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01";
+  text-rendering: optimizeLegibility;
+}
+
+/*
+ * No film-grain overlay (removed in v5): a fixed full-page layer over the photos made them look
+ * noisy rather than clean, and it had to be composited on every scroll frame.
+ */
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Keep anchored sections clear of the sticky header. */
+[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+/* In the components layer so Tailwind utilities (leading-*, tracking-*) can still override. */
+@layer components {
+  /* Display type: tight, confident, optical sizing on. */
+  .display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.022em;
+    line-height: 1;
+  }
+
+  /* Timecode-style label used for section markers and metadata. */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* A ruler of tick marks, like the top of an editing timeline. */
+  .ruler {
+    background-image:
+      repeating-linear-gradient(90deg, var(--line-strong) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 16px);
+    background-size:
+      100% 12px,
+      100% 6px;
+    background-repeat: repeat-x;
+  }
+
+  /* Native selects with a chevron that matches the theme (form fields are on dark surfaces). */
+  .select-field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23a8a095' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    background-size: 1rem;
+    padding-right: 2.75rem;
+  }
+
+  /* Diagonal hatch marking a suggested cut. */
+  .hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      var(--accent-soft) 0 6px,
+      transparent 6px 12px
+    );
+  }
+}
+
+/* ---------- Hero headline: the filler word gets cut on load ---------- */
+.hero-cut {
+  position: relative;
+  display: inline-block;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.hero-cut::after {
+  content: "";
+  position: absolute;
+  left: -0.04em;
+  right: -0.04em;
+  top: 54%;
+  height: 0.09em;
+  border-radius: 999px;
+  background: var(--accent);
+  transform-origin: left center;
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-cut {
+    animation: hero-cut-fade 600ms ease-out 1300ms both;
+  }
+  .hero-cut::after {
+    animation: hero-cut-strike 500ms cubic-bezier(0.65, 0, 0.35, 1) 800ms both;
+  }
+}
+
+@keyframes hero-cut-strike {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes hero-cut-fade {
+  to {
+    opacity: 0.55;
+  }
+}
+/* Used by the hero's .slide-rise (see "Hero slide changes" below). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Not used on purpose: content-visibility: auto on sections. It cut layout work, but audit tools
+ * (Lighthouse, PageSpeed, axe) then measured wrong backgrounds for unrendered sections and
+ * reported false contrast failures. Accurate audits matter more here than a few points.
+ */
+
+/*
+ * ---------- Scroll motion (v5, modelled on adobe.com) ----------
+ * Only transform and opacity move. Everything is off for reduced motion, and the page reads the
+ * same without any of it.
+ *
+ * 1. Reveal: <ScrollReveal> marks `.reveal` elements that start below the first screen as
+ *    "wait" and flips them to "in" when they scroll into view. Elements on the first screen are
+ *    never hidden. (v4 tried CSS view() timelines on every section instead: about 3 Lighthouse
+ *    mobile points slower. One IntersectionObserver does no work while scrolling.)
+ */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal="wait"] {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  [data-reveal="in"] {
+    transition:
+      opacity 700ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
+      transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
+  }
+}
+
+/*
+ * 2. Scroll-linked effects (CSS scroll timelines, run by the browser's compositor; where they are
+ *    not supported, the page is simply static):
+ *    - the hero drifts up at about half speed and dims while the first section slides over it;
+ *    - large media settle from slightly larger to their place as they enter the screen.
+ *    The longhands come after any shorthand on purpose: `animation` resets the timeline.
+ */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-drift,
+    .hero-dim {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+    .hero-drift {
+      animation-name: hero-drift;
+    }
+    .hero-dim {
+      animation-name: hero-dim;
+    }
+    .settle {
+      animation-name: settle;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+    /* Ends at 75% of entry: the wordmark's cropped bottom never fully enters the screen. */
+    .wordmark-rise {
+      animation-name: wordmark-rise;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 75%;
+    }
+  }
+}
+@keyframes hero-drift {
+  to {
+    transform: translateY(45vh);
+  }
+}
+@keyframes hero-dim {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+@keyframes settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes wordmark-rise {
+  from {
+    transform: translateY(65%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/*
+ * 3. Hero slide changes: the incoming slide's text rises in line by line and its picture settles.
+ *    Slide 1's first paint is left exactly as loaded; these run from the first change onwards.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .is-active .slide-rise {
+    animation: rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 90ms);
+  }
+  .is-active .slide-settle {
+    animation: slide-settle 1600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+@keyframes slide-settle {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* ---------- Interactive cut demo ---------- */
+.demo-segment {
+  transition:
+    flex-grow 650ms cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 400ms ease,
+    margin 650ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .demo-run .demo-playhead {
+    animation: playhead 3.2s cubic-bezier(0.45, 0, 0.55, 1) 400ms both;
+  }
+  .demo-run .demo-flag {
+    animation: flag-in 350ms ease-out both;
+    animation-delay: calc(400ms + var(--at, 0) * 3.2s);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo-segment {
+    transition: none;
+  }
+  .demo-playhead {
+    display: none;
+  }
+}
+/* The playhead track spans the timeline; moving it with transform avoids layout on every frame. */
+@keyframes playhead {
+  0% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+@keyframes flag-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Long-form text: legal and about pages ---------- */
+.prose-doc {
+  line-height: 1.75;
+  font-size: 1.0625rem;
+}
+.prose-doc h2 {
+  margin-top: 3rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.prose-doc h3 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+.prose-doc p,
+.prose-doc ul {
+  margin-top: 0.875rem;
+  color: var(--muted);
+}
+.prose-doc ul {
+  list-style: disc;
+  padding-inline-start: 1.25rem;
+}
+.prose-doc li + li {
+  margin-top: 0.375rem;
+}
+.prose-doc li::marker {
+  color: var(--accent);
+}
+.prose-doc a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.prose-doc a:hover {
+  color: var(--accent-strong);
+}
+.prose-doc strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* ---------- Header "Product" menu: panel drops in, page behind dims ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .menu-in {
+    animation: menu-in 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .menu-dim {
+    animation: menu-dim 220ms ease-out both;
+  }
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes menu-dim {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- Progress line: active hero tab and story dot ---------- */
+@keyframes tab-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.tab-progress {
+  transform-origin: left center;
+  animation-name: tab-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}

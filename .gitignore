@@ -17,3 +17,36 @@ desktop.ini
 # Python
 __pycache__/
 *.pyc
+
+# Node, pnpm, Turborepo, Next.js
+node_modules/
+.turbo/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+*.log
+# Playwright output
+test-results/
+playwright-report/
+blob-report/
+
+# Creator media and data: never commit footage, audio, transcripts or creator names
+data/
+*.mp4
+*.mov
+*.mkv
+*.m4a
+*.wav
+*.mp3
+*.opus
+
+# Original photo/video-poster exports (large). Web-ready copies live in apps/www/src/assets/media.
+apps/www/media-src/
+apps/www/src/photos/
+
+# Exception: the website's own AI-generated marketing loops (not creator footage).
+!apps/www/public/videos/*.mp4
