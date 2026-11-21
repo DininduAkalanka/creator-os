@@ -4,9 +4,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { BRAND, SITE_INDEXABLE, SITE_URL } from "@/config/site";
 import { siteCopy } from "@/content/site";
+import { displayFont, monoFont, sansFont } from "./fonts";
 import "./globals.css";
 
-// System fonts on purpose: no font download at build time and no third-party font requests.
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: siteCopy.titleDefault, template: `%s · ${BRAND.name}` },
@@ -24,19 +24,20 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#faf9f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e0d11" },
-  ],
+  themeColor: "#0c0b0a",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full">
+    <html
+      lang="en"
+      className={`${displayFont.variable} ${sansFont.variable} ${monoFont.variable} h-full`}
+    >
       <body className="flex min-h-full flex-col antialiased">
         <a
           href="#main"
-          className="sr-only z-50 rounded-lg bg-surface px-4 py-2 font-semibold focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+          className="sr-only z-[70] rounded-full bg-accent px-4 py-2 font-semibold text-on-accent focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
         >
           {siteCopy.skipLink}
         </a>

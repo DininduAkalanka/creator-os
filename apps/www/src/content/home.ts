@@ -2,52 +2,76 @@
  * Home page copy (English). Kept apart from layout so it can be translated later (ADR-020).
  * Every claim here must match an accepted ADR. Anything not built yet is described as planned.
  * Sources: ADR-001 (scope), ADR-009 (YouTube access), ADR-014 (price), ADR-015 (media), ADR-020.
+ * Illustrations (the demo clip, captions, chapters, comments) are examples, labelled as such.
  */
 import { BRAND } from "@/config/site";
 import { FOUNDING_OFFER } from "@/config/offer";
+import type { DemoSegment } from "@/lib/demo";
 
 const name = BRAND.name;
 const offer = FOUNDING_OFFER;
 
 export const hero = {
-  eyebrow: "For long-form YouTube creators",
+  eyebrow: "Early access · For long-form YouTube creators",
+  /** Plain headline for metadata, social cards and screen readers. */
   headline: "Your raw recording, rough-cut and captioned in minutes.",
-  lead: `${name} removes silences, filler words and bad takes, then hands a clean timeline to Premiere Pro, DaVinci Resolve or Final Cut Pro. You review every cut. You finish the edit.`,
+  /** The visual headline: the filler word is drawn struck out (hidden from screen readers). */
+  headlineBefore: "Your raw recording,",
+  headlineCut: "um,",
+  headlineAfter: "rough-cut and captioned in minutes.",
+  lead: `${name} finds the silences, filler words and bad takes, and suggests cutting them. You review every cut, then finish the edit in Premiere Pro, DaVinci Resolve or Final Cut Pro.`,
   primaryCta: "Join early access",
   secondaryCta: "See how it works",
   status: "In development. Free to join. No card needed.",
   exportLine: "Export to Premiere Pro, DaVinci Resolve or Final Cut Pro",
+  exportsLabel: "Hands off to",
+  apps: ["Premiere Pro", "DaVinci Resolve", "Final Cut Pro"],
 };
 
-export const illustration = {
-  label: "Illustration of the review screen, not the finished product",
-  title: "Suggested cuts",
-  legendRemoved: "Suggested cut",
-  legendKept: "Kept",
-  lines: [
-    {
-      time: "00:12",
-      parts: [
-        { text: "So, um, ", cut: true },
-        { text: "today I'm going to show you how I plan a whole month of videos", cut: false },
-      ],
-    },
-    { time: "00:19", parts: [{ text: "[pause, 4.2 seconds]", cut: true }] },
-    {
-      time: "00:23",
-      parts: [{ text: "in one afternoon. Wait, let me start that again.", cut: true }],
-    },
-    {
-      time: "00:31",
-      parts: [{ text: "in one afternoon, using a simple spreadsheet.", cut: false }],
-    },
-  ],
-  summary: "3 cuts suggested · 9.8 seconds removed",
+const demoSegments: DemoSegment[] = [
+  {
+    id: "s1",
+    kind: "speech",
+    text: "Today I'm going to show you how I plan a whole month of videos",
+    seconds: 5.6,
+  },
+  { id: "s2", kind: "pause", text: "4.2 s pause", seconds: 4.2 },
+  {
+    id: "s3",
+    kind: "retake",
+    text: "in one afternoon. Wait, let me start that again.",
+    seconds: 3.8,
+  },
+  { id: "s4", kind: "speech", text: "in one afternoon, using a simple spreadsheet.", seconds: 3.1 },
+  { id: "s5", kind: "filler", text: "Um, so, basically,", seconds: 1.9 },
+  { id: "s6", kind: "speech", text: "the trick is to batch your ideas first.", seconds: 2.6 },
+  { id: "s7", kind: "pause", text: "2.8 s pause", seconds: 2.8 },
+  { id: "s8", kind: "speech", text: "Then you script, film and edit in blocks.", seconds: 3.0 },
+];
+
+export const demo = {
+  label: "Interactive illustration, not the finished product",
+  clipName: "month-planning-take-1.mov",
+  heading: "Suggested cuts",
+  transcriptHeading: "Transcript",
+  timelineLabel: "Timeline. Select a suggested cut to keep or remove it.",
+  acceptAll: "Accept all cuts",
+  reset: "Start over",
+  lengthLabel: "Clip length",
+  kindLabels: { pause: "Pause", filler: "Filler", retake: "Retake" },
+  /** Screen-reader name of each toggle, e.g. "Cut filler: Um, so, basically,". */
+  cutPrefix: "Cut",
+  status: (accepted: number, total: number, length: string) =>
+    `${accepted} of ${total} suggested cuts accepted. Clip length ${length}.`,
+  segments: demoSegments,
 };
 
 export const problem = {
-  heading: "The first pass eats your week",
+  index: "01",
+  eyebrow: "The problem",
+  heading: "The first pass eats your week.",
   lead: "Before the real editing starts, someone has to scrub through the raw footage and cut out everything that shouldn't be there. For long videos, that takes hours, and it's the least creative part of the job.",
+  timelineCaption: "Illustration: each mark is a pause, filler or retake to find and cut by hand.",
   points: [
     {
       title: "Hunting for silences",
@@ -65,17 +89,22 @@ export const problem = {
 };
 
 export const steps = {
-  heading: "How it works",
+  index: "02",
+  eyebrow: "How it works",
+  heading: "Three steps. Every cut is your call.",
   items: [
     {
+      tag: "In",
       title: "Add your recording",
       body: "Choose your raw file. Where possible, only the audio is uploaded and your original stays on your computer.",
     },
     {
+      tag: "Review",
       title: "Review the suggested cuts",
       body: "Read your video as a transcript. Silences, filler words and repeated takes are marked. Accept or reject each one, or all at once.",
     },
     {
+      tag: "Out",
       title: "Export to your editor",
       body: "Download a timeline for Premiere Pro, DaVinci Resolve or Final Cut Pro that links to your original files, plus captions. Finish the edit the way you always do.",
     },
@@ -83,34 +112,45 @@ export const steps = {
 };
 
 export const features = {
-  heading: "What you get",
-  note: "Planned for the first release. We'll confirm the final list before early access opens.",
-  items: [
-    {
-      title: "A rough cut you approve",
-      body: "Silences, filler words and bad takes are suggested as cuts. Nothing is removed until you say so.",
-    },
-    {
-      title: "Hand-off to your editor",
-      body: "FCPXML, Premiere XML and EDL exports that point to your original footage, at full quality.",
-    },
-    {
-      title: "Captions",
-      body: "Caption files (SRT) that follow your final cut. English first.",
-    },
-    {
-      title: "Chapters, title and description",
-      body: "Drafts based on what you actually said, ready for you to edit.",
-    },
-    {
-      title: "Thumbnail ideas",
-      body: "Concepts and text options to brief your designer, or yourself.",
-    },
-    {
-      title: "Review with your team",
-      body: "Invite an editor or a reviewer. They can comment on and approve the cut in the browser.",
-    },
-  ],
+  index: "03",
+  eyebrow: "What you get",
+  heading: "Everything the first pass needs.",
+  note: "Planned for the first release. We'll confirm the final list before early access opens. Examples below are illustrations.",
+  roughCut: {
+    title: "A rough cut you approve",
+    body: "Silences, filler words and bad takes are suggested as cuts. Nothing is removed until you say so.",
+  },
+  handoff: {
+    title: "Hand-off to your editor",
+    body: "Timelines that point to your original footage, at full quality.",
+    files: ["timeline.fcpxml", "timeline.xml", "timeline.edl", "captions.srt"],
+  },
+  captions: {
+    title: "Captions",
+    body: "Caption files that follow your final cut. English first.",
+    sample: "the trick is to batch your ideas first.",
+    timecode: "00:00:09:12",
+  },
+  chapters: {
+    title: "Chapters, title and description",
+    body: "Drafts based on what you actually said, ready to edit.",
+    sample: [
+      { time: "00:00", label: "Why plan a whole month" },
+      { time: "01:12", label: "Batch your ideas first" },
+      { time: "04:30", label: "Script, film and edit in blocks" },
+    ],
+  },
+  thumbnails: {
+    title: "Thumbnail ideas",
+    body: "Concepts and text options to brief your designer, or yourself.",
+    sample: ["A month of videos in one day", "My planning spreadsheet", "Stop filming daily"],
+  },
+  review: {
+    title: "Review with your team",
+    body: "Invite an editor or a reviewer. They comment on and approve the cut in the browser.",
+    comment: { role: "Editor", text: "Keeping the second take here, it's tighter." },
+    reply: { role: "You", text: "Agreed. Approved." },
+  },
   notList: {
     heading: `What ${name} is not`,
     items: [
@@ -121,8 +161,10 @@ export const features = {
 };
 
 export const audiences = {
-  heading: "Who it's for",
-  lead: "Built for long talking-head videos, tutorials, screen recordings and podcasts recorded on one camera.",
+  index: "04",
+  eyebrow: "Who it's for",
+  heading: "Built for long videos with one voice and one camera.",
+  lead: "Talking-head videos, tutorials, screen recordings and podcasts.",
   items: [
     {
       title: "Creators who edit their own videos",
@@ -140,8 +182,12 @@ export const audiences = {
 };
 
 export const foundingOffer = {
-  heading: "Founding creator offer",
+  index: "05",
+  eyebrow: "Founding creator offer",
+  heading: "Be one of the first fifty.",
   badge: "Planned",
+  passLabel: "Founding pass",
+  seats: `${offer.foundingSpots} seats`,
   planLabel: `${offer.planName} plan`,
   price: `$${offer.priceUsdPerMonth}`,
   pricePeriod: "per month",
@@ -157,7 +203,9 @@ export const foundingOffer = {
 };
 
 export const dataHandling = {
-  heading: "Your footage and your channel",
+  index: "06",
+  eyebrow: "Your data",
+  heading: "Your footage. Your channel. Your call.",
   lead: "What we plan to do with your files and accounts, in plain words. The privacy policy will give the full detail before launch.",
   privacyLink: "Read the privacy policy",
   items: [
@@ -177,7 +225,9 @@ export const dataHandling = {
 };
 
 export const faq = {
-  heading: "Questions",
+  index: "07",
+  eyebrow: "Questions",
+  heading: "Questions, answered.",
   items: [
     {
       q: "When can I use it?",
@@ -211,6 +261,6 @@ export const faq = {
 };
 
 export const finalCta = {
-  heading: "Get early access",
+  heading: "Get early access.",
   lead: "Join the waitlist. We'll email you when early access and founding pre-orders open, and nothing else.",
 };

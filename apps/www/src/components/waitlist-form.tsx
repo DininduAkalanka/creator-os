@@ -28,7 +28,7 @@ import { buttonPrimary } from "./styles";
 const initialState: WaitlistFormState = { status: "idle" };
 
 const inputClass =
-  "mt-1.5 block w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-base text-ink placeholder:text-muted/70 aria-[invalid=true]:border-danger";
+  "mt-1.5 block w-full rounded-xl border border-line-strong bg-bg px-3.5 py-3 text-base text-fg placeholder:text-faint transition-colors hover:border-fg/30 focus:border-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 aria-[invalid=true]:border-danger";
 
 interface AriaErrorProps {
   "aria-invalid"?: true;
@@ -183,7 +183,7 @@ export function WaitlistForm() {
         <button type="submit" disabled={pending} className={`${buttonPrimary} px-6 py-3 text-base`}>
           {pending ? copy.submitting : copy.submit}
         </button>
-        <p role="status" className="text-sm text-ink">
+        <p role="status" className="text-sm text-fg">
           {state.status === "not_open" ? copy.notOpen : ""}
         </p>
       </div>
@@ -220,7 +220,7 @@ function SelectField(props: {
         id={props.id}
         name={props.name}
         defaultValue={props.defaultValue ?? ""}
-        className={inputClass}
+        className={`${inputClass} select-field`}
         {...props.extraProps}
       >
         <option value="">{props.placeholder}</option>

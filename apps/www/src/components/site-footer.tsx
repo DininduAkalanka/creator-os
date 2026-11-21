@@ -3,62 +3,71 @@ import { BRAND, COMPANY } from "@/config/site";
 import { siteCopy } from "@/content/site";
 import { LogoMark } from "./logo";
 import { EmailLink, MissingValue } from "./missing-value";
-import { container } from "./styles";
+import { buttonPrimary, container } from "./styles";
 
 export function SiteFooter() {
   const { footer } = siteCopy;
   return (
-    <footer className="mt-auto border-t border-line bg-surface">
-      <div className={`${container} grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4`}>
-        <div className="lg:col-span-2">
-          <p className="flex items-center gap-2.5 font-semibold">
-            <LogoMark className="size-6" />
-            {BRAND.name}
+    <footer className="mt-auto border-t border-line bg-raised">
+      <div className={`${container} py-16`}>
+        <div className="flex flex-col items-start justify-between gap-8 border-b border-line pb-12 lg:flex-row lg:items-end">
+          <p className="display max-w-2xl text-4xl leading-[1.05] font-semibold text-balance sm:text-5xl">
+            {footer.statement}
           </p>
-          <p className="mt-3 max-w-sm text-sm text-muted">{footer.tagline}</p>
+          <Link href="/#waitlist" className={`${buttonPrimary} px-6 py-3.5 text-base`}>
+            {footer.cta}
+          </Link>
         </div>
 
-        <nav aria-labelledby="footer-legal">
-          <h2 id="footer-legal" className="text-sm font-semibold">
-            {footer.legalHeading}
-          </h2>
-          <ul className="mt-3 space-y-2 text-sm">
-            <li>
-              <Link href="/privacy" className="text-muted hover:text-ink">
-                {footer.privacy}
-              </Link>
-            </li>
-            <li>
-              <Link href="/terms" className="text-muted hover:text-ink">
-                {footer.terms}
-              </Link>
-            </li>
-            <li>
-              <Link href="/about" className="text-muted hover:text-ink">
-                {footer.about}
-              </Link>
-            </li>
-          </ul>
-        </nav>
+        <div className="grid gap-10 pt-12 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="lg:col-span-2">
+            <p className="flex items-center gap-2.5 font-semibold">
+              <LogoMark className="size-6" />
+              {BRAND.name}
+            </p>
+            <p className="mt-3 max-w-sm text-sm text-muted">{footer.tagline}</p>
+          </div>
 
-        <div>
-          <h2 className="text-sm font-semibold">{footer.companyHeading}</h2>
-          <address className="mt-3 space-y-1 text-sm not-italic text-muted">
-            <p>
-              <MissingValue value={COMPANY.legalName} />
-            </p>
-            <p>
-              <MissingValue value={COMPANY.postalAddress} />
-            </p>
-            <p>
-              <EmailLink email={COMPANY.contactEmail} />
-            </p>
-          </address>
+          <nav aria-labelledby="footer-legal">
+            <h2 id="footer-legal" className="label-mono text-faint">
+              {footer.legalHeading}
+            </h2>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              <li>
+                <Link href="/privacy" className="text-muted transition-colors hover:text-fg">
+                  {footer.privacy}
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="text-muted transition-colors hover:text-fg">
+                  {footer.terms}
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="text-muted transition-colors hover:text-fg">
+                  {footer.about}
+                </Link>
+              </li>
+            </ul>
+          </nav>
+
+          <div>
+            <h2 className="label-mono text-faint">{footer.companyHeading}</h2>
+            <address className="mt-4 space-y-1.5 text-sm text-muted not-italic">
+              <p>
+                <MissingValue value={COMPANY.legalName} />
+              </p>
+              <p>
+                <MissingValue value={COMPANY.postalAddress} />
+              </p>
+              <p>
+                <EmailLink email={COMPANY.contactEmail} />
+              </p>
+            </address>
+          </div>
         </div>
-      </div>
 
-      <div className="border-t border-line">
-        <div className={`${container} space-y-2 py-6 text-xs text-muted`}>
+        <div className="mt-12 space-y-2 border-t border-line pt-6 text-xs text-faint">
           {!BRAND.nameIsFinal && <p>{footer.workingName}</p>}
           <p>{footer.trademarks}</p>
         </div>

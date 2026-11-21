@@ -11,11 +11,16 @@ export const siteCopy = {
   nav: {
     label: "Main",
     howItWorks: "How it works",
+    features: "Features",
     offer: "Founding offer",
     faq: "Questions",
     cta: "Join early access",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
   },
   footer: {
+    statement: "Spend your time on the edit, not the first pass.",
+    cta: "Join early access",
     tagline: "AI first-pass editing for long-form YouTube creators.",
     legalHeading: "Legal",
     companyHeading: "Company",
