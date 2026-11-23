@@ -18,10 +18,10 @@ import {
   RoughCutVisual,
   ThumbnailsVisual,
 } from "@/components/feature-visuals";
+import { CutDemo } from "@/components/cut-demo";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { HowItWorks } from "@/components/how-it-works";
 import { ArrowRightIcon, CheckIcon, CrossIcon, LoopIcon, PlusIcon } from "@/components/icons";
-import { LazyCutDemo } from "@/components/lazy-cut-demo";
 import { AiCredit, Photo, VideoPanel } from "@/components/media";
 import {
   AuditMiniBody,
@@ -292,9 +292,12 @@ function TryIt() {
             ))}
           </ul>
         </div>
-        {/* The demo is an editor screen, and video editors are dark: a dark window on a light page. */}
+        {/* The demo is an editor screen, and video editors are dark: a dark window on a light page.
+            Rendered with the page: its code is 6 KB, and the stand-in it used to load behind
+            could not match its height (434 to 599 px, by screen width), so the page below
+            jumped when it arrived. */}
         <div className="reveal theme-dark rounded-[1.5rem] bg-transparent">
-          <LazyCutDemo />
+          <CutDemo />
         </div>
       </div>
     </section>
