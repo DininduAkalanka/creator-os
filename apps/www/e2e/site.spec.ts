@@ -58,16 +58,12 @@ test.describe("home page", () => {
     expect((await rgba(bar))[3]).toBe(0);
     expect(await rgba(logo, "color")).toEqual([255, 255, 255, 1]);
 
-    // Scrolled: a floating white bar (slightly see-through, blurred) with the logo in navy.
+    // Scrolled: a solid white bar with the logo in navy, as on adobe.com. (v6.3's see-through
+    // bar turned grey over the dark hero, with the headline smudged behind it.)
     await page.evaluate(() => window.scrollTo({ top: 600, behavior: "instant" }));
     await expect(header).toHaveAttribute("data-overlay", "false");
     await expect.poll(async () => (await rgba(logo, "color")).join()).toBe("11,10,71,1");
-    await expect
-      .poll(async () => {
-        const [red, green, blue, alpha = 0] = await rgba(bar);
-        return red === 255 && green === 255 && blue === 255 && alpha >= 0.8;
-      })
-      .toBe(true);
+    await expect.poll(async () => (await rgba(bar)).join()).toBe("255,255,255,1");
 
     // Every other page starts with the solid white bar.
     await page.goto("/privacy");
@@ -209,6 +205,80 @@ test.describe("hero slideshow", () => {
       "true",
       { timeout: 12_000 },
     );
+  });
+
+  test("a slide change never shows two slides' words at once", async ({ page }) => {
+    await page.goto("/");
+    // Interactive (and motion allowed) once the pause button is there.
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    // Watch every frame for a second after the click: of all the slides' word panels, the
+    // second most visible one must stay (nearly) invisible. v6.3 crossfaded both over 700 ms.
+    const overlap = await heroOf(page).evaluate(async (hero) => {
+      const panels = [...hero.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+      const tab = hero.querySelector<HTMLElement>('[role="tab"][aria-selected="false"]');
+      if (!tab) throw new Error("No other slide to switch to.");
+      tab.click();
+      let worst = 0;
+      const until = performance.now() + 1000;
+      while (performance.now() < until) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        const shown = panels
+          .map((panel) => Number(getComputedStyle(panel).opacity))
+          .sort((a, b) => b - a);
+        worst = Math.max(worst, shown[1] ?? 0);
+      }
+      return worst;
+    });
+    expect(overlap).toBeLessThanOrEqual(0.1);
+  });
+
+  test("the pause button arriving never moves the tab cards", async ({ page, browser }) => {
+    // The server's page (no JavaScript) against the running one: the tab row must be identical,
+    // because the button's place is kept from the first paint. v6.3 shifted it 10 to 31 px.
+    const tabsBox = (target: Page) =>
+      heroOf(target)
+        .getByRole("tablist")
+        .evaluate((list) => {
+          const box = list.getBoundingClientRect();
+          return { x: Math.round(box.x), width: Math.round(box.width) };
+        });
+    const viewport = page.viewportSize();
+    const still = await browser.newContext({ javaScriptEnabled: false, viewport });
+    const serverPage = await still.newPage();
+    await serverPage.goto("/");
+    const before = await tabsBox(serverPage);
+    await still.close();
+
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    expect(await tabsBox(page)).toEqual(before);
+  });
+
+  test("on a 27-inch screen the menu bar and the hero use the full width", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "This is about very wide screens.");
+    await page.setViewportSize({ width: 2560, height: 1440 });
+    await page.goto("/");
+    const width = (locator: Locator) =>
+      locator.evaluate((element) => element.getBoundingClientRect().width);
+    // adobe.com never caps its bar or its hero; v6.3 capped both at 1600 px (white bands).
+    expect(await width(page.getByRole("banner").locator(":scope > div"))).toBeGreaterThan(2500);
+    expect(await width(page.locator("[data-hero-stage]"))).toBeGreaterThan(2500);
+    // The menu opens at a readable width instead of stretching across the screen.
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    const nav = page.getByRole("navigation", { name: "Main" });
+    await nav.getByRole("button", { name: "Product" }).click();
+    const panel = nav.locator('[id$="-panel"]');
+    await expect(panel).toBeVisible();
+    expect(await width(panel)).toBeLessThanOrEqual(1440);
   });
 
   test("holds while the pointer is on the tabs, then carries on", async ({ page, isMobile }) => {
