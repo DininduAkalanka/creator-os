@@ -239,7 +239,12 @@ export function HeroCarousel() {
         // Dark because it is media (video and photos), not page background. It fills the first
         // screen, and grows rather than letting the words run into the tab cards (short screens,
         // long translations): the words and the tab row are in normal flow, the media behind them.
-        className="theme-dark relative mx-auto flex min-h-[clamp(38rem,calc(100svh-3rem),60rem)] max-w-[100rem] touch-pan-y flex-col overflow-hidden rounded-[1.75rem] bg-[#0e0d1c] sm:rounded-[2.25rem]"
+        // Full width at every size, like adobe.com's full-bleed hero (v6.3 capped it at 1600 px,
+        // which left white bands on 27-inch screens); the words stay in the centred container.
+        // Height: the first screen, between 38rem and 60rem; very wide screens (over ~2180 px)
+        // may grow to 44vw, so the frame never gets much wider than about 2.25 : 1 and faces
+        // aren't cropped off.
+        className="theme-dark relative flex min-h-[clamp(38rem,calc(100svh-3rem),max(60rem,44vw))] touch-pan-y flex-col overflow-hidden rounded-[1.75rem] bg-[#0e0d1c] sm:rounded-[2.25rem]"
       >
         {/* Media: every slide's picture or video, crossfading; it drifts slowly on scroll. */}
         <div aria-hidden="true" className="hero-drift absolute inset-0">
@@ -297,7 +302,9 @@ export function HeroCarousel() {
                 aria-roledescription="slide"
                 aria-label={carouselCopy.slideOf(index + 1, total)}
                 inert={!isActive}
-                className={`relative col-start-1 row-start-1 flex transition-opacity duration-700 ${isActive ? "is-active z-10 opacity-100" : "pointer-events-none z-0 opacity-0"}`}
+                // One slide's words at a time: the old ones fade out in 150 ms, the new ones fade
+                // and rise in after that (globals.css), so two headlines never overlap.
+                className={`relative col-start-1 row-start-1 flex transition-opacity ${isActive ? "is-active z-10 opacity-100 delay-150 duration-300" : "pointer-events-none z-0 opacity-0 duration-150"}`}
               >
                 {overlay && (
                   <div
@@ -466,17 +473,22 @@ export function HeroCarousel() {
                 );
               })}
             </div>
-            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-              {motionAllowed && (
-                <button
-                  type="button"
-                  onClick={() => setPlaying((value) => !value)}
-                  aria-label={playing ? carouselCopy.pause : carouselCopy.play}
-                  className="flex size-11 items-center justify-center rounded-full bg-black/50 text-white ring-1 ring-white/20 transition-colors ring-inset hover:bg-black/70"
-                >
-                  {playing ? <PauseIcon className="size-4" /> : <PlayIcon className="size-4" />}
-                </button>
-              )}
+            <div className="flex shrink-0 gap-2">
+              {/* The pause button arrives once the page knows motion is allowed; its place is
+                  kept from the first paint, so the tab cards never jump sideways. With reduced
+                  motion nothing moves, so there is no button and no place for it. */}
+              <span className="flex size-11 motion-reduce:hidden">
+                {motionAllowed && (
+                  <button
+                    type="button"
+                    onClick={() => setPlaying((value) => !value)}
+                    aria-label={playing ? carouselCopy.pause : carouselCopy.play}
+                    className="flex size-11 items-center justify-center rounded-full bg-black/50 text-white ring-1 ring-white/20 transition-colors ring-inset hover:bg-black/70"
+                  >
+                    {playing ? <PauseIcon className="size-4" /> : <PlayIcon className="size-4" />}
+                  </button>
+                )}
+              </span>
               <button
                 type="button"
                 onClick={() => go(active + 1)}
@@ -502,7 +514,8 @@ function SlideMedia(props: {
 }) {
   const { media } = props;
   if (!props.mounted) return null;
-  const cover = "absolute inset-0 h-full w-full object-cover";
+  // Wide frames crop from the bottom rather than the middle: the faces are in the upper part.
+  const cover = "absolute inset-0 h-full w-full object-cover object-[50%_30%]";
 
   if (media.kind === "photo") {
     return (
@@ -569,7 +582,7 @@ function FirstPoster() {
       <source media="(min-width: 768px)" srcSet={desktop} />
       <source media="(max-width: 767px)" srcSet={mobile} />
       {/* eslint-disable-next-line jsx-a11y/alt-text -- alt="" (decorative) is in `rest` */}
-      <img {...rest} className="absolute inset-0 h-full w-full object-cover" />
+      <img {...rest} className="absolute inset-0 h-full w-full object-cover object-[50%_30%]" />
     </picture>
   );
 }
