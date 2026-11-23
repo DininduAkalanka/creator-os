@@ -1,6 +1,6 @@
 # Website design: research, system and quality bar
 
-Status: v6.3 of the pre-launch site (`apps/www`), 23 Nov 2026: **light first** (§11), **adobe.com-style type** (§12), **the services as a guided tour** (§13), **our own service icons, an adobe.com-style hero and menu, how it works in pictures** (§14). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11 to §14, the later section wins.
+Status: v6.4 of the pre-launch site (`apps/www`), 23 Nov 2026: **light first** (§11), **adobe.com-style type** (§12), **the services as a guided tour** (§13), **our own service icons, an adobe.com-style hero and menu, how it works in pictures** (§14), **full width on large screens and calmer loading** (§15). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11 to §15, the later section wins.
 
 ## 1. What we learned from production sites
 
@@ -388,3 +388,31 @@ On large screens a numbered rail joins the steps and draws itself as they scroll
 **Tests:** new end-to-end tests check that the menu floats over the hero, becomes a white bar once the page scrolls and is a white bar on every other page; that the hero's words never run into the tab cards or the media's label, with the tab cards in a laptop's first screen; that the service icons are drawings with no letters; and that how it works shows four steps with pictures, labelled as illustrations. 86 end-to-end tests pass, 10 skipped by design; axe finds no WCAG 2.2 AA violations on any page.
 
 **Lesson:** pin layout claims to measurements at real sizes. A hero that looked right in one screenshot collided at the most common laptop size; a test now guards the gap.
+
+## 15. v6.4: full width on large screens, calmer loading (23 Nov 2026)
+
+**Why:** on the founder's 27-inch screen (1920 px wide) the hero frame and the menu bar stopped at 1600 px and left white bands on both sides, while on a laptop they fill the screen. The founder also saw loading and animation glitches next to adobe.com.
+
+**adobe.com, studied again.** Its CDN answers automated browsers with "Access Denied", so the live page could not be measured. The study used Adobe's open-source Milo library, the code behind www.adobe.com (`libs/blocks/global-navigation` with its menu, keyboard and search parts, `libs/blocks/marquee`, `libs/styles/styles.css`), and the founder's screenshots.
+
+| Part | adobe.com (Milo) |
+| --- | --- |
+| Header | Sticky and solid, never see-through, with no scroll states. Its background spans the full width at every size; Milo keeps the content within 1440 px, and the live homepage spreads the logo and Sign in to the edges. Desktop layout from 900 px. |
+| Mega menu | Opens on click (no hover), one at a time. Escape closes it and returns focus to the button; arrow keys move between items and columns; the page behind dims (50% black with a blur). Links have an icon, a title and a description, plus a promo card and a call to action at the bottom. On phones it is a full-screen panel with tabs, a back button and breadcrumbs. |
+| Search | An icon in the bar opens a field. Suggestions come from Adobe's search service as you type (150 ms debounce), and results open on its help site. Escape clears the field, then closes it. |
+| Hero (marquee) | The background is full-bleed at every width (no cap). The text sits in the page container: 83.4% of the width, 1200 px from 1440 px up. There are no rules for 1920 or 2560 px, no fade-ins on load, and headings go up to 80 px. |
+
+**What changed:**
+
+- **Full width at every size.** The hero frame and the header bar have no width cap now (v6.3: 1600 px). Both keep the laptop's 8 to 12 px inset; the words, the tabs and the sections' content stay in the centred container (1280 px).
+- **Very wide screens.** The frame may grow up to 44vw tall (from about 2180 px wide), so it never gets much wider than 2.25 : 1. Every hero picture is cropped from the bottom rather than the middle (`object-position: 50% 30%`), so faces stay in view; the founder's screenshot showed a face cut off at the top.
+- **Solid header once scrolled,** as on adobe.com. v6.3's see-through, blurred bar turned grey over the dark hero, with the headline smudged behind it.
+- **Slide changes.** The old words fade out in 150 ms, and the new ones fade and rise in after that. v6.3 crossfaded both over 700 ms, so for half a second two headlines were drawn on top of each other (filmed frame by frame).
+- **No jump while loading.** The pause button arrives once the page is idle. Its place is now kept from the first paint, so the tab cards no longer shift 10 to 31 px sideways about a quarter of a second after the page appears (found with a layout-shift log).
+- **The Product menu** opens under its button at up to 1440 px wide (adobe.com's menu width), instead of stretching across a 2560 px screen.
+
+**Not changed, on purpose: search.** adobe.com needs search for thousands of pages, and its results go to a help centre. This site is one page with six services and a FAQ, so a search box would be a control with little to find. Add it together with a help centre or docs site. The Product menu already behaves like adobe.com's (click to open, Escape, click outside, arrow keys, dimmed page).
+
+**Measured:** at 1366, 1536, 1920, 2048 and 2560 px the bar and the frame are 24 px narrower than the screen, and the words start at the container's edge (83, 168, 360, 424 and 680 px). A load recorded at 1920 × 1080 on a 10 Mbps connection has no layout shift after the first paint, and the hero video's first frame matches its poster. Lighthouse mobile in alternating runs, with the machine busy (so the absolute numbers are low): v6.3 74 to 84, v6.4 81 to 88; CLS 0; accessibility 100.
+
+**Tests:** new end-to-end tests check that a slide change never shows two slides' words at once (each panel's opacity is read on every frame for a second); that the pause button arriving never moves the tab cards (the server's page without JavaScript against the running page); that on a 2560 × 1440 screen the bar and the frame use the full width and the Product menu stays within 1440 px; and that the scrolled bar is solid white. All four failed on the v6.3 build. 91 end-to-end tests pass, 11 skipped by design; axe finds no WCAG 2.2 AA violations on any page.
