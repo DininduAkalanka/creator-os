@@ -121,7 +121,7 @@ test.describe("home page", () => {
     const demo = page.getByRole("figure", { name: "Suggested cuts" });
     const length = (value: string) => demo.getByText(value, { exact: true });
 
-    // The demo code loads only when scrolled to, so allow extra time for the first render.
+    // Generous time for the first render on a slow machine (the demo comes with the page).
     await expect(length("0:27.0")).toBeVisible({ timeout: 20_000 });
 
     await demo.getByRole("button", { name: "Accept all cuts" }).click();
@@ -729,6 +729,71 @@ test.describe("navigation", () => {
     await expect(home).toBeVisible();
     await home.click();
     await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("the logo always brings back the home page afresh, at the top", async ({ page }) => {
+    // Reduced motion: the slideshow stays where it is put, so "back on the first slide" can only
+    // come from the reload, however slowly the page loads. (Its tabs still work by click.)
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const logo = page.getByRole("banner").getByRole("link", { name: "CreatorOS", exact: true });
+    const atTop = () => expect.poll(() => page.evaluate(() => Math.round(window.scrollY))).toBe(0);
+    const hero = page.locator('section[aria-roledescription="carousel"]');
+    const firstSlide = hero.getByRole("tab", { name: /Rough cut/ });
+    const thirdSlide = hero.getByRole("tab", { name: /Editor review/ });
+    // "domcontentloaded", not "load": Edge holds the load event back while lazy images load.
+    const reloadBy = (click: Promise<void>) =>
+      Promise.all([page.waitForEvent("domcontentloaded"), click]);
+
+    // On the home page, scrolled down and on another slide: the logo reloads it (v6.4 did
+    // nothing here, so the logo looked broken).
+    await page.goto("/");
+    // A click before the page is interactive is lost: retry until the slide has changed.
+    await expect(async () => {
+      await thirdSlide.click();
+      await expect(thirdSlide).toHaveAttribute("aria-selected", "true", { timeout: 1000 });
+    }).toPass({ timeout: 15_000 });
+    await page.evaluate(() => window.scrollTo({ top: 3000, behavior: "instant" }));
+    await reloadBy(logo.click());
+    await atTop();
+    await expect(firstSlide).toHaveAttribute("aria-selected", "true");
+
+    // After a section link the address has a #section; the logo drops it.
+    await page.goto("/#plans");
+    await reloadBy(logo.click());
+    await expect(page).toHaveURL(/\/$/);
+    await atTop();
+
+    // From another page it lands at the top (v6.4 stopped 703 px down: an animated scroll).
+    await page.goto("/privacy");
+    await logo.click();
+    await expect(page).toHaveURL(/\/$/);
+    await atTop();
+  });
+
+  test("a section link works again after scrolling away from its section", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    const join = page
+      .locator('section[aria-roledescription="carousel"]')
+      .getByRole("link", { name: "Join early access" });
+    const waitlistTop = () =>
+      page.evaluate(() =>
+        Math.round(document.getElementById("waitlist")?.getBoundingClientRect().top ?? 99_999),
+      );
+    // Brought into view: its top in the upper third of the screen, not under the header.
+    const third = (page.viewportSize()?.height ?? 720) / 3;
+    await join.click();
+    await expect(page).toHaveURL(/#waitlist$/);
+    await expect.poll(waitlistTop).toBeLessThan(third);
+
+    // Back to the top and the same link again: the address is already /#waitlist, and v6.4 did
+    // nothing here (a Next.js Link to the current address does not navigate).
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await join.click();
+    await expect.poll(waitlistTop).toBeLessThan(third);
+    expect(await waitlistTop()).toBeGreaterThan(0);
   });
 
   test("the footer lists every service, each linked to its section", async ({ page }) => {
