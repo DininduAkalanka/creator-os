@@ -1,6 +1,6 @@
 # Website design: research, system and quality bar
 
-Status: v6.2 of the pre-launch site (`apps/www`), 22 Nov 2026: **light first** (§11), **adobe.com-style type and icons** (§12), **the services as a guided tour** (§13). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11, §11 wins.
+Status: v6.3 of the pre-launch site (`apps/www`), 23 Nov 2026: **light first** (§11), **adobe.com-style type** (§12), **the services as a guided tour** (§13), **our own service icons, an adobe.com-style hero and menu, how it works in pictures** (§14). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11 to §14, the later section wins.
 
 ## 1. What we learned from production sites
 
@@ -67,7 +67,7 @@ No requests to Google Fonts or any other third party.
 
 ### Components
 
-`SectionIntro` (optionally centred), `ServiceSwitcher` (client, v6.2; replaced `ServiceRail`), `AppIcon` and the line icons in `icons.tsx` (v6.1), `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (white, one readable column), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
+`SectionIntro` (optionally centred), `ServiceSwitcher` (client, v6.2; replaced `ServiceRail`), `ServiceIcon` (v6.3; replaced `AppIcon`) and the line icons in `icons.tsx` (v6.1), `HeaderShell` (client: the menu over the hero, then a floating bar; v6.3), `HeroCarousel` (client), `HowItWorks` (v6.3), `CutDemo` (client), `WaitlistForm` (client), `MobileMenu` (client), `feature-visuals` (pure HTML/SVG illustrations), `DocPage` (white, one readable column), `PreviewNotice`, `DraftNotice`, `MissingValue`. All copy lives in `src/content/`.
 
 ## 4. Engineering quality bar
 
@@ -313,7 +313,7 @@ Deliberately **not** used: in the hero (the header already shows it), on the AI-
 
 **Buttons:** bold pills with a 2 px border. The primary one is navy (our colour where adobe.com uses blue or black); the outline one fills with the text colour on hover, as adobe.com's does.
 
-**App icons (`AppIcon`):** an original family in the spirit of adobe.com's product icons. Each service has a rounded tile in the logo's navy with its two-letter mark in its own colour and a thin inner line of the same colour: Rc (AI rough cut) red, Cc (captions) amber, Ex (export) blue, Rv (editor review) violet, Au (Channel Audit) green, Nx (what to film next) pink. Planned items have quieter grey marks. Every letter colour is at least 6.5:1 on the navy. Sizes follow Milo's scale (16 to 56 px). The icons appear wherever adobe.com shows a product icon: on the services cards, in the Product menu, on the hero tabs and slides, on the "Later" cards, and in a new footer "Product" column (adobe.com's "Featured products"). They are decorative (`aria-hidden`): the name is always written next to them.
+**App icons (`AppIcon`, removed in v6.3, see §14: the two-letter tiles followed adobe.com's product-icon pattern too closely):** an original family in the spirit of adobe.com's product icons. Each service has a rounded tile in the logo's navy with its two-letter mark in its own colour and a thin inner line of the same colour: Rc (AI rough cut) red, Cc (captions) amber, Ex (export) blue, Rv (editor review) violet, Au (Channel Audit) green, Nx (what to film next) pink. Planned items have quieter grey marks. Every letter colour is at least 6.5:1 on the navy. Sizes follow Milo's scale (16 to 56 px). The icons appear wherever adobe.com shows a product icon: on the services cards, in the Product menu, on the hero tabs and slides, on the "Later" cards, and in a new footer "Product" column (adobe.com's "Featured products"). They are decorative (`aria-hidden`): the name is always written next to them.
 
 **UI icons (`icons.tsx`):** one line family on a 20 px grid with rounded ends (chevrons, arrows, plus, close, menu, loop, play, pause, check, cross). They replace the text characters → › ↺ + and the one-off drawings, so every icon has the same weight in every browser and font. Arrows and chevrons flip in right-to-left text. The video and slideshow pause buttons inside media became rounded squares, like adobe.com's.
 
@@ -341,3 +341,50 @@ Deliberately **not** used: in the hero (the header already shows it), on the AI-
 **Tests:** the services-row tests were replaced: every service is listed in full with its status; choosing a service shows it on the stage with its link, and arrow keys move between services; the tour moves on by itself and the pause button stops it; on phones the chips scroll sideways and the stage swipes; with reduced motion no tour control is offered. Because the page now has two tab lists, the hero's tests look up tabs inside the hero only. 78 end-to-end tests pass, 10 skipped by design.
 
 **Lesson:** a pattern that works for adobe.com at its width and item count can break at ours. Check the narrowest state (here, a closed card) at real sizes before adopting it.
+
+## 14. v6.3: our own service icons, an adobe.com-style hero and menu, how it works in pictures (23 Nov 2026)
+
+**Why:** the founder compared the site with adobe.com again (screenshots and a teardown of adobe.com) and asked for three things: no icons that copy adobe.com's product icons; a hero and menu built like adobe.com's, the menu not a full-width bar; and pictures that explain the product instead of paragraphs.
+
+**Service icons (`ServiceIcon`, replaces `AppIcon`):** v6.1's navy tiles with two-letter marks ("Rc", "Cc") followed the pattern of adobe.com's product icons too closely, so they are gone. Each service now has its own pictogram, drawn for this site on a 24 px grid in the same rounded line as the UI icons, on a round tile tinted in the service's colour:
+
+| Service | Pictogram | Colour |
+| --- | --- | --- |
+| AI rough cut | a waveform with a cut in it | red |
+| Captions, chapters & titles | a frame with subtitle lines | amber |
+| Export to your editor | a clip leaving its frame | blue |
+| Editor review | a comment with a tick | violet |
+| Free Channel Audit | a trend rising above the usual-range band | green |
+| What to film next | a play button with a spark | pink |
+| Later items | upload, vertical video, film strip, target, bookmark with a star, cloud with play | grey |
+
+No letters anywhere. The tile and line colours follow the nearest theme (white page or dark section) through one CSS rule (`.service-icon`, `--si-dark`). Every line colour is at least 4.8:1 on its tile on light and 6.5:1 on dark (graphics need 3:1). The icons are decorative: the name is always written next to them.
+
+**Hero (adobe.com's marquee):**
+
+- One large rounded media frame (up to 1600 px wide) fills the first screen. The message is left-aligned in the content column over a darkening gradient.
+- **The menu floats over the frame.** At the top of the home page it is no bar at all, only white words on the media. Once the page scrolls, and on every other page, it is a floating white bar inset from the screen edges with rounded corners, slightly see-through with a blur. While a menu is open the bar is solid white. (`HeaderShell` sets `data-overlay`; a `.header-overlay` rule swaps the colour tokens.)
+- **The tab cards sit inside the frame** at the bottom, only as wide as the content, with the pause and next buttons beside them. The active card is white and carries the progress line.
+- **The words never touch the tabs.** The words and the tab row are in normal flow over the media (all slides stacked in one grid cell), so the frame grows instead of letting them collide. The first v6.3 draft placed the tabs absolutely, and the message ran into them at 1440 × 900, the most common laptop size. Measured now: 114 px clear at 1440 × 900, 61 px at 1366 × 768 and 42 px at 1280 × 720, with the tab cards inside the first screen at every laptop size.
+- The headline scales with the smaller of the screen's width and height (`min(4.6vw, 7.5svh)`, 41.6 to 72 px), so it stays at three lines on laptops.
+- **The AI label** moved from the top right, where it covered the eyebrow on phones, to a credit-style spot above the controls. On small screens it has its own line.
+- **Phones:** the tab cards are a sideways strip whose far edge fades out, so a cut-off card reads as "more". The status gets its own line under the eyebrow instead of a dangling dot.
+- **Scroll:** the media drifts more slowly than the page (parallax) while the message rises and fades (CSS scroll timelines; off with reduced motion).
+- **Screen readers** are told once that the slideshow moves by itself and how to pause it, as adobe.com does.
+
+**How it works, shown (`HowItWorks`, a new section after the services):** four steps, each a small picture of the planned product drawn in code, with one short line.
+
+1. The recording's video file stays on the drive (lock) while only its audio travels to CreatorOS: a dashed line marked "Audio only" and an upload bar.
+2. The transcript with suggested cuts.
+3. An editor's comment on a moment, the reply and "Approved".
+4. The export files and the three editors.
+
+On large screens a numbered rail joins the steps and draws itself as they scroll into view; the upload bar fills the same way. The section is labelled "Illustrations of the planned product." Copy got shorter elsewhere too (the hero lead and the slide leads), because the pictures now carry the explanation.
+
+**Media:** no new photos or videos yet. The founder offered to generate them, and prompts were given for the rough-cut hero loop (16:9 and 9:16), the Channel Audit, "what to film next" and editor-review slides, and an optional "Later" band. Product screens stay drawn in code, never AI-generated, and every AI photo and video keeps its label.
+
+**Performance, the cost of a full-screen media hero:** the hero's poster now covers the first screen, so it is the LCP element, as on adobe.com (before, the hero's paragraph on white was). Lighthouse's simulated mobile test counts every script and font that finishes before an image LCP as blocking it, so the score dropped. Alternating runs on this machine gave v6.2 97 to 99 (LCP 1.3 s) and v6.3 89 to 92 (LCP 3.1 to 3.3 s simulated; the final build 92 and 92). With real throttling (Lighthouse `--throttling-method=devtools`) the gap is small: LCP 2.68 to 2.70 s for v6.3 against 2.42 to 2.55 s for v6.2. Accessibility and best practices stay at 100. CLS is 0.025 (v6.2: 0 to 0.064); what remains is the web font replacing its fallback in the hero headline on phones, which adds a line. Two fixes went in: the poster's two crops are preloaded at the top of `<head>`, each for its own screens (React `preload` with `media`), and the notes are upright, as on adobe.com, so the italic font file (29 KB) is no longer downloaded on the home page. Many runs failed with the known `NO_NAVSTART` error and were discarded. If the score falls under 90, the next levers are a lighter first frame or a shorter frame on phones.
+
+**Tests:** new end-to-end tests check that the menu floats over the hero, becomes a white bar once the page scrolls and is a white bar on every other page; that the hero's words never run into the tab cards or the media's label, with the tab cards in a laptop's first screen; that the service icons are drawings with no letters; and that how it works shows four steps with pictures, labelled as illustrations. 86 end-to-end tests pass, 10 skipped by design; axe finds no WCAG 2.2 AA violations on any page.
+
+**Lesson:** pin layout claims to measurements at real sizes. A hero that looked right in one screenshot collided at the most common laptop size; a test now guards the gap.
