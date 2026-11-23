@@ -3,6 +3,21 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const PAGES = ["/", "/privacy", "/terms", "/about"] as const;
 
+/** A CSS colour as [red, green, blue, alpha 0–1], whatever form the browser reports it in. */
+function rgba(locator: Locator, property: "background-color" | "color" = "background-color") {
+  return locator.evaluate((element, name) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) throw new Error("No 2D canvas.");
+    context.fillStyle = getComputedStyle(element).getPropertyValue(name);
+    context.fillRect(0, 0, 1, 1);
+    const [red = 0, green = 0, blue = 0, alpha = 0] = context.getImageData(0, 0, 1, 1).data;
+    return [red, green, blue, Math.round((alpha / 255) * 100) / 100];
+  }, property);
+}
+
 test.describe("home page", () => {
   test("gives screen readers the clean headline, without the struck-out filler word", async ({
     page,
@@ -18,8 +33,6 @@ test.describe("home page", () => {
     const background = (locator: Locator) =>
       locator.evaluate((element) => getComputedStyle(element).backgroundColor);
     expect(await background(page.locator("body"))).toBe("rgb(255, 255, 255)");
-    // The header is a white bar (adobe.com), not a dark one.
-    expect(await background(page.locator("header > div").first())).toBe("rgb(255, 255, 255)");
     // Dark sections are the "Later" band and the sign-up at the end, then the footer.
     const dark = await page
       .locator("main section.theme-dark")
@@ -31,6 +44,67 @@ test.describe("home page", () => {
     await page.goto("/privacy");
     expect(await background(page.locator("body"))).toBe("rgb(255, 255, 255)");
     await expect(page.locator("main .theme-dark")).toHaveCount(0);
+  });
+
+  test("the menu floats over the hero, then is a white bar once the page scrolls", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const header = page.getByRole("banner");
+    const bar = header.locator(":scope > div");
+    const logo = header.getByRole("link", { name: "CreatorOS", exact: true });
+    // At the top of the home page there is no bar: white words on the hero's media (adobe.com).
+    await expect(header).toHaveAttribute("data-overlay", "true");
+    expect((await rgba(bar))[3]).toBe(0);
+    expect(await rgba(logo, "color")).toEqual([255, 255, 255, 1]);
+
+    // Scrolled: a floating white bar (slightly see-through, blurred) with the logo in navy.
+    await page.evaluate(() => window.scrollTo({ top: 600, behavior: "instant" }));
+    await expect(header).toHaveAttribute("data-overlay", "false");
+    await expect.poll(async () => (await rgba(logo, "color")).join()).toBe("11,10,71,1");
+    await expect
+      .poll(async () => {
+        const [red, green, blue, alpha = 0] = await rgba(bar);
+        return red === 255 && green === 255 && blue === 255 && alpha >= 0.8;
+      })
+      .toBe(true);
+
+    // Every other page starts with the solid white bar.
+    await page.goto("/privacy");
+    await expect(header).toHaveAttribute("data-overlay", "false");
+    expect(await rgba(bar)).toEqual([255, 255, 255, 1]);
+  });
+
+  test("service icons are our own drawings, never letters", async ({ page }) => {
+    await page.goto("/");
+    const icons = page.locator(".service-icon");
+    expect(await icons.count()).toBeGreaterThan(10);
+    const notDrawn = await icons.evaluateAll(
+      (all) =>
+        all.filter((icon) => (icon.textContent ?? "").trim() !== "" || !icon.querySelector("svg"))
+          .length,
+    );
+    expect(notDrawn).toBe(0);
+  });
+
+  test("how it works: four steps, each shown in a picture", async ({ page }) => {
+    await page.goto("/");
+    const section = page.locator("#how-it-works");
+    await expect(
+      section.getByRole("heading", { name: "From recording to timeline in four steps." }),
+    ).toBeVisible();
+    await expect(section.getByRole("listitem")).toHaveCount(4);
+    await expect(section.getByRole("heading", { level: 3 })).toHaveText([
+      "Drop in your recording",
+      "See every cut on your transcript",
+      "Review it, alone or with your editor",
+      "Open it in your editor",
+    ]);
+    // The pictures are drawn in code and labelled honestly as illustrations. Step 1's picture
+    // shows the video staying on the creator's drive while only the audio uploads.
+    await expect(section).toContainText("Illustrations of the planned product.");
+    await expect(section.getByText("Video stays on your drive", { exact: true })).toBeVisible();
+    await expect(section.getByText("Audio only", { exact: true })).toBeVisible();
   });
 
   test("the struck-out word stays readable after it is cut", async ({ page }) => {
@@ -187,6 +261,35 @@ test.describe("hero slideshow", () => {
       "aria-selected",
       "true",
     );
+  });
+
+  test("the words never run into the tab cards or the media's label", async ({
+    page,
+    isMobile,
+  }) => {
+    await page.goto("/");
+    const box = async (locator: Locator) => {
+      const found = await locator.boundingBox();
+      if (!found) throw new Error("No box: the element is not rendered.");
+      return found;
+    };
+    type Box = Awaited<ReturnType<typeof box>>;
+    const overlap = (a: Box, b: Box) =>
+      a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+    const words = await box(
+      heroOf(page).locator('[role="tabpanel"]:not([inert]) .hero-lift > div'),
+    );
+    const tabs = await box(heroOf(page).getByRole("tablist"));
+    const label = await box(heroOf(page).locator("[data-media-label]"));
+    expect(words.y + words.height).toBeLessThanOrEqual(tabs.y);
+    expect(overlap(words, label)).toBe(false);
+    expect(overlap(label, tabs)).toBe(false);
+    // On a laptop screen the tab cards are part of the first screen, as on adobe.com.
+    if (!isMobile) {
+      const height = page.viewportSize()?.height ?? 0;
+      expect(tabs.y + tabs.height).toBeLessThanOrEqual(height);
+    }
   });
 
   test("previews come with an honest example-data label", async ({ page }) => {
