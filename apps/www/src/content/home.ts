@@ -30,9 +30,51 @@ export const hero = {
   apps: ["Premiere Pro", "DaVinci Resolve", "Final Cut Pro"],
 };
 
+/**
+ * How it works, in four steps, each shown as a small picture of the planned product (drawn in
+ * code, labelled as an illustration). Short lines: the pictures do the explaining.
+ */
+export const howItWorks = {
+  eyebrow: "How it works",
+  heading: "From recording to timeline in four steps.",
+  note: "Illustrations of the planned product.",
+  steps: [
+    {
+      title: "Drop in your recording",
+      body: "Where possible only the audio uploads. Your video stays on your drive.",
+    },
+    {
+      title: "See every cut on your transcript",
+      body: "Pauses, filler words and retakes, marked for you to keep or cut.",
+    },
+    {
+      title: "Review it, alone or with your editor",
+      body: "Comments on exact moments, then approve.",
+    },
+    {
+      title: "Open it in your editor",
+      body: "A timeline with your cuts, captions included.",
+    },
+  ],
+  /** Words inside the step pictures. */
+  upload: {
+    file: "month-plan.mov",
+    audioOnly: "Audio only",
+    staysLocal: "Video stays on your drive",
+    destination: `To ${name}`,
+  },
+  review: {
+    who: "Editor · 00:23",
+    comment: "Keeping the second take here, it's tighter.",
+    replyWho: "You",
+    reply: "Agreed.",
+    approved: "Approved",
+  },
+};
+
 export const story = {
   index: "02",
-  eyebrow: "How it works",
+  eyebrow: "Before and after",
   heading: "You know this night.",
   note: "An illustration of a typical evening. The times are an example, not a measured result.",
   before: {

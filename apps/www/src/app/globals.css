@@ -354,6 +354,8 @@ body {
  *    `animation` resets the timeline.
  *    - Hero (adobe.com "parallax-move-up-fast"): the message moves up faster than the page and
  *      fades, while the media behind it drifts more slowly (parallax inside the rounded frame).
+ *    - "How it works": the line between the steps draws itself and the upload bar fills as they
+ *      come into view (scrubbed by the scroll, never looping).
  *    - Large media settle from slightly larger to their place as they enter the screen.
  *    - "Garage door" (adobe.com "parallax-garage-door-reveal"): the photo window at the start
  *      of the "Later" band opens from a rounded inset to the full width while its picture
@@ -369,6 +371,17 @@ body {
       animation-fill-mode: both;
       animation-timeline: scroll(root);
       animation-range: 0 100vh;
+    }
+    .draw-on-view {
+      transform-origin: left center;
+      animation-name: draw-on-view;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 30% cover 55%;
+    }
+    .draw-on-view:dir(rtl) {
+      transform-origin: right center;
     }
     .settle {
       animation-name: settle;
@@ -436,6 +449,14 @@ body {
   }
   to {
     transform: translateY(5%) scale(1.08);
+  }
+}
+@keyframes draw-on-view {
+  from {
+    transform: scaleX(0.04);
+  }
+  to {
+    transform: none;
   }
 }
 @keyframes settle {

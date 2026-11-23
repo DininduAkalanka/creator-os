@@ -19,6 +19,7 @@ import {
   ThumbnailsVisual,
 } from "@/components/feature-visuals";
 import { HeroCarousel } from "@/components/hero-carousel";
+import { HowItWorks } from "@/components/how-it-works";
 import { ArrowRightIcon, CheckIcon, CrossIcon, LoopIcon, PlusIcon } from "@/components/icons";
 import { LazyCutDemo } from "@/components/lazy-cut-demo";
 import { AiCredit, Photo, VideoPanel } from "@/components/media";
@@ -74,6 +75,7 @@ export default function HomePage() {
       <ScrollReveal />
       <HeroCarousel />
       <Services />
+      <HowItWorks />
       <Story />
       <TryIt />
       <Features />
@@ -207,7 +209,7 @@ function Services() {
 
 function Story() {
   return (
-    <section id="how-it-works" aria-labelledby="story-heading">
+    <section id="your-evening" aria-labelledby="story-heading">
       <div className={`${container} py-20 sm:py-28 lg:py-32`}>
         <SectionIntro center id="story-heading" eyebrow={story.eyebrow} heading={story.heading} />
         <div className="mt-14 grid gap-4 lg:grid-cols-2">
