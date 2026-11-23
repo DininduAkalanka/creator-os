@@ -138,7 +138,7 @@ export function AuditPreview() {
           </ul>
         </div>
       </div>
-      <figcaption className="border-t border-line bg-bg/40 px-5 py-2.5 text-xs text-faint italic">
+      <figcaption className="border-t border-line bg-bg/40 px-5 py-2.5 text-xs text-faint">
         {p.disclaimer}
       </figcaption>
     </figure>
@@ -194,7 +194,7 @@ export function NextVideoPreview() {
           {p.outcome}
         </p>
       </div>
-      <figcaption className="border-t border-line bg-bg/40 px-5 py-2.5 text-xs text-faint italic">
+      <figcaption className="border-t border-line bg-bg/40 px-5 py-2.5 text-xs text-faint">
         {p.disclaimer}
       </figcaption>
     </figure>

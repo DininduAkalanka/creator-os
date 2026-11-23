@@ -13,6 +13,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
+import { preload } from "react-dom";
 import heroPoster from "@/assets/media/hero-poster.jpg";
 import heroPosterVertical from "@/assets/media/hero-poster-vertical.jpg";
 import nightEdit from "@/assets/media/night-edit.jpg";
@@ -23,16 +24,16 @@ import { hero } from "@/content/home";
 import {
   carouselCopy,
   heroSlides,
-  serviceMarks,
+  serviceIcons,
   statusLabels,
   type ServiceStatus,
 } from "@/content/services";
 import { siteCopy } from "@/content/site";
 import { swipeStep } from "@/lib/motion";
-import { AppIcon } from "./app-icon";
 import { ArrowRightIcon, ChevronRightIcon, PauseIcon, PlayIcon } from "./icons";
 import { AuditMini, NextMini, ReviewMini } from "./product-previews";
-import { buttonLarge, buttonPrimary, buttonSecondary, container } from "./styles";
+import { ServiceIcon } from "./service-icon";
+import { buttonLarge, buttonPrimary, buttonSecondary } from "./styles";
 
 const SLIDE_MS = 8000;
 
@@ -55,10 +56,7 @@ const SLIDE_MEDIA: Array<{ media: Media; overlay?: ReactNode }> = [
   {
     media: { kind: "video", poster: talkingPoster, sources: [{ src: "/videos/talking-loop.mp4" }] },
     overlay: (
-      <p
-        aria-hidden="true"
-        className="rounded-lg bg-black/85 px-4 py-2 text-center text-lg text-white shadow-2xl"
-      >
+      <p className="rounded-lg bg-black/85 px-4 py-2 text-center text-lg text-white shadow-2xl">
         The trick is to batch your ideas first.
       </p>
     ),
@@ -68,8 +66,7 @@ const SLIDE_MEDIA: Array<{ media: Media; overlay?: ReactNode }> = [
   { media: { kind: "photo", image: personaEducator }, overlay: <NextMini /> },
 ];
 
-/** Status colour of the small label in each tab (the active tab is navy, so it uses white). */
-const tabStatusTone: Record<ServiceStatus, string> = {
+const statusTone: Record<ServiceStatus, string> = {
   first: "text-keep",
   beta: "text-accent",
   later: "text-faint",
@@ -78,23 +75,24 @@ const tabStatusTone: Record<ServiceStatus, string> = {
 const order = (index: number) => ({ "--i": index }) as CSSProperties;
 
 /**
- * Hero, light (v6, adobe.com's white homepage): the page's message on white, then a large rounded
- * "stage" with the service swapper, and a row of tab cards under it (the active one turns navy,
- * with a progress line). While the page scrolls, the message moves up faster than the page and
- * the stage opens to its full size (CSS scroll timelines, globals.css).
+ * Hero, laid out like adobe.com's: one large rounded media frame that fills the first screen,
+ * with the menu floating over its top (see HeaderShell), the message left-aligned in the content
+ * column, and the slides' tab cards inside the frame at the bottom, as wide as the content.
+ * While the page scrolls, the message moves up faster than the page and fades, and the media
+ * drifts more slowly (parallax; CSS scroll timelines, globals.css).
  *
- * The swapper: auto-advance, an arrow to move on, swipe on touch screens; the incoming slide's
- * text rises in and its picture settles. Rotation keeps going while the mouse rests on the stage
- * (as on adobe.com). It holds while the pointer is on the tab bar and while keyboard focus is
- * inside, then continues where it stopped. The progress line shows this.
+ * The swapper: auto-advance with the time shown in the active tab card; it keeps going while the
+ * mouse rests on the media, holds while the pointer is on the tab cards or keyboard focus is
+ * inside, and continues where it stopped. Arrow keys, Home and End move between tabs; touch
+ * screens swipe. The incoming slide's text rises in and its picture settles.
  *
- * Accessibility (WAI-ARIA APG tabbed carousel): tabs with roving focus and arrow keys; inactive
- * slides are inert; slide changes are announced only while rotation is off; one button pauses
- * both the rotation and the video (WCAG 2.2.2); nothing moves for reduced-motion or data-saver
- * visitors.
+ * Accessibility (WAI-ARIA APG tabbed carousel): inactive slides are inert; changes are announced
+ * only while rotation is off; one button pauses both the rotation and the video (WCAG 2.2.2),
+ * and screen readers are told so. Nothing moves for reduced-motion or data-saver visitors.
  *
- * Loading (adobe.com eager/lazy phases): slide 1's poster is the only eager media. Other slides'
- * images and all videos mount after the page has loaded; videos never download until played.
+ * Loading (adobe.com eager/lazy phases): slide 1's poster is the only eager media and is never
+ * hidden on load. Other slides' images and all videos mount after the page has loaded; videos
+ * never download until played.
  */
 export function HeroCarousel() {
   const baseId = useId();
@@ -157,7 +155,7 @@ export function HeroCarousel() {
     });
   }, [active, playing, motionAllowed, mediaReady]);
 
-  // On phones the tab bar scrolls sideways: keep the active tab in view (the bar only, not the page).
+  // On phones the tab row scrolls sideways: keep the active tab in view (the row only, not the page).
   useEffect(() => {
     const tab = tabRefs.current[active];
     const list = tab?.parentElement;
@@ -201,9 +199,10 @@ export function HeroCarousel() {
     if (!event.currentTarget.contains(event.relatedTarget)) setFocusHold(false);
   }
 
-  // Touch swipe on the stage (not on the message above it, which is text to read).
+  // Touch swipe on the media frame (the tab row scrolls sideways on phones, so it is excluded).
   function onPointerDown(event: PointerEvent<HTMLElement>) {
     if (event.pointerType === "mouse") return;
+    if (event.target instanceof Element && event.target.closest('[role="tablist"]')) return;
     swipeStart.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
   }
 
@@ -223,223 +222,270 @@ export function HeroCarousel() {
       aria-label={carouselCopy.label}
       onFocus={onFocus}
       onBlur={onBlur}
-      className="relative isolate overflow-x-clip pt-10 pb-6 sm:pt-14"
+      // Pulled up under the sticky header (72 px), so the menu floats over the media.
+      className="relative isolate -mt-[4.5rem] px-2 sm:px-3"
     >
       {/* The page's h1, read once by screen readers (the visible one draws the cut). */}
       <h1 className="sr-only">{hero.headline}</h1>
+      {motionAllowed && <p className="sr-only">{carouselCopy.autoplayNote}</p>}
 
-      {/* The message on white. It moves up faster than the page and fades as the stage opens
-          (adobe.com "parallax-move-up-fast"). Never hidden on load: it is the first paint. */}
-      <div className={`${container} hero-lift text-center`}>
-        <p className="detail inline-flex items-center gap-2 text-faint">
-          <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />
-          {hero.eyebrow}
-        </p>
-        <p
-          aria-hidden="true"
-          className="display mx-auto mt-5 max-w-[21ch] text-[clamp(2.75rem,5.8vw,5.5rem)] leading-[0.98] font-black tracking-[-0.03em] text-balance"
-        >
-          {hero.headlineBefore} <span className="hero-cut">{hero.headlineCut}</span>{" "}
-          {hero.headlineAfter}
-        </p>
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-pretty text-muted sm:text-xl">
-          {hero.lead}
-        </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="#waitlist" className={`${buttonPrimary} ${buttonLarge}`}>
-            {hero.primaryCta}
-          </Link>
-          <Link href="#try-it" className={`${buttonSecondary} ${buttonLarge}`}>
-            {hero.secondaryCta}
-          </Link>
+      <div
+        data-hero-stage=""
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => {
+          swipeStart.current = null;
+        }}
+        // Dark because it is media (video and photos), not page background. It fills the first
+        // screen, and grows rather than letting the words run into the tab cards (short screens,
+        // long translations): the words and the tab row are in normal flow, the media behind them.
+        className="theme-dark relative mx-auto flex min-h-[clamp(38rem,calc(100svh-3rem),60rem)] max-w-[100rem] touch-pan-y flex-col overflow-hidden rounded-[1.75rem] bg-[#0e0d1c] sm:rounded-[2.25rem]"
+      >
+        {/* Media: every slide's picture or video, crossfading; it drifts slowly on scroll. */}
+        <div aria-hidden="true" className="hero-drift absolute inset-0">
+          {heroSlides.map((slide, index) => {
+            const config = SLIDE_MEDIA[index];
+            if (!config) return null;
+            const isActive = index === active;
+            return (
+              <div
+                key={slide.id}
+                className={`absolute inset-0 transition-opacity duration-700 ${isActive ? "is-active opacity-100" : "opacity-0"}`}
+              >
+                <div className={`absolute inset-0 ${changed ? "slide-settle" : ""}`}>
+                  <SlideMedia
+                    index={index}
+                    media={config.media}
+                    mounted={index === 0 || mediaReady}
+                    videoAllowed={mediaReady && motionAllowed}
+                    shown={shown.has(index)}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <p className="mt-3 text-sm text-faint">{hero.status}</p>
-      </div>
 
-      <div className="mt-12 px-2 sm:mt-14 sm:px-3">
-        {/* The stage: dark because it is media (video and photos), not page background. */}
+        {/* Legibility: dark under the menu, behind the message and behind the tab cards. */}
         <div
-          data-hero-stage=""
-          onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
-          onPointerCancel={() => {
-            swipeStart.current = null;
-          }}
-          className="hero-open theme-dark relative mx-auto h-[clamp(32rem,80svh,48rem)] max-w-[100rem] touch-pan-y overflow-hidden rounded-[1.75rem] bg-[#0e0d1c] sm:rounded-[2.25rem]"
-        >
-          {/* Slides: stacked, crossfading. Announced only while rotation is off (APG). */}
-          <div aria-live={rotating ? "off" : "polite"} className="absolute inset-0">
-            {heroSlides.map((slide, index) => {
-              const isActive = index === active;
-              const config = SLIDE_MEDIA[index];
-              if (!config) return null;
-              return (
-                <div
-                  key={slide.id}
-                  id={`${baseId}-panel-${index}`}
-                  role="tabpanel"
-                  aria-labelledby={`${baseId}-tab-${index}`}
-                  aria-roledescription="slide"
-                  aria-label={carouselCopy.slideOf(index + 1, total)}
-                  inert={!isActive}
-                  className={`absolute inset-0 transition-opacity duration-700 ${isActive ? "is-active z-10 opacity-100" : "z-0 opacity-0"}`}
-                >
-                  <div className={`absolute inset-0 ${changed ? "slide-settle" : ""}`}>
-                    <SlideMedia
-                      index={index}
-                      media={config.media}
-                      mounted={index === 0 || mediaReady}
-                      videoAllowed={mediaReady && motionAllowed}
-                      shown={shown.has(index)}
-                    />
-                  </div>
-                  {/* Legibility: dark at the bottom (phones) and at the left (large screens). */}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[#06060e]/70 to-transparent"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#06060e]/95 via-[#06060e]/55 to-transparent lg:h-1/2"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-0 hidden w-3/4 bg-gradient-to-r from-[#06060e]/90 via-[#06060e]/45 to-transparent lg:block"
+        />
+
+        {/* The slides' words, one panel each, stacked in one grid cell so the tallest sets the
+            height (no jump between slides); only the active one is shown and exposed. */}
+        <div aria-live={rotating ? "off" : "polite"} className="relative grid flex-1">
+          {heroSlides.map((slide, index) => {
+            const isActive = index === active;
+            const overlay = SLIDE_MEDIA[index]?.overlay;
+            // Slide 1 is the first paint: never hidden on load, it only rises in after a change.
+            const rise = index === 0 && !changed ? "" : "slide-rise";
+            return (
+              <div
+                key={slide.id}
+                id={`${baseId}-panel-${index}`}
+                role="tabpanel"
+                aria-labelledby={`${baseId}-tab-${index}`}
+                aria-roledescription="slide"
+                aria-label={carouselCopy.slideOf(index + 1, total)}
+                inert={!isActive}
+                className={`relative col-start-1 row-start-1 flex transition-opacity duration-700 ${isActive ? "is-active z-10 opacity-100" : "pointer-events-none z-0 opacity-0"}`}
+              >
+                {overlay && (
                   <div
                     aria-hidden="true"
-                    className="absolute inset-0 bg-[linear-gradient(to_top,rgb(6_6_14/0.92)_0%,rgb(6_6_14/0.6)_38%,rgb(6_6_14/0)_70%)] lg:bg-[linear-gradient(to_right,rgb(6_6_14/0.88)_0%,rgb(6_6_14/0.5)_40%,rgb(6_6_14/0)_68%)]"
-                  />
-                  {config.overlay && (
-                    <div className="absolute top-1/2 right-[6%] hidden -translate-y-1/2 lg:block">
-                      <div style={order(3)} className="slide-rise">
-                        {config.overlay}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="absolute inset-x-0 bottom-0 px-5 pb-20 sm:px-10 sm:pb-24 lg:inset-y-0 lg:flex lg:items-center lg:px-16 lg:pb-0">
-                    <div className="max-w-xl lg:max-w-[34rem]">
-                      <p
-                        style={order(0)}
-                        className="slide-rise detail flex flex-wrap items-center gap-x-2 gap-y-1 text-white/85"
-                      >
-                        <AppIcon mark={serviceMarks[slide.id] ?? "··"} size="md" className="me-1" />
-                        {slide.eyebrow}
-                        <span className="hidden text-white/45 sm:inline" aria-hidden="true">
-                          ·
-                        </span>
-                        <span className="hidden text-accent sm:inline">
-                          {statusLabels[slide.status]}
-                        </span>
-                      </p>
-                      <h2
-                        style={order(1)}
-                        className="slide-rise display mt-5 text-[clamp(2rem,3.8vw,3.6rem)] leading-[1] font-black tracking-[-0.025em] text-balance"
-                      >
-                        {slide.heading}
-                      </h2>
-                      <p
-                        style={order(2)}
-                        className="slide-rise mt-4 hidden max-w-md leading-relaxed text-pretty text-white/80 sm:block sm:text-lg"
-                      >
-                        {slide.lead}
-                      </p>
-                      <div style={order(3)} className="slide-rise mt-6">
-                        <Link
-                          href={slide.cta.href}
-                          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[0.9375rem] font-bold text-navy transition-[background-color,transform] duration-200 hover:bg-white/90 active:scale-[0.98]"
-                        >
-                          {slide.cta.label}
-                          <ArrowRightIcon className="size-4" />
-                        </Link>
-                      </div>
+                    className="absolute top-[45%] right-[5%] hidden -translate-y-1/2 xl:block"
+                  >
+                    <div style={order(3)} className="slide-rise">
+                      {overlay}
                     </div>
                   </div>
+                )}
+
+                <div className="hero-lift mx-auto flex w-full max-w-7xl flex-col justify-end px-5 pt-28 pb-6 sm:px-8 sm:pb-8 lg:justify-center lg:px-10 lg:pt-24">
+                  <div className="max-w-2xl">
+                    <p
+                      style={order(0)}
+                      className={`${rise} detail flex flex-wrap items-center gap-x-2 gap-y-1 text-white/90`}
+                    >
+                      <ServiceIcon
+                        name={serviceIcons[slide.id] ?? "rough-cut"}
+                        size="sm"
+                        className="me-1"
+                      />
+                      {index === 0 ? hero.eyebrow : slide.eyebrow}
+                      {/* Phones: the status gets its own line rather than a dangling dot. */}
+                      <span aria-hidden="true" className="hidden text-white/45 sm:inline">
+                        ·
+                      </span>
+                      <span className={`${statusTone[slide.status]} max-sm:basis-full`}>
+                        {statusLabels[slide.status]}
+                      </span>
+                    </p>
+
+                    {index === 0 ? (
+                      <>
+                        <p
+                          aria-hidden="true"
+                          style={order(1)}
+                          className={`${rise} display mt-5 max-w-[18ch] text-[clamp(2.6rem,min(4.6vw,7.5svh),4.5rem)] leading-[0.98] font-black tracking-[-0.03em] text-balance`}
+                        >
+                          {hero.headlineBefore} <span className="hero-cut">{hero.headlineCut}</span>{" "}
+                          {hero.headlineAfter}
+                        </p>
+                        <p
+                          style={order(2)}
+                          className={`${rise} mt-5 max-w-lg text-lg leading-relaxed text-pretty text-white/85 sm:text-xl`}
+                        >
+                          {hero.lead}
+                        </p>
+                        <div
+                          style={order(3)}
+                          className={`${rise} mt-8 flex flex-wrap items-center gap-3`}
+                        >
+                          <Link href="#waitlist" className={`${buttonPrimary} ${buttonLarge}`}>
+                            {hero.primaryCta}
+                          </Link>
+                          <Link href="#try-it" className={`${buttonSecondary} ${buttonLarge}`}>
+                            {hero.secondaryCta}
+                          </Link>
+                        </div>
+                        <p className="mt-4 text-sm text-white/70">{hero.status}</p>
+                      </>
+                    ) : (
+                      <>
+                        <h2
+                          style={order(1)}
+                          className="slide-rise display mt-5 max-w-[18ch] text-[clamp(2.4rem,min(4.4vw,7svh),4.25rem)] leading-[0.98] font-black tracking-[-0.03em] text-balance"
+                        >
+                          {slide.heading}
+                        </h2>
+                        <p
+                          style={order(2)}
+                          className="slide-rise mt-5 max-w-lg text-lg leading-relaxed text-pretty text-white/85 sm:text-xl"
+                        >
+                          {slide.lead}
+                        </p>
+                        <div style={order(3)} className="slide-rise mt-8">
+                          <Link href={slide.cta.href} className={`${buttonPrimary} ${buttonLarge}`}>
+                            {slide.cta.label}
+                            <ArrowRightIcon className="size-4" />
+                          </Link>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-              );
-            })}
-          </div>
-
-          <span className="detail pointer-events-none absolute top-4 left-4 z-20 rounded-full bg-black/60 px-2 py-1 text-[0.625rem] text-white/85 sm:top-6 sm:left-6">
-            {SLIDE_MEDIA[active]?.media.kind === "video"
-              ? siteCopy.aiGeneratedVideo
-              : siteCopy.aiGenerated}
-          </span>
-
-          {/* Pause and next, inside the stage (adobe.com puts its pause button there too). */}
-          <div className="absolute right-4 bottom-4 z-20 flex gap-2 sm:right-6 sm:bottom-6">
-            {motionAllowed && (
-              <button
-                type="button"
-                onClick={() => setPlaying((value) => !value)}
-                aria-label={playing ? carouselCopy.pause : carouselCopy.play}
-                className="flex size-11 items-center justify-center rounded-xl border border-white/20 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/80"
-              >
-                {playing ? <PauseIcon className="size-4" /> : <PlayIcon className="size-4" />}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => go(active + 1)}
-              aria-label={carouselCopy.next}
-              className="hidden size-11 items-center justify-center rounded-xl border border-white/20 bg-black/60 text-white backdrop-blur-md transition-colors hover:bg-black/80 sm:flex"
-            >
-              <ChevronRightIcon className="size-5" />
-            </button>
-          </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Tab cards under the stage, with the time to the next slide in the active one. */}
-        <div
-          onPointerEnter={(event) => {
-            if (event.pointerType === "mouse") setPointerHold(true);
-          }}
-          onPointerLeave={() => setPointerHold(false)}
-          className="mx-auto mt-3 max-w-[100rem]"
-        >
-          <div
-            role="tablist"
-            aria-label={carouselCopy.label}
-            className="flex snap-x gap-2 overflow-x-auto [scrollbar-width:none] lg:grid lg:grid-cols-5 [&::-webkit-scrollbar]:hidden"
-          >
-            {heroSlides.map((slide, index) => {
-              const isActive = index === active;
-              return (
-                <button
-                  key={slide.id}
-                  ref={(element) => {
-                    tabRefs.current[index] = element;
-                  }}
-                  id={`${baseId}-tab-${index}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls={`${baseId}-panel-${index}`}
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => go(index)}
-                  onKeyDown={(event) => onTabKeyDown(event, index)}
-                  className={`relative flex min-w-[14rem] shrink-0 snap-start items-center justify-between gap-3 overflow-hidden rounded-2xl py-3.5 ps-3.5 pe-4 text-left text-[0.9375rem] font-bold transition-colors duration-300 lg:min-w-0 ${
-                    isActive ? "bg-ink text-on-ink" : "bg-raised text-fg hover:bg-panel"
-                  }`}
-                >
-                  <span className="flex min-w-0 items-center gap-3">
-                    <AppIcon mark={serviceMarks[slide.id] ?? "··"} size="sm" />
-                    <span className="flex flex-col gap-0.5">
+        {/* Tab cards inside the frame, as wide as the content (adobe.com), then pause and next. */}
+        <div className="relative z-20 mx-auto w-full max-w-7xl px-3 pb-3 sm:px-8 sm:pb-6 lg:px-10">
+          {/* The media's label, like a photo credit: its own line on small screens; on large
+              ones it floats above the controls, clear of the words in the left column. */}
+          <p className="pointer-events-none mb-3 flex justify-end px-1 lg:absolute lg:end-10 lg:bottom-full lg:px-0">
+            <span
+              data-media-label=""
+              className="detail rounded-full bg-black/60 px-2 py-1 text-[0.625rem] text-white/85"
+            >
+              {SLIDE_MEDIA[active]?.media.kind === "video"
+                ? siteCopy.aiGeneratedVideo
+                : siteCopy.aiGenerated}
+            </span>
+          </p>
+          <div className="flex items-center gap-3">
+            <div
+              role="tablist"
+              aria-label={carouselCopy.label}
+              onPointerEnter={(event) => {
+                if (event.pointerType === "mouse") setPointerHold(true);
+              }}
+              onPointerLeave={() => setPointerHold(false)}
+              // Phones: a sideways strip whose far edge fades, so a cut-off card reads as "more".
+              className="flex min-w-0 flex-1 snap-x gap-2 overflow-x-auto [mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)] [scrollbar-width:none] after:w-6 after:shrink-0 after:content-[''] lg:grid lg:grid-cols-5 lg:[mask-image:none] lg:after:hidden rtl:[mask-image:linear-gradient(to_left,#000_calc(100%-2.5rem),transparent)] rtl:lg:[mask-image:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {heroSlides.map((slide, index) => {
+                const isActive = index === active;
+                return (
+                  <button
+                    key={slide.id}
+                    ref={(element) => {
+                      tabRefs.current[index] = element;
+                    }}
+                    id={`${baseId}-tab-${index}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls={`${baseId}-panel-${index}`}
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => go(index)}
+                    onKeyDown={(event) => onTabKeyDown(event, index)}
+                    className={`relative flex min-w-[12.5rem] shrink-0 snap-start flex-col gap-3 overflow-hidden rounded-2xl px-4 py-3.5 text-start transition-colors duration-300 lg:min-w-0 ${
+                      isActive
+                        ? "theme-light bg-white"
+                        : "bg-black/50 text-white ring-1 ring-white/15 ring-inset hover:bg-black/65"
+                    }`}
+                  >
+                    <span className="flex w-full items-center justify-between gap-2">
+                      <ServiceIcon name={serviceIcons[slide.id] ?? "rough-cut"} size="sm" />
                       <span
-                        className={`detail text-[0.625rem] ${isActive ? "text-white/70" : tabStatusTone[slide.status]}`}
+                        className={`detail text-[0.625rem] ${isActive ? statusTone[slide.status] : "text-white/70"}`}
                       >
                         {statusLabels[slide.status]}
                       </span>
-                      {slide.tab}
                     </span>
-                  </span>
-                  <ChevronRightIcon
-                    className={`size-4 shrink-0 ${isActive ? "text-white/70" : "text-faint"}`}
-                  />
-                  {isActive && motionAllowed && (
-                    <span
-                      key={`progress-${active}`}
-                      aria-hidden="true"
-                      onAnimationEnd={() => go(active + 1)}
-                      style={{
-                        animationDuration: `${SLIDE_MS}ms`,
-                        animationPlayState: rotating ? "running" : "paused",
-                      }}
-                      className="tab-progress absolute inset-x-0 bottom-0 h-[3px] bg-brand"
-                    />
-                  )}
+                    <span className="flex w-full items-center justify-between gap-2 text-[0.9375rem] font-bold">
+                      {slide.tab}
+                      <ChevronRightIcon
+                        className={`size-4 shrink-0 ${isActive ? "text-faint" : "text-white/60"}`}
+                      />
+                    </span>
+                    {isActive && motionAllowed && (
+                      <span
+                        key={`progress-${active}`}
+                        aria-hidden="true"
+                        onAnimationEnd={() => go(active + 1)}
+                        style={{
+                          animationDuration: `${SLIDE_MS}ms`,
+                          animationPlayState: rotating ? "running" : "paused",
+                        }}
+                        className="tab-progress absolute inset-x-0 bottom-0 h-[3px] bg-brand"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+              {motionAllowed && (
+                <button
+                  type="button"
+                  onClick={() => setPlaying((value) => !value)}
+                  aria-label={playing ? carouselCopy.pause : carouselCopy.play}
+                  className="flex size-11 items-center justify-center rounded-full bg-black/50 text-white ring-1 ring-white/20 transition-colors ring-inset hover:bg-black/70"
+                >
+                  {playing ? <PauseIcon className="size-4" /> : <PlayIcon className="size-4" />}
                 </button>
-              );
-            })}
+              )}
+              <button
+                type="button"
+                onClick={() => go(active + 1)}
+                aria-label={carouselCopy.next}
+                className="hidden size-11 items-center justify-center rounded-full bg-white text-[#0e0d1c] shadow-float transition-transform hover:scale-105 sm:flex"
+              >
+                <ChevronRightIcon className="size-5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -496,7 +542,12 @@ function SlideMedia(props: {
   );
 }
 
-/** Slide 1's poster: art-directed (vertical crop on phones), eager, high priority. */
+/**
+ * Slide 1's poster: the LCP element (the media fills the first screen, as on adobe.com).
+ * Art-directed (vertical crop on phones), eager, high priority, and preloaded: React puts the two
+ * preloads, each limited to its own screens, at the top of <head>, so the picture is requested
+ * before the stylesheet and the scripts instead of after them.
+ */
 function FirstPoster() {
   const common = {
     alt: "",
@@ -505,11 +556,14 @@ function FirstPoster() {
     fetchPriority: "high" as const,
   };
   const {
-    props: { srcSet: desktop },
+    props: { srcSet: desktop, src: desktopSrc },
   } = getImageProps({ ...common, src: heroPoster });
   const {
     props: { srcSet: mobile, ...rest },
   } = getImageProps({ ...common, src: heroPosterVertical });
+  const image = { as: "image", imageSizes: "100vw", fetchPriority: "high" } as const;
+  preload(desktopSrc, { ...image, imageSrcSet: desktop, media: "(min-width: 768px)" });
+  preload(rest.src, { ...image, imageSrcSet: mobile, media: "(max-width: 767px)" });
   return (
     <picture>
       <source media="(min-width: 768px)" srcSet={desktop} />

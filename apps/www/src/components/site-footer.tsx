@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { BRAND, COMPANY } from "@/config/site";
-import { serviceMarks, services } from "@/content/services";
+import { serviceIcons, services } from "@/content/services";
 import { siteCopy } from "@/content/site";
-import { AppIcon } from "./app-icon";
+import { ServiceIcon } from "./service-icon";
 import { Logo, Wordmark } from "./logo";
 import { EmailLink, MissingValue } from "./missing-value";
 import { buttonPrimary, container } from "./styles";
@@ -43,7 +43,7 @@ export function SiteFooter() {
                     href={`/${card.href}`}
                     className="inline-flex items-center gap-2.5 text-muted transition-colors hover:text-fg"
                   >
-                    <AppIcon mark={serviceMarks[card.id] ?? "··"} size="xs" />
+                    <ServiceIcon name={serviceIcons[card.id] ?? "rough-cut"} size="xs" />
                     {card.title}
                   </Link>
                 </li>

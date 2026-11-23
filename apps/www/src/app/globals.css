@@ -44,6 +44,10 @@
   /* Shadow colour (r g b), so shadows stay soft on white and deep on black. */
   --shadow: 14 13 28;
   --radius: 1rem;
+  /* The logo's ink: its own navy on light, white on dark. */
+  --logo-ink: #0b0a47;
+  /* 0 on light, 1 on dark: lets the service icons pick their light or dark colours. */
+  --si-dark: 0;
 }
 
 .theme-dark {
@@ -68,6 +72,28 @@
   --danger: #ff8f80;
   --focus: #8ab4ff;
   --shadow: 0 0 0;
+  --logo-ink: #ffffff;
+  --si-dark: 1;
+}
+
+/*
+ * The header while it sits over the hero (home page, top of the page): white type straight on
+ * the media and no bar, as on adobe.com. When a menu opens, it is the light bar again.
+ */
+.header-overlay:not(:has([aria-expanded="true"])) {
+  color-scheme: dark;
+  --fg: #ffffff;
+  --muted: #d6d5e0;
+  --raised: rgb(255 255 255 / 0.14);
+  --panel: rgb(255 255 255 / 0.2);
+  --line: rgb(255 255 255 / 0.18);
+  --line-strong: rgb(255 255 255 / 0.4);
+  --ink: #ffffff;
+  --ink-strong: #e6e6ee;
+  --on-ink: #0b0a47;
+  --focus: #8ab4ff;
+  --logo-ink: #ffffff;
+  color: var(--fg);
 }
 
 /* In the base layer, so a utility (e.g. bg-navy on a dark card) can still set the surface. */
@@ -93,6 +119,7 @@
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
   --color-brand: var(--brand);
+  --color-logo-ink: var(--logo-ink);
   --color-ink: var(--ink);
   --color-ink-strong: var(--ink-strong);
   --color-on-ink: var(--on-ink);
@@ -117,6 +144,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -184,6 +212,16 @@ body {
     line-height: 1.25;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+  }
+
+  /* Service icons (service-icon.tsx): their light or dark colours follow the nearest theme. */
+  .service-icon {
+    background-color: color-mix(
+      in srgb,
+      var(--si-bg-dark) calc(var(--si-dark, 0) * 100%),
+      var(--si-bg)
+    );
+    color: color-mix(in srgb, var(--si-fg-dark) calc(var(--si-dark, 0) * 100%), var(--si-fg));
   }
 
   /* Timecode-style label, only inside the product screens (the editor demo, the previews). */
@@ -315,7 +353,7 @@ body {
  *    supported, the page is simply static). The longhands come after any shorthand on purpose:
  *    `animation` resets the timeline.
  *    - Hero (adobe.com "parallax-move-up-fast"): the message moves up faster than the page and
- *      fades, while the stage below opens from 92% to its full size.
+ *      fades, while the media behind it drifts more slowly (parallax inside the rounded frame).
  *    - Large media settle from slightly larger to their place as they enter the screen.
  *    - "Garage door" (adobe.com "parallax-garage-door-reveal"): the photo window at the start
  *      of the "Later" band opens from a rounded inset to the full width while its picture
@@ -325,14 +363,12 @@ body {
  */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
-    .hero-open {
+    .hero-drift {
+      animation-name: hero-drift;
       animation-timing-function: linear;
       animation-fill-mode: both;
       animation-timeline: scroll(root);
-    }
-    .hero-open {
-      animation-name: hero-open;
-      animation-range: 0 60vh;
+      animation-range: 0 100vh;
     }
     .settle {
       animation-name: settle;
@@ -393,12 +429,13 @@ body {
     opacity: 0.15;
   }
 }
-@keyframes hero-open {
+/* Scaled a little so the drift never shows an edge inside the rounded frame. */
+@keyframes hero-drift {
   from {
-    transform: scale(0.92);
+    transform: scale(1.08);
   }
   to {
-    transform: none;
+    transform: translateY(5%) scale(1.08);
   }
 }
 @keyframes settle {

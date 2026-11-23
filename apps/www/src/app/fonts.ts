@@ -20,7 +20,8 @@ export const sansFont = localFont({
       style: "normal",
     },
     {
-      // Only downloaded when italic text is on screen (a few notes below the fold).
+      // Only downloaded when a page shows italic text. The home page has none (v6.3): the notes
+      // are upright, as on adobe.com, so this file never competes with the hero image there.
       path: "../../node_modules/@fontsource-variable/source-sans-3/files/source-sans-3-latin-wght-italic.woff2",
       weight: "200 900",
       style: "italic",

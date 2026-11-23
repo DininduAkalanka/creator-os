@@ -21,7 +21,7 @@ export const hero = {
   headlineBefore: "Your raw recording,",
   headlineCut: "um,",
   headlineAfter: "rough-cut and captioned in minutes.",
-  lead: `You talked to camera for an hour. You shouldn't lose the rest of the night scrubbing for every pause, every "so, basically" and every intro you restarted. ${name} marks them for you. You decide what goes, then finish in the editor you already use.`,
+  lead: `${name} marks every pause, filler word and retake. You decide what goes, then finish in the editor you already use.`,
   primaryCta: "Join early access",
   secondaryCta: "Try the demo",
   status: "In development. Free to join. No card needed.",

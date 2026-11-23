@@ -22,7 +22,7 @@ export function SiteHeader() {
       <div className="relative flex h-16 items-center justify-between gap-4 px-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-6">
           {/* The full logo (symbol and name) in its own navy; its accessible name is the brand name. */}
-          <Link href="/" className="flex shrink-0 items-center rounded-md py-1 text-navy">
+          <Link href="/" className="flex shrink-0 items-center rounded-md py-1 text-logo-ink">
             <Logo className="h-7 w-auto sm:h-8" />
           </Link>
           <nav aria-label={nav.label} className="hidden lg:block">

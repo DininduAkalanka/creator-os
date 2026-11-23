@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { productMenu, statusLabels, type MenuItem, type ServiceStatus } from "@/content/services";
-import { AppIcon } from "./app-icon";
 import { ChevronDownIcon, ChevronRightIcon } from "./icons";
+import { ServiceIcon } from "./service-icon";
 
 // Same colours as the status pills on the page: first release green, beta red, later neutral.
 const pillTone: Record<ServiceStatus, string> = {
@@ -182,7 +182,7 @@ function MenuCard({ item, onNavigate }: { item: MenuItem; onNavigate: () => void
       className="group flex h-full min-h-40 flex-col rounded-xl border border-transparent bg-raised p-4 transition-colors hover:border-line hover:bg-panel"
     >
       <span className="flex items-center justify-between gap-3">
-        <AppIcon mark={item.mark} size="lg" />
+        <ServiceIcon name={item.icon} size="lg" />
         <span
           className={`detail rounded-full border px-2 py-0.5 text-[0.625rem] ${pillTone[item.status]}`}
         >

@@ -19,7 +19,6 @@ import {
   ThumbnailsVisual,
 } from "@/components/feature-visuals";
 import { HeroCarousel } from "@/components/hero-carousel";
-import { AppIcon } from "@/components/app-icon";
 import { ArrowRightIcon, CheckIcon, CrossIcon, LoopIcon, PlusIcon } from "@/components/icons";
 import { LazyCutDemo } from "@/components/lazy-cut-demo";
 import { AiCredit, Photo, VideoPanel } from "@/components/media";
@@ -32,6 +31,7 @@ import {
 } from "@/components/product-previews";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SectionIntro } from "@/components/section-intro";
+import { ServiceIcon } from "@/components/service-icon";
 import { ServiceSwitcher } from "@/components/service-switcher";
 import { StoryCarousel } from "@/components/story-carousel";
 import { buttonLarge, buttonPrimary, container } from "@/components/styles";
@@ -39,11 +39,11 @@ import { WaitlistForm } from "@/components/waitlist-form";
 import { faq, features, finalCta, hero, story, tryIt } from "@/content/home";
 import {
   audit,
-  laterMarks,
+  laterIcons,
   nextVideo,
   plans,
   roadmap,
-  serviceMarks,
+  serviceIcons,
   services,
   statusLabels,
   stories,
@@ -144,7 +144,7 @@ function Services() {
   };
   const items = services.cards.map((card) => ({
     ...card,
-    mark: serviceMarks[card.id] ?? "··",
+    icon: serviceIcons[card.id] ?? "rough-cut",
     visual: visuals[card.id],
   }));
   return (
@@ -262,7 +262,7 @@ function Story() {
             </div>
           </article>
         </div>
-        <p className="mt-5 text-center text-sm text-faint italic">{story.note}</p>
+        <p className="mt-5 text-center text-sm text-faint">{story.note}</p>
       </div>
     </section>
   );
@@ -697,7 +697,7 @@ function Roadmap() {
               <div className={`lag h-full ${tabletLag[index % 2]} ${desktopLag[index % 3]}`}>
                 <div className="flex h-full flex-col rounded-[1.5rem] bg-raised p-6 transition-colors duration-300 hover:bg-panel sm:min-h-60 sm:p-7">
                   <div className="flex items-center justify-between gap-3">
-                    <AppIcon mark={laterMarks[index] ?? "··"} size="md" />
+                    <ServiceIcon name={laterIcons[index] ?? "publish"} size="md" />
                     <StatusPill status="later" />
                   </div>
                   <h3 className="display mt-auto pt-6 text-2xl font-bold tracking-[-0.015em] sm:pt-12">
