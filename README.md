@@ -33,7 +33,8 @@ packages/
   db/                     Drizzle schema, migrations, row-level security (M3)
   ui/                     shared React components (M7)
 .github/                  CI (format, lint, typecheck, test, build, Docker build, secret scan, audit), Dependabot
-compose.yaml              local containers (today: the website, `pnpm docker:www`)
+compose.yaml              local containers: PostgreSQL + pgvector, S3 (RustFS), the website (`pnpm docker:www`)
+docker/                   container setup files (the database's first-start roles script)
 prompts/                  coding-agent prompt kit (01 kickoff … 04 review)
 docs/
   README.md               documentation index: start here
@@ -67,6 +68,24 @@ pnpm test:e2e                 # end-to-end + accessibility tests (Playwright + a
 
 `pnpm lint:deps` checks the import rules: apps never import other apps, packages never import apps, `contracts` imports nothing internal, the app never imports server packages (`db`, `ai`, `media`), and no package is imported through its internal files.
 
+### Local database and S3
+
+Needs Docker Desktop running. First time:
+
+1. Copy the "Local database and S3" block of `.env.example` into `.env` at the repo root, with your own long random values.
+2. Copy the `packages/db` block into `packages/db/.env.local`, with the same passwords in the URLs.
+
+```bash
+docker compose up -d          # PostgreSQL 18 + pgvector on 127.0.0.1:5432, S3 (RustFS) on 127.0.0.1:9000
+pnpm db:migrate               # create or update the schema (safe to run again)
+pnpm db:seed                  # two example users and their organizations (safe to run again)
+pnpm test:int                 # integration tests; they start their own database, not this one
+docker compose stop           # stop both, keeping the data
+```
+
+- The database creates its roles (`creatoros_migrator`, `app_user`, `auth_service`, `tenant_bootstrap`) on its first start, from `packages/db/sql/roles`. To start over with new passwords, run `docker compose down --volumes`. This deletes the local data.
+- Tenant tables use forced row-level security. The app only reads and writes through `withOrgTx` in `packages/db` (see `docs/engineering/PLAN.md` §3).
+
 ### Run the website in Docker
 
 Needs Docker Desktop running. This builds the production image and serves it like a real deployment:
@@ -74,7 +93,7 @@ Needs Docker Desktop running. This builds the production image and serves it lik
 ```bash
 pnpm docker:www               # build and start -> http://localhost:3000
 pnpm docker:www:logs          # follow the logs
-pnpm docker:down              # stop and remove the container
+pnpm docker:down              # stop and remove the website container (the database keeps running)
 ```
 
 - Use it to check the production build. For day-to-day work, `pnpm dev` is faster: it reloads on every change.
