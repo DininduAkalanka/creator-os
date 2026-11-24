@@ -4,5 +4,7 @@
  * helpers. Imports nothing internal (AGENTS.md §3). Change it in its own commit, before the code
  * that uses it (AGENTS.md §4.2).
  */
+export * from "./enums.js";
 export * from "./errors.js";
 export * from "./state-machine.js";
+export * from "./states.js";
