@@ -1,0 +1,7 @@
+{
+  "extends": "@creatoros/config/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}
