@@ -44,6 +44,10 @@
   /* Shadow colour (r g b), so shadows stay soft on white and deep on black. */
   --shadow: 14 13 28;
   --radius: 1rem;
+  /* The logo's ink: its own navy on light, white on dark. */
+  --logo-ink: #0b0a47;
+  /* 0 on light, 1 on dark: lets the service icons pick their light or dark colours. */
+  --si-dark: 0;
 }
 
 .theme-dark {
@@ -68,6 +72,28 @@
   --danger: #ff8f80;
   --focus: #8ab4ff;
   --shadow: 0 0 0;
+  --logo-ink: #ffffff;
+  --si-dark: 1;
+}
+
+/*
+ * The header while it sits over the hero (home page, top of the page): white type straight on
+ * the media and no bar, as on adobe.com. When a menu opens, it is the light bar again.
+ */
+.header-overlay:not(:has([aria-expanded="true"])) {
+  color-scheme: dark;
+  --fg: #ffffff;
+  --muted: #d6d5e0;
+  --raised: rgb(255 255 255 / 0.14);
+  --panel: rgb(255 255 255 / 0.2);
+  --line: rgb(255 255 255 / 0.18);
+  --line-strong: rgb(255 255 255 / 0.4);
+  --ink: #ffffff;
+  --ink-strong: #e6e6ee;
+  --on-ink: #0b0a47;
+  --focus: #8ab4ff;
+  --logo-ink: #ffffff;
+  color: var(--fg);
 }
 
 /* In the base layer, so a utility (e.g. bg-navy on a dark card) can still set the surface. */
@@ -93,6 +119,7 @@
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
   --color-brand: var(--brand);
+  --color-logo-ink: var(--logo-ink);
   --color-ink: var(--ink);
   --color-ink-strong: var(--ink-strong);
   --color-on-ink: var(--on-ink);
@@ -117,6 +144,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -168,12 +196,16 @@ body {
 
 /* In the components layer so Tailwind utilities (leading-*, tracking-*) can still override. */
 @layer components {
-  /* Display type: heavy and tight, like adobe.com's headings (Milo: weight 700 to 800). */
+  /*
+   * Display type (v7): bold, not black, with tight tracking. Production sites set their big
+   * headings at 600 to 700 (Notion 600 at -0.048em, UptimeRobot 600 at -0.04em, adobe.com 700 to
+   * 800); v6's 800 to 900 read as heavy rather than refined.
+   */
   .display {
     font-family: var(--font-display);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
   }
 
   /* adobe.com "detail" text (Milo: weight 700, uppercase): eyebrows, badges, status labels. */
@@ -184,6 +216,16 @@ body {
     line-height: 1.25;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+  }
+
+  /* Service icons (service-icon.tsx): their light or dark colours follow the nearest theme. */
+  .service-icon {
+    background-color: color-mix(
+      in srgb,
+      var(--si-bg-dark) calc(var(--si-dark, 0) * 100%),
+      var(--si-bg)
+    );
+    color: color-mix(in srgb, var(--si-fg-dark) calc(var(--si-dark, 0) * 100%), var(--si-fg));
   }
 
   /* Timecode-style label, only inside the product screens (the editor demo, the previews). */
@@ -315,7 +357,9 @@ body {
  *    supported, the page is simply static). The longhands come after any shorthand on purpose:
  *    `animation` resets the timeline.
  *    - Hero (adobe.com "parallax-move-up-fast"): the message moves up faster than the page and
- *      fades, while the stage below opens from 92% to its full size.
+ *      fades, while the media behind it drifts more slowly (parallax inside the rounded frame).
+ *    - "How it works": the line between the steps draws itself and the upload bar fills as they
+ *      come into view (scrubbed by the scroll, never looping).
  *    - Large media settle from slightly larger to their place as they enter the screen.
  *    - "Garage door" (adobe.com "parallax-garage-door-reveal"): the photo window at the start
  *      of the "Later" band opens from a rounded inset to the full width while its picture
@@ -325,14 +369,23 @@ body {
  */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
-    .hero-open {
+    .hero-drift {
+      animation-name: hero-drift;
       animation-timing-function: linear;
       animation-fill-mode: both;
       animation-timeline: scroll(root);
+      animation-range: 0 100vh;
     }
-    .hero-open {
-      animation-name: hero-open;
-      animation-range: 0 60vh;
+    .draw-on-view {
+      transform-origin: left center;
+      animation-name: draw-on-view;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 30% cover 55%;
+    }
+    .draw-on-view:dir(rtl) {
+      transform-origin: right center;
     }
     .settle {
       animation-name: settle;
@@ -393,9 +446,18 @@ body {
     opacity: 0.15;
   }
 }
-@keyframes hero-open {
+/* Scaled a little so the drift never shows an edge inside the rounded frame. */
+@keyframes hero-drift {
   from {
-    transform: scale(0.92);
+    transform: scale(1.08);
+  }
+  to {
+    transform: translateY(5%) scale(1.08);
+  }
+}
+@keyframes draw-on-view {
+  from {
+    transform: scaleX(0.04);
   }
   to {
     transform: none;
@@ -445,11 +507,13 @@ body {
 /*
  * 3. Hero slide changes: the incoming slide's text rises in line by line and its picture settles.
  *    Slide 1's first paint is left exactly as loaded; these run from the first change onwards.
+ *    The rise waits 150 ms, the time the outgoing words take to fade out (hero-carousel.tsx), so
+ *    two slides' words are never on screen together; only the pictures crossfade.
  */
 @media (prefers-reduced-motion: no-preference) {
   .is-active .slide-rise {
     animation: rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-    animation-delay: calc(var(--i, 0) * 90ms);
+    animation-delay: calc(150ms + var(--i, 0) * 90ms);
   }
   .is-active .slide-settle {
     animation: slide-settle 1600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;

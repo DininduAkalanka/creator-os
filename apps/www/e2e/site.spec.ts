@@ -3,6 +3,21 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const PAGES = ["/", "/privacy", "/terms", "/about"] as const;
 
+/** A CSS colour as [red, green, blue, alpha 0–1], whatever form the browser reports it in. */
+function rgba(locator: Locator, property: "background-color" | "color" = "background-color") {
+  return locator.evaluate((element, name) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) throw new Error("No 2D canvas.");
+    context.fillStyle = getComputedStyle(element).getPropertyValue(name);
+    context.fillRect(0, 0, 1, 1);
+    const [red = 0, green = 0, blue = 0, alpha = 0] = context.getImageData(0, 0, 1, 1).data;
+    return [red, green, blue, Math.round((alpha / 255) * 100) / 100];
+  }, property);
+}
+
 test.describe("home page", () => {
   test("gives screen readers the clean headline, without the struck-out filler word", async ({
     page,
@@ -18,8 +33,6 @@ test.describe("home page", () => {
     const background = (locator: Locator) =>
       locator.evaluate((element) => getComputedStyle(element).backgroundColor);
     expect(await background(page.locator("body"))).toBe("rgb(255, 255, 255)");
-    // The header is a white bar (adobe.com), not a dark one.
-    expect(await background(page.locator("header > div").first())).toBe("rgb(255, 255, 255)");
     // Dark sections are the "Later" band and the sign-up at the end, then the footer.
     const dark = await page
       .locator("main section.theme-dark")
@@ -31,6 +44,63 @@ test.describe("home page", () => {
     await page.goto("/privacy");
     expect(await background(page.locator("body"))).toBe("rgb(255, 255, 255)");
     await expect(page.locator("main .theme-dark")).toHaveCount(0);
+  });
+
+  test("the menu floats over the hero, then is a white bar once the page scrolls", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const header = page.getByRole("banner");
+    const bar = header.locator(":scope > div");
+    const logo = header.getByRole("link", { name: "CreatorOS", exact: true });
+    // At the top of the home page there is no bar: white words on the hero's media (adobe.com).
+    await expect(header).toHaveAttribute("data-overlay", "true");
+    expect((await rgba(bar))[3]).toBe(0);
+    expect(await rgba(logo, "color")).toEqual([255, 255, 255, 1]);
+
+    // Scrolled: a solid white bar with the logo in navy, as on adobe.com. (v6.3's see-through
+    // bar turned grey over the dark hero, with the headline smudged behind it.)
+    await page.evaluate(() => window.scrollTo({ top: 600, behavior: "instant" }));
+    await expect(header).toHaveAttribute("data-overlay", "false");
+    await expect.poll(async () => (await rgba(logo, "color")).join()).toBe("11,10,71,1");
+    await expect.poll(async () => (await rgba(bar)).join()).toBe("255,255,255,1");
+
+    // Every other page starts with the solid white bar.
+    await page.goto("/privacy");
+    await expect(header).toHaveAttribute("data-overlay", "false");
+    expect(await rgba(bar)).toEqual([255, 255, 255, 1]);
+  });
+
+  test("service icons are our own drawings, never letters", async ({ page }) => {
+    await page.goto("/");
+    const icons = page.locator(".service-icon");
+    expect(await icons.count()).toBeGreaterThan(10);
+    const notDrawn = await icons.evaluateAll(
+      (all) =>
+        all.filter((icon) => (icon.textContent ?? "").trim() !== "" || !icon.querySelector("svg"))
+          .length,
+    );
+    expect(notDrawn).toBe(0);
+  });
+
+  test("how it works: four steps, each shown in a picture", async ({ page }) => {
+    await page.goto("/");
+    const section = page.locator("#how-it-works");
+    await expect(
+      section.getByRole("heading", { name: "From recording to timeline in four steps." }),
+    ).toBeVisible();
+    await expect(section.getByRole("listitem")).toHaveCount(4);
+    await expect(section.getByRole("heading", { level: 3 })).toHaveText([
+      "Drop in your recording",
+      "See every cut on your transcript",
+      "Review it, alone or with your editor",
+      "Open it in your editor",
+    ]);
+    // The pictures are drawn in code and labelled honestly as illustrations. Step 1's picture
+    // shows the video staying on the creator's drive while only the audio uploads.
+    await expect(section).toContainText("Illustrations of the planned product.");
+    await expect(section.getByText("Video stays on your drive", { exact: true })).toBeVisible();
+    await expect(section.getByText("Audio only", { exact: true })).toBeVisible();
   });
 
   test("the struck-out word stays readable after it is cut", async ({ page }) => {
@@ -51,7 +121,7 @@ test.describe("home page", () => {
     const demo = page.getByRole("figure", { name: "Suggested cuts" });
     const length = (value: string) => demo.getByText(value, { exact: true });
 
-    // The demo code loads only when scrolled to, so allow extra time for the first render.
+    // Generous time for the first render on a slow machine (the demo comes with the page).
     await expect(length("0:27.0")).toBeVisible({ timeout: 20_000 });
 
     await demo.getByRole("button", { name: "Accept all cuts" }).click();
@@ -137,6 +207,80 @@ test.describe("hero slideshow", () => {
     );
   });
 
+  test("a slide change never shows two slides' words at once", async ({ page }) => {
+    await page.goto("/");
+    // Interactive (and motion allowed) once the pause button is there.
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    // Watch every frame for a second after the click: of all the slides' word panels, the
+    // second most visible one must stay (nearly) invisible. v6.3 crossfaded both over 700 ms.
+    const overlap = await heroOf(page).evaluate(async (hero) => {
+      const panels = [...hero.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+      const tab = hero.querySelector<HTMLElement>('[role="tab"][aria-selected="false"]');
+      if (!tab) throw new Error("No other slide to switch to.");
+      tab.click();
+      let worst = 0;
+      const until = performance.now() + 1000;
+      while (performance.now() < until) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        const shown = panels
+          .map((panel) => Number(getComputedStyle(panel).opacity))
+          .sort((a, b) => b - a);
+        worst = Math.max(worst, shown[1] ?? 0);
+      }
+      return worst;
+    });
+    expect(overlap).toBeLessThanOrEqual(0.1);
+  });
+
+  test("the pause button arriving never moves the tab cards", async ({ page, browser }) => {
+    // The server's page (no JavaScript) against the running one: the tab row must be identical,
+    // because the button's place is kept from the first paint. v6.3 shifted it 10 to 31 px.
+    const tabsBox = (target: Page) =>
+      heroOf(target)
+        .getByRole("tablist")
+        .evaluate((list) => {
+          const box = list.getBoundingClientRect();
+          return { x: Math.round(box.x), width: Math.round(box.width) };
+        });
+    const viewport = page.viewportSize();
+    const still = await browser.newContext({ javaScriptEnabled: false, viewport });
+    const serverPage = await still.newPage();
+    await serverPage.goto("/");
+    const before = await tabsBox(serverPage);
+    await still.close();
+
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    expect(await tabsBox(page)).toEqual(before);
+  });
+
+  test("on a 27-inch screen the menu bar and the hero use the full width", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "This is about very wide screens.");
+    await page.setViewportSize({ width: 2560, height: 1440 });
+    await page.goto("/");
+    const width = (locator: Locator) =>
+      locator.evaluate((element) => element.getBoundingClientRect().width);
+    // adobe.com never caps its bar or its hero; v6.3 capped both at 1600 px (white bands).
+    expect(await width(page.getByRole("banner").locator(":scope > div"))).toBeGreaterThan(2500);
+    expect(await width(page.locator("[data-hero-stage]"))).toBeGreaterThan(2500);
+    // The menu opens at a readable width instead of stretching across the screen.
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    const nav = page.getByRole("navigation", { name: "Main" });
+    await nav.getByRole("button", { name: "Product" }).click();
+    const panel = nav.locator('[id$="-panel"]');
+    await expect(panel).toBeVisible();
+    expect(await width(panel)).toBeLessThanOrEqual(1440);
+  });
+
   test("holds while the pointer is on the tabs, then carries on", async ({ page, isMobile }) => {
     test.skip(isMobile, "Hover needs a mouse.");
     await page.goto("/");
@@ -187,6 +331,35 @@ test.describe("hero slideshow", () => {
       "aria-selected",
       "true",
     );
+  });
+
+  test("the words never run into the tab cards or the media's label", async ({
+    page,
+    isMobile,
+  }) => {
+    await page.goto("/");
+    const box = async (locator: Locator) => {
+      const found = await locator.boundingBox();
+      if (!found) throw new Error("No box: the element is not rendered.");
+      return found;
+    };
+    type Box = Awaited<ReturnType<typeof box>>;
+    const overlap = (a: Box, b: Box) =>
+      a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+    const words = await box(
+      heroOf(page).locator('[role="tabpanel"]:not([inert]) .hero-lift > div'),
+    );
+    const tabs = await box(heroOf(page).getByRole("tablist"));
+    const label = await box(heroOf(page).locator("[data-media-label]"));
+    expect(words.y + words.height).toBeLessThanOrEqual(tabs.y);
+    expect(overlap(words, label)).toBe(false);
+    expect(overlap(label, tabs)).toBe(false);
+    // On a laptop screen the tab cards are part of the first screen, as on adobe.com.
+    if (!isMobile) {
+      const height = page.viewportSize()?.height ?? 0;
+      expect(tabs.y + tabs.height).toBeLessThanOrEqual(height);
+    }
   });
 
   test("previews come with an honest example-data label", async ({ page }) => {
@@ -556,6 +729,71 @@ test.describe("navigation", () => {
     await expect(home).toBeVisible();
     await home.click();
     await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("the logo always brings back the home page afresh, at the top", async ({ page }) => {
+    // Reduced motion: the slideshow stays where it is put, so "back on the first slide" can only
+    // come from the reload, however slowly the page loads. (Its tabs still work by click.)
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const logo = page.getByRole("banner").getByRole("link", { name: "CreatorOS", exact: true });
+    const atTop = () => expect.poll(() => page.evaluate(() => Math.round(window.scrollY))).toBe(0);
+    const hero = page.locator('section[aria-roledescription="carousel"]');
+    const firstSlide = hero.getByRole("tab", { name: /Rough cut/ });
+    const thirdSlide = hero.getByRole("tab", { name: /Editor review/ });
+    // "domcontentloaded", not "load": Edge holds the load event back while lazy images load.
+    const reloadBy = (click: Promise<void>) =>
+      Promise.all([page.waitForEvent("domcontentloaded"), click]);
+
+    // On the home page, scrolled down and on another slide: the logo reloads it (v6.4 did
+    // nothing here, so the logo looked broken).
+    await page.goto("/");
+    // A click before the page is interactive is lost: retry until the slide has changed.
+    await expect(async () => {
+      await thirdSlide.click();
+      await expect(thirdSlide).toHaveAttribute("aria-selected", "true", { timeout: 1000 });
+    }).toPass({ timeout: 15_000 });
+    await page.evaluate(() => window.scrollTo({ top: 3000, behavior: "instant" }));
+    await reloadBy(logo.click());
+    await atTop();
+    await expect(firstSlide).toHaveAttribute("aria-selected", "true");
+
+    // After a section link the address has a #section; the logo drops it.
+    await page.goto("/#plans");
+    await reloadBy(logo.click());
+    await expect(page).toHaveURL(/\/$/);
+    await atTop();
+
+    // From another page it lands at the top (v6.4 stopped 703 px down: an animated scroll).
+    await page.goto("/privacy");
+    await logo.click();
+    await expect(page).toHaveURL(/\/$/);
+    await atTop();
+  });
+
+  test("a section link works again after scrolling away from its section", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("button", { name: "Pause slideshow and video" })).toBeVisible({
+      timeout: 15_000,
+    });
+    const join = page
+      .locator('section[aria-roledescription="carousel"]')
+      .getByRole("link", { name: "Join early access" });
+    const waitlistTop = () =>
+      page.evaluate(() =>
+        Math.round(document.getElementById("waitlist")?.getBoundingClientRect().top ?? 99_999),
+      );
+    // Brought into view: its top in the upper third of the screen, not under the header.
+    const third = (page.viewportSize()?.height ?? 720) / 3;
+    await join.click();
+    await expect(page).toHaveURL(/#waitlist$/);
+    await expect.poll(waitlistTop).toBeLessThan(third);
+
+    // Back to the top and the same link again: the address is already /#waitlist, and v6.4 did
+    // nothing here (a Next.js Link to the current address does not navigate).
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await join.click();
+    await expect.poll(waitlistTop).toBeLessThan(third);
+    expect(await waitlistTop()).toBeGreaterThan(0);
   });
 
   test("the footer lists every service, each linked to its section", async ({ page }) => {

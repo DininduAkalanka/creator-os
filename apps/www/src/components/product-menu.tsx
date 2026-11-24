@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { productMenu, statusLabels, type MenuItem, type ServiceStatus } from "@/content/services";
-import { AppIcon } from "./app-icon";
 import { ChevronDownIcon, ChevronRightIcon } from "./icons";
+import { ServiceIcon } from "./service-icon";
 
 // Same colours as the status pills on the page: first release green, beta red, later neutral.
 const pillTone: Record<ServiceStatus, string> = {
@@ -99,7 +99,9 @@ export function ProductMenu() {
       <div
         id={panelId}
         hidden={!open}
-        className="menu-in absolute inset-x-0 top-[calc(100%_+_0.5rem)] z-10 rounded-2xl border border-line bg-bg p-3 text-left font-normal shadow-lift sm:p-4"
+        // As wide as the bar, up to adobe.com's 1440 px menu width, and opening under the
+        // button's side of the bar: on a 2560 px screen the cards keep a readable size.
+        className="menu-in absolute inset-x-0 top-[calc(100%_+_0.5rem)] z-10 max-w-[90rem] rounded-2xl border border-line bg-bg p-3 text-left font-normal shadow-lift sm:p-4"
       >
         <div className="grid gap-4 lg:grid-cols-[14rem_1fr]">
           <div className="flex flex-col gap-4 p-1">
@@ -160,8 +162,8 @@ export function ProductMenu() {
         </div>
       </div>
 
-      {/* The page behind dims (adobe.com). In a portal: the floating header's backdrop blur
-          would otherwise trap a fixed overlay inside the header. */}
+      {/* The page behind dims (adobe.com). In a portal, so no style on the header (a filter, a
+          transform) can ever trap this fixed overlay inside it. */}
       {open &&
         createPortal(
           <div
@@ -182,7 +184,7 @@ function MenuCard({ item, onNavigate }: { item: MenuItem; onNavigate: () => void
       className="group flex h-full min-h-40 flex-col rounded-xl border border-transparent bg-raised p-4 transition-colors hover:border-line hover:bg-panel"
     >
       <span className="flex items-center justify-between gap-3">
-        <AppIcon mark={item.mark} size="lg" />
+        <ServiceIcon name={item.icon} size="lg" />
         <span
           className={`detail rounded-full border px-2 py-0.5 text-[0.625rem] ${pillTone[item.status]}`}
         >

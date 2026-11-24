@@ -12,8 +12,9 @@ export function AiCredit({
   className?: string;
 }) {
   return (
+    // Always shown, but quiet (v7): a small sentence-case caption, not an uppercase badge.
     <span
-      className={`detail pointer-events-none rounded-full bg-black/65 px-2 py-1 text-[0.5625rem] text-white/85 ${className}`}
+      className={`pointer-events-none rounded-full bg-black/55 px-2 py-0.5 text-[0.6875rem] font-medium text-white/90 backdrop-blur-sm ${className}`}
     >
       {video ? siteCopy.aiGeneratedVideo : siteCopy.aiGenerated}
     </span>

@@ -12,14 +12,20 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { services, statusHelp, statusLabels, type ServiceStatus } from "@/content/services";
+import {
+  services,
+  statusHelp,
+  statusLabels,
+  type ServiceIconName,
+  type ServiceStatus,
+} from "@/content/services";
 import { swipeStep } from "@/lib/motion";
-import { AppIcon } from "./app-icon";
 import { ArrowRightIcon, PauseIcon, PlayIcon } from "./icons";
+import { ServiceIcon } from "./service-icon";
 
 export type SwitcherItem = {
   id: string;
-  mark: string;
+  icon: ServiceIconName;
   title: string;
   body: string;
   status: ServiceStatus;
@@ -30,14 +36,19 @@ export type SwitcherItem = {
 
 const STEP_MS = 6500;
 
-/** A soft backdrop per service, in the colour of its app icon. */
-const BACKDROPS: Record<string, string> = {
-  Rc: "radial-gradient(60% 80% at 90% 0%, rgb(255 107 102 / 0.32), transparent 70%), linear-gradient(160deg, #fff5f4, #ffe8e6)",
-  Cc: "radial-gradient(60% 80% at 90% 0%, rgb(255 194 75 / 0.38), transparent 70%), linear-gradient(160deg, #fffaf0, #fff0d4)",
-  Ex: "radial-gradient(60% 80% at 90% 0%, rgb(98 203 255 / 0.36), transparent 70%), linear-gradient(160deg, #f4fbff, #e1f3ff)",
-  Rv: "radial-gradient(60% 80% at 90% 0%, rgb(185 173 255 / 0.4), transparent 70%), linear-gradient(160deg, #f8f6ff, #ebe7ff)",
-  Au: "radial-gradient(60% 80% at 90% 0%, rgb(79 226 169 / 0.34), transparent 70%), linear-gradient(160deg, #f3fcf8, #dcf6ea)",
-  Nx: "radial-gradient(60% 80% at 90% 0%, rgb(255 146 212 / 0.34), transparent 70%), linear-gradient(160deg, #fff5fb, #ffe4f3)",
+/** A soft backdrop per service, in the colour of its icon. */
+const BACKDROPS: Partial<Record<ServiceIconName, string>> = {
+  "rough-cut":
+    "radial-gradient(60% 80% at 90% 0%, rgb(255 107 102 / 0.32), transparent 70%), linear-gradient(160deg, #fff5f4, #ffe8e6)",
+  captions:
+    "radial-gradient(60% 80% at 90% 0%, rgb(255 194 75 / 0.38), transparent 70%), linear-gradient(160deg, #fffaf0, #fff0d4)",
+  export:
+    "radial-gradient(60% 80% at 90% 0%, rgb(98 203 255 / 0.36), transparent 70%), linear-gradient(160deg, #f4fbff, #e1f3ff)",
+  review:
+    "radial-gradient(60% 80% at 90% 0%, rgb(185 173 255 / 0.4), transparent 70%), linear-gradient(160deg, #f8f6ff, #ebe7ff)",
+  audit:
+    "radial-gradient(60% 80% at 90% 0%, rgb(79 226 169 / 0.34), transparent 70%), linear-gradient(160deg, #f3fcf8, #dcf6ea)",
+  next: "radial-gradient(60% 80% at 90% 0%, rgb(255 146 212 / 0.34), transparent 70%), linear-gradient(160deg, #fff5fb, #ffe4f3)",
 };
 
 const statusTone: Record<ServiceStatus, string> = {
@@ -218,7 +229,7 @@ export function ServiceSwitcher({ items }: { items: SwitcherItem[] }) {
                   isActive ? "bg-bg shadow-float" : "hover:bg-bg/60"
                 }`}
               >
-                <AppIcon mark={item.mark} size="md" />
+                <ServiceIcon name={item.icon} size="md" />
                 <span className="min-w-0">
                   <span className="block text-[0.9375rem] leading-tight font-bold whitespace-nowrap lg:text-base lg:whitespace-normal">
                     {item.title}
@@ -283,7 +294,7 @@ export function ServiceSwitcher({ items }: { items: SwitcherItem[] }) {
           <div
             key={item.id}
             aria-hidden="true"
-            style={{ background: BACKDROPS[item.mark] ?? BACKDROPS.Rc }}
+            style={{ background: BACKDROPS[item.icon] ?? BACKDROPS["rough-cut"] }}
             className={`absolute inset-0 -z-10 transition-opacity duration-700 ${index === active ? "opacity-100" : "opacity-0"}`}
           />
         ))}
@@ -311,7 +322,7 @@ export function ServiceSwitcher({ items }: { items: SwitcherItem[] }) {
                         <span className="size-2.5 rounded-full bg-white/20" />
                         <span className="size-2.5 rounded-full bg-white/20" />
                       </span>
-                      <AppIcon mark={item.mark} size="sm" className="sm:ms-2" />
+                      <ServiceIcon name={item.icon} size="sm" className="sm:ms-2" />
                       <span className="truncate text-sm font-bold text-fg">{item.title}</span>
                     </div>
                     <span className="detail shrink-0 rounded-full border border-white/20 px-2 py-0.5 text-[0.5625rem] text-faint">

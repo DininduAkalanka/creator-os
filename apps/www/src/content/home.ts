@@ -21,7 +21,7 @@ export const hero = {
   headlineBefore: "Your raw recording,",
   headlineCut: "um,",
   headlineAfter: "rough-cut and captioned in minutes.",
-  lead: `You talked to camera for an hour. You shouldn't lose the rest of the night scrubbing for every pause, every "so, basically" and every intro you restarted. ${name} marks them for you. You decide what goes, then finish in the editor you already use.`,
+  lead: `${name} marks every pause, filler word and retake. You decide what goes, then finish in the editor you already use.`,
   primaryCta: "Join early access",
   secondaryCta: "Try the demo",
   status: "In development. Free to join. No card needed.",
@@ -30,9 +30,51 @@ export const hero = {
   apps: ["Premiere Pro", "DaVinci Resolve", "Final Cut Pro"],
 };
 
+/**
+ * How it works, in four steps, each shown as a small picture of the planned product (drawn in
+ * code, labelled as an illustration). Short lines: the pictures do the explaining.
+ */
+export const howItWorks = {
+  eyebrow: "How it works",
+  heading: "From recording to timeline in four steps.",
+  note: "Illustrations of the planned product.",
+  steps: [
+    {
+      title: "Drop in your recording",
+      body: "Where possible only the audio uploads. Your video stays on your drive.",
+    },
+    {
+      title: "See every cut on your transcript",
+      body: "Pauses, filler words and retakes, marked for you to keep or cut.",
+    },
+    {
+      title: "Review it, alone or with your editor",
+      body: "Comments on exact moments, then approve.",
+    },
+    {
+      title: "Open it in your editor",
+      body: "A timeline with your cuts, captions included.",
+    },
+  ],
+  /** Words inside the step pictures. */
+  upload: {
+    file: "month-plan.mov",
+    audioOnly: "Audio only",
+    staysLocal: "Video stays on your drive",
+    destination: `To ${name}`,
+  },
+  review: {
+    who: "Editor · 00:23",
+    comment: "Keeping the second take here, it's tighter.",
+    replyWho: "You",
+    reply: "Agreed.",
+    approved: "Approved",
+  },
+};
+
 export const story = {
   index: "02",
-  eyebrow: "How it works",
+  eyebrow: "Before and after",
   heading: "You know this night.",
   note: "An illustration of a typical evening. The times are an example, not a measured result.",
   before: {
@@ -129,7 +171,7 @@ export const features = {
   index: "04",
   eyebrow: "What you get",
   heading: "Everything the first pass needs.",
-  note: "Planned for the first release. We'll confirm the final list before early access opens. On-screen examples are illustrations.",
+  note: "Planned for the first release. The pictures show the planned product.",
   blocks: {
     roughCut: {
       title: "Get to the rough cut, fast.",
@@ -145,6 +187,7 @@ export const features = {
         "Then you script, film and edit in blocks.",
       ],
       timecode: "00:00:09:12",
+      cueTimes: ["00:09", "00:12", "00:16"],
     },
     handoff: {
       title: "Hand it to your editor. Or finish it yourself.",

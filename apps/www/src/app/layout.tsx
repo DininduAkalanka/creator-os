@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { PreviewNotice } from "@/components/notices";
+import { SectionLinkScroll } from "@/components/section-link-scroll";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { BRAND, SITE_INDEXABLE, SITE_URL } from "@/config/site";
@@ -30,7 +31,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${sansFont.variable} ${monoFont.variable} h-full`}>
+    // data-scroll-behavior: the page scrolls smoothly (globals.css), and this lets Next.js turn
+    // that off while it moves to another page. Without it, its scroll to the new page's top was
+    // animated and could stop halfway (home from /privacy landed 703 px down).
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${sansFont.variable} ${monoFont.variable} h-full`}
+    >
       <body className="flex min-h-full flex-col antialiased">
         <a
           href="#main"
@@ -44,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <SiteFooter />
+        <SectionLinkScroll />
       </body>
     </html>
   );

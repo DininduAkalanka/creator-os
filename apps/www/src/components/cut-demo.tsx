@@ -152,7 +152,7 @@ export function CutDemo() {
       <p role="status" className="sr-only">
         {demo.status(accepted.size, cutIds.length, formatClipTime(length))}
       </p>
-      <figcaption className="border-t border-line bg-bg/40 px-4 py-2.5 text-xs text-faint italic sm:px-5">
+      <figcaption className="border-t border-line bg-bg/40 px-4 py-2.5 text-xs text-faint sm:px-5">
         {demo.label}
       </figcaption>
     </figure>

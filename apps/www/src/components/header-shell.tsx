@@ -1,14 +1,20 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
 /**
- * adobe.com-style header: a floating white bar with rounded corners, on every page and from the
- * first paint (the page is white, so nothing needs to sit transparent over a dark hero). Once
- * the page scrolls, it turns slightly translucent with a deeper shadow; over a dark section it
- * reads as frosted glass, like adobe.com's.
+ * adobe.com's header, in two states:
+ * - At the top of the home page it is no bar at all: white type straight on the hero's media
+ *   (the "header-overlay" colours in globals.css).
+ * - Once the page scrolls (and on every other page) it is a solid white bar with a soft shadow,
+ *   as on adobe.com. (v6.3 made it see-through with a blur; over the dark hero that read as a
+ *   grey bar with the headline smudged behind it.)
+ * The bar spans the screen at every size, inset like the hero frame below it; adobe.com's bar
+ * is never capped either. While a menu is open the bar is solid white too.
  */
 export function HeaderShell({ children }: { children: ReactNode }) {
+  const home = usePathname() === "/";
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -25,14 +31,17 @@ export function HeaderShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const overlay = home && !scrolled;
+
   return (
-    <header className="sticky top-0 z-40 px-2 pt-2 sm:px-3">
-      {/* While a menu is open the bar turns solid (adobe.com), whatever the scroll position. */}
+    <header data-overlay={overlay} className="sticky top-0 z-40 px-2 pt-2 sm:px-3">
       <div
-        className={`mx-auto max-w-[100rem] rounded-2xl border transition-[background-color,box-shadow,border-color] duration-300 has-[[aria-expanded=true]]:bg-bg ${
-          scrolled
-            ? "border-line bg-bg/85 shadow-float backdrop-blur-xl backdrop-saturate-150"
-            : "border-line bg-bg shadow-soft"
+        className={`rounded-2xl border transition-[background-color,box-shadow,border-color,color] duration-300 has-[[aria-expanded=true]]:border-line has-[[aria-expanded=true]]:bg-bg has-[[aria-expanded=true]]:shadow-float ${
+          overlay
+            ? "header-overlay border-transparent bg-transparent"
+            : scrolled
+              ? "border-line bg-bg shadow-float"
+              : "border-line bg-bg shadow-soft"
         }`}
       >
         {children}

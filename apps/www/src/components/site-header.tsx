@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { siteCopy } from "@/content/site";
 import { HeaderShell } from "./header-shell";
+import { HomeLink } from "./home-link";
 import { Logo } from "./logo";
 import { MobileMenu } from "./mobile-menu";
 import { ProductMenu } from "./product-menu";
@@ -21,10 +22,11 @@ export function SiteHeader() {
       {/* The bar spans the screen (adobe.com): logo at the far left, the call to action at the right. */}
       <div className="relative flex h-16 items-center justify-between gap-4 px-3 sm:px-5">
         <div className="flex min-w-0 items-center gap-6">
-          {/* The full logo (symbol and name) in its own navy; its accessible name is the brand name. */}
-          <Link href="/" className="flex shrink-0 items-center rounded-md py-1 text-navy">
+          {/* The full logo (symbol and name) in its own navy; its accessible name is the brand name.
+              It always loads the home page afresh, at the top (see HomeLink). */}
+          <HomeLink className="flex shrink-0 items-center rounded-md py-1 text-logo-ink">
             <Logo className="h-7 w-auto sm:h-8" />
-          </Link>
+          </HomeLink>
           <nav aria-label={nav.label} className="hidden lg:block">
             <ul className="flex items-center gap-0.5 text-[0.9375rem] font-bold">
               <li>

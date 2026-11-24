@@ -18,6 +18,21 @@ const name = BRAND.name;
 
 export type ServiceStatus = "first" | "beta" | "later";
 
+/** Our own pictograms (components/service-icon.tsx): one per service and planned item. */
+export type ServiceIconName =
+  | "rough-cut"
+  | "captions"
+  | "export"
+  | "review"
+  | "audit"
+  | "next"
+  | "publish"
+  | "shorts"
+  | "broll"
+  | "outcomes"
+  | "memory"
+  | "render";
+
 export const statusLabels: Record<ServiceStatus, string> = {
   first: "First release",
   beta: "Beta",
@@ -38,7 +53,7 @@ export const heroSlides = [
     status: "first" as ServiceStatus,
     eyebrow: "AI first-pass editing",
     heading: "Every pause and retake, marked for you.",
-    lead: "Silences, filler words and restarted intros show up as suggested cuts on your transcript. You approve every one, then open the cut in your own editor.",
+    lead: "Suggested cuts on your transcript. You approve every one.",
     cta: { label: "Try the demo", href: "#try-it" },
   },
   {
@@ -47,7 +62,7 @@ export const heroSlides = [
     status: "first" as ServiceStatus,
     eyebrow: "Captions, chapters, titles",
     heading: "Captions that follow every cut.",
-    lead: "Cut a sentence and its caption goes with it. Chapters, a title, a description and thumbnail ideas are drafted from what you actually said, for you to rewrite.",
+    lead: "Plus chapters, a title, a description and thumbnail ideas, drafted from what you said.",
     cta: { label: "See everything you get", href: "#features" },
   },
   {
@@ -56,7 +71,7 @@ export const heroSlides = [
     status: "beta" as ServiceStatus,
     eyebrow: "Review with your editor",
     heading: "Hand your editor a clean first pass.",
-    lead: "Invite an editor or a reviewer. They comment on exact moments and approve the cut in the browser, then it opens in Premiere Pro, DaVinci Resolve or Final Cut Pro.",
+    lead: "Comments on exact moments and approval in the browser. Then it opens in their editor.",
     cta: { label: "How hand-off works", href: "#features" },
   },
   {
@@ -65,7 +80,7 @@ export const heroSlides = [
     status: "beta" as ServiceStatus,
     eyebrow: "Free Channel Audit",
     heading: "See what your channel is already telling you.",
-    lead: "Connect YouTube read-only. Each video is compared with your own channel's usual results, your topics are grouped, and you get a handful of insights, each with the evidence behind it.",
+    lead: "Read-only. Each video compared with your own usual results, with the evidence.",
     cta: { label: "How the Audit works", href: "#channel-audit" },
   },
   {
@@ -74,7 +89,7 @@ export const heroSlides = [
     status: "beta" as ServiceStatus,
     eyebrow: "Recommendations",
     heading: "Know what to film next, and why.",
-    lead: "Ideas built on what actually worked on your channel, with the evidence and a confidence level. You decide. The next video then starts in the editor.",
+    lead: "Ideas built on what worked on your channel, with a confidence level. You decide.",
     cta: { label: "See a recommendation", href: "#next-video" },
   },
 ];
@@ -84,6 +99,7 @@ export const carouselCopy = {
   pause: "Pause slideshow and video",
   play: "Play slideshow and video",
   next: "Next slide",
+  autoplayNote: "This slideshow moves on by itself. Use the pause button to stop it.",
   slideOf: (index: number, total: number) => `${index} of ${total}`,
 };
 
@@ -91,7 +107,7 @@ export const services = {
   index: "01",
   eyebrow: "Everything it does",
   heading: "From raw footage to your next video.",
-  lead: `${name} is one loop: cut the video you just filmed, finish it with your editor, learn from how your channel is doing, and start the next one with a better idea. Here's all of it, honestly labelled.`,
+  lead: `${name} is one loop: cut the video, finish it with your editor, learn from your channel, plan the next one. Each service shows its honest status.`,
   cards: [
     {
       id: "rough-cut",
@@ -144,16 +160,6 @@ export const services = {
     example: "Example",
     more: (title: string) => `More about ${title}`,
   },
-  loopHeading: "The loop",
-  loop: [
-    { step: "Film", status: null },
-    { step: "Cut", status: "first" as ServiceStatus },
-    { step: "Review", status: "beta" as ServiceStatus },
-    { step: "Export", status: "first" as ServiceStatus },
-    { step: "Publish", status: "later" as ServiceStatus },
-    { step: "Learn", status: "beta" as ServiceStatus },
-    { step: "Next idea", status: "beta" as ServiceStatus },
-  ],
 };
 
 export const audit = {
@@ -294,31 +300,37 @@ export const roadmap = {
 
 export type MenuItem = {
   id: string;
-  /** Two-letter tile, in the spirit of app icons. */
-  mark: string;
+  icon: ServiceIconName;
   title: string;
   body: string;
   status: ServiceStatus;
   href: string;
 };
 
-/** Two-letter tiles for the services, shared by the Product menu and the services row. */
-export const serviceMarks: Record<string, string> = {
-  "rough-cut": "Rc",
-  captions: "Cc",
-  export: "Ex",
-  review: "Rv",
-  audit: "Au",
-  next: "Nx",
+/** The pictogram for each service, by its id. */
+export const serviceIcons: Record<string, ServiceIconName> = {
+  "rough-cut": "rough-cut",
+  captions: "captions",
+  export: "export",
+  review: "review",
+  audit: "audit",
+  next: "next",
 };
 
-/** Two-letter tiles for the roadmap items, in the same order as roadmap.items. */
-export const laterMarks = ["Pu", "Sh", "Br", "Ot", "Cm", "Cr"];
+/** The pictograms for the roadmap items, in the same order as roadmap.items. */
+export const laterIcons: ServiceIconName[] = [
+  "publish",
+  "shorts",
+  "broll",
+  "outcomes",
+  "memory",
+  "render",
+];
 
 function serviceItem(id: string): MenuItem {
   const card = services.cards.find((item) => item.id === id);
   if (!card) throw new Error(`Product menu: unknown service "${id}"`);
-  return { ...card, mark: serviceMarks[id] ?? "··", href: `/${card.href}` };
+  return { ...card, icon: serviceIcons[id] ?? "rough-cut", href: `/${card.href}` };
 }
 
 /**
@@ -347,7 +359,7 @@ export const productMenu = {
       label: "Coming later",
       items: roadmap.items.map((item, index): MenuItem => ({
         id: `later-${index}`,
-        mark: laterMarks[index] ?? "··",
+        icon: laterIcons[index] ?? "publish",
         title: item.title,
         body: item.body,
         status: "later",

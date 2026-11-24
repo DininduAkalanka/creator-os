@@ -15,9 +15,7 @@ export function DocPage(props: {
     <div>
       <article className={`${container} max-w-3xl py-16 sm:py-24`}>
         {props.eyebrow && <p className="text-lg font-semibold text-muted">{props.eyebrow}</p>}
-        <h1 className="display mt-3 text-5xl leading-[1.02] font-black tracking-[-0.025em] sm:text-6xl">
-          {props.title}
-        </h1>
+        <h1 className="display mt-3 text-5xl sm:text-6xl">{props.title}</h1>
         {props.updated && <p className="detail mt-5 text-faint">{props.updated}</p>}
         {props.legal && (
           <div className="mt-8">
