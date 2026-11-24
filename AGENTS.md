@@ -24,7 +24,7 @@ The product name is **not final**. "CreatorOS" / `creatoros` is the internal cod
 
 | # | File | Use |
 | --- | --- | --- |
-| 1 | `docs/00_Decision_Log.md` | ADR-001 to 023. **Wins over everything.** |
+| 1 | `docs/00_Decision_Log.md` | ADR-001 to 025. **Wins over everything.** |
 | 2 | `docs/26_Revised_SaaS_Foundation_and_Unit_Economics.md` | Scope, MVP in/out, pricing, metering, data additions (§14) |
 | 3 | `docs/Implementation_Plan.md` | Steps, exit tests, data model v1, engineering standards, beta metrics |
 | 4 | `docs/engineering/PROGRESS.md` | Where we are now, what's next, open questions |

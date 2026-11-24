@@ -1,9 +1,9 @@
 # CreatorOS — Engineering Plan (milestone M0)
 
-**Status:** Approved for M1 by the founder on 24 November 2026; M1 is built (see "As built in M1" in section 2). M3 and M4 need their own approval before code.
+**Status:** Approved for M1 by the founder on 24 November 2026; M1 and M2 are built (see "As built in M1" and "As built in M2" in section 2). M3 and M4 need their own approval before code.
 **Written:** 20 November 2026, on branch `docs/m0-engineering-plan`.
 **Covers:** Step 1 — Foundation, milestones M1 to M7 in [prompts/01_KICKOFF_foundation.md](../../prompts/01_KICKOFF_foundation.md).
-**Rule:** this plan follows the [Decision Log](../00_Decision_Log.md) (ADR-001 to 023). Where it recommends a change, the change is listed as a proposal (P-01, P-02, …) in [PROGRESS.md](./PROGRESS.md). Nothing here edits an accepted ADR.
+**Rule:** this plan follows the [Decision Log](../00_Decision_Log.md) (ADR-001 to 025). Where it recommends a change, the change is listed as a proposal (P-01, P-02, …) in [PROGRESS.md](./PROGRESS.md). Nothing here edits an accepted ADR.
 
 ---
 
@@ -43,7 +43,7 @@ Dockerfiles live next to the app they build (`apps/api/Dockerfile`, `apps/worker
 
 | Package | Purpose | May import (internal) |
 | --- | --- | --- |
-| `packages/contracts` | The single source of enums, schemas, errors and IDs | **Nothing internal** (external: `zod`, `uuid`) |
+| `packages/contracts` | The single source of enums, schemas, errors and IDs | **Nothing internal** (external: `zod`, `uuid`, `@asteasolutions/zod-to-openapi`) |
 | `packages/config` | Shared tool presets | Nothing (dev-only) |
 | `packages/db` | Schema, migrations, tenancy helpers | `contracts` |
 | `packages/ai` | Model and speech-to-text gateways | `contracts` |
@@ -129,6 +129,15 @@ Re-checked with `pnpm view` when installed. Differences from the table above:
 - **No `@nestjs/cli`:** builds use `tsc`, and `pnpm dev` uses `packages/config/bin/dev-node.mjs` (tsc --watch + node --watch).
 - `@tanstack/react-query`, `tailwindcss` and `shadcn` were not added yet: nothing in M1 uses them (the app shell is M7).
 - Workspace packages export `"@creatoros/source"` (source, read only by the import rules), `"types"` and `"default"` (both from `dist/`).
+
+### As built in M2 (24 November 2026)
+
+What `packages/contracts` holds and why: [CONTRACTS.md](./CONTRACTS.md). Differences from the table above:
+
+- **`uuid` 14.0.3 arrived in M2**, not M3, because the ID schema in contracts also generates IDs (`newId()`, section 5).
+- **`@vitest/coverage-v8` 5.1.1 arrived in M2**, in `packages/contracts`, the first package that measures coverage. Its `pnpm test` fails below 95%.
+- **`@asteasolutions/zod-to-openapi` 9.1.0 is used without `extendZodWithOpenApi`.** Component names come from zod's `.meta({ id })`, so importing contracts never patches zod's prototype (the web app imports contracts too).
+- `zod` 4.6.7 and `@asteasolutions/zod-to-openapi` 9.1.0 as in the table. All four packages were re-checked with `pnpm view`, were older than pnpm's one-day release age, and `pnpm audit --prod` found no known vulnerabilities.
 
 ---
 

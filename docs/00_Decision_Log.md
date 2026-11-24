@@ -5,7 +5,7 @@
 
 **Status values:** Accepted · Superseded · Proposed
 
-The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan. The background for ADR-014 to ADR-019 is in [Document 26 — Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md). ADR-020 records the founder's market decision of 20 November 2026; its numbers come from the Doc 26 model re-run with one global price. ADR-021 to ADR-023 record the founder's approval, on 24 November 2026, of the engineering plan's proposals ([PLAN.md](./engineering/PLAN.md); the proposals are in [PROGRESS.md](./engineering/PROGRESS.md)).
+The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan. The background for ADR-014 to ADR-019 is in [Document 26 — Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md). ADR-020 records the founder's market decision of 20 November 2026; its numbers come from the Doc 26 model re-run with one global price. ADR-021 to ADR-023 record the founder's approval, on 24 November 2026, of the engineering plan's proposals ([PLAN.md](./engineering/PLAN.md); the proposals are in [PROGRESS.md](./engineering/PROGRESS.md)). ADR-024 and ADR-025 record the founder's approval, the same day, of the contract details built in M2 ([CONTRACTS.md](./engineering/CONTRACTS.md)).
 
 ---
 
@@ -16,8 +16,8 @@ The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan
 | 001 | MVP scope | **Accepted (revised 20 Nov 2026)** |
 | 002 | Tenancy and roles | **Accepted (revised 20 Nov 2026)** |
 | 003 | Domain language | Accepted |
-| 004 | Canonical states | Accepted (extended 20 Nov 2026) |
-| 005 | API conventions | Accepted |
+| 004 | Canonical states | Accepted (extended 20 Nov 2026; transitions in ADR-024) |
+| 005 | API conventions | Accepted (codes and limits in ADR-025) |
 | 006 | Stack | Accepted (Redis superseded by ADR-021; PostgreSQL version by ADR-022) |
 | 007 | ORM | Accepted |
 | 008 | Workflow execution | Accepted (BullMQ and the outbox superseded by ADR-021) |
@@ -36,6 +36,8 @@ The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan
 | 021 | Job queue in PostgreSQL | **Accepted (24 Nov 2026)** |
 | 022 | Data layer baseline | **Accepted (24 Nov 2026)** |
 | 023 | Sign-in with Better Auth; the organization header | **Accepted (24 Nov 2026)** |
+| 024 | State transitions | **Accepted (24 Nov 2026)** |
+| 025 | Error codes and response details | **Accepted (24 Nov 2026)** |
 
 ---
 
@@ -314,3 +316,35 @@ We will **not** build, in the MVP or Phase 2 without a new ADR:
 **Why:** the tenancy rules (ADR-002) stay in tables we control and test; there is no per-user fee; and a header keeps URLs clean and works the same for the web app and the generated API client.
 
 **Supersedes:** nothing. It chooses within ADR-009 and fills a gap the docs left open.
+
+## ADR-024 — State transitions
+
+**Decision (founder, 24 November 2026; was proposal P-12):**
+
+- Each ADR-004 lifecycle has one transition map in `packages/contracts`. `assertTransition` refuses every move its map doesn't list, with `INVALID_STATE_TRANSITION` (HTTP 409). The tables, with the source of each move, are in [CONTRACTS.md §2](./engineering/CONTRACTS.md).
+- The maps follow ADR-004's order, plus moves for documented behaviour: plan approval, cancel, retrying a failed step, request changes or reject, partial re-runs that mark downstream steps STALE, retention and expiry.
+- Rules worth knowing:
+  - a reviewer can flip a cut between ACCEPTED and REJECTED;
+  - a recommendation can be accepted or dismissed straight from NEW;
+  - in the MVP an approved content is archived from APPROVED;
+  - a workflow run can be cancelled from any unfinished state;
+  - an approval decision is final, and the next review round is a new approval.
+- Staying in the same state is never a transition. Moves no document covers (PROGRESS.md Q15) stay refused until a feature needs one and a reviewed contracts change adds it.
+
+**Why:** ADR-004 lists the states but not most of the moves. One agreed map keeps the database, the API and the UI from each guessing (Implementation Plan, problem 4).
+
+**Supersedes:** nothing. It completes ADR-004.
+
+## ADR-025 — Error codes and response details
+
+**Decision (founder, 24 November 2026; was proposal P-13):**
+
+- The error catalog has one code per error category in Doc 17 §51, with an HTTP status from Doc 11 §11, plus `INVALID_STATE_TRANSITION`: `BAD_REQUEST` 400, `UNAUTHENTICATED` 401, `FORBIDDEN` 403, `NOT_FOUND` 404, `CONFLICT` 409, `INVALID_STATE_TRANSITION` 409, `VALIDATION_FAILED` 422, `RATE_LIMITED` 429, `INTERNAL_ERROR` 500, `PROVIDER_FAILED` 502, `SERVICE_UNAVAILABLE` 503.
+- New codes arrive with the milestone that needs them (idempotency in M6, usage limits in T2.2), each in its own contracts commit.
+- One generic `NOT_FOUND`, with `details.resource`, instead of a code per resource.
+- The envelopes are strict: `{data, meta}` and `{error: {code, message, requestId, details?}}`, with no other fields.
+- Lists return pages of 20 by default and 100 at most, with an opaque base64url cursor, `meta.nextCursor` set to null on the last page, and no total count.
+
+**Why:** ADR-005 fixes the shape but not the codes or the limits. Doc 11's examples (`PROJECT_NOT_FOUND`, `page=1&limit=20`) predate it.
+
+**Supersedes:** nothing. It completes ADR-005.

@@ -3,9 +3,10 @@
 **Start here:**
 
 1. [Document 26 — Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md): what we build first, pricing, and whether it makes a profit.
-2. [Decision Log](./00_Decision_Log.md): the decisions (ADR-001 to 023; ADR-020 sets the worldwide market focus; ADR-021 to 023 the job queue, data layer and sign-in). **It wins over every other document.**
+2. [Decision Log](./00_Decision_Log.md): the decisions (ADR-001 to 025; ADR-020 sets the worldwide market focus; ADR-021 to 023 the job queue, data layer and sign-in; ADR-024 and 025 the state transitions and error codes). **It wins over every other document.**
 3. [Implementation Plan](./Implementation_Plan.md): the step-by-step build plan, a copy of the live plan doc.
 4. [Engineering progress](./engineering/PROGRESS.md): where the build is now; the coding agent keeps it up to date.
+5. [Contracts reference](./engineering/CONTRACTS.md): the state machines, error codes, envelopes, pagination and IDs that every layer shares (built in M2).
 
 Coding agents: start with [AGENTS.md](../AGENTS.md) and the [prompt kit](../prompts/README.md).
 
