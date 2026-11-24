@@ -31,7 +31,7 @@ Finish **Step 1 — Foundation**. The exit test, from the plan: *a user signs up
   - `current_setting('app.current_org_id', true)`;
 - how sign-up creates the first organization before any org context exists. Choose one of: a narrow `SECURITY DEFINER` function, or a separate privileged bootstrap path. Explain the trade-off.
 - the UUID v7 strategy: generate in the app, or use Postgres 18's `uuidv7()` if the target managed Postgres supports it;
-- the test strategy for tenancy, idempotency and the outbox;
+- the test strategy for tenancy, idempotency and the job queue (ADR-021);
 - risks and open questions.
 
 Then stop. I approve the plan before M1.
@@ -58,7 +58,7 @@ Then stop. I approve the plan before M1.
 *Exit:* unit tests cover every allowed transition and a sample of forbidden ones; contracts coverage is at least 95%.
 
 **M3 — Database and tenancy.** (Plan approval needed before code.)
-- `docker-compose.yml` with Postgres + pgvector, Redis and MinIO, all with healthchecks.
+- `docker-compose.yml` with PostgreSQL 18 + pgvector and the local S3 image (ADR-022), both with healthchecks.
 - `packages/db` with Drizzle.
 - Migration 001: `users`, `organizations`, `memberships` (role OWNER / EDITOR / REVIEWER) and `audit_logs`, with the roles and RLS from PLAN.md.
 - A `withOrgTx(orgId, fn)` helper and a deterministic seed script.
@@ -68,10 +68,10 @@ Then stop. I approve the plan before M1.
 2. a query with no org context returns no tenant rows;
 3. migrations from an empty database are repeatable.
 
-**M4 — Auth and personal organization.** **Stop before starting** and ask me to confirm the auth provider. My recommendation is Better Auth (self-hosted, data in our Postgres, no per-user fee); the alternative is Clerk. Then build:
+**M4 — Auth and personal organization.** Better Auth (ADR-023), with our own `organizations` and `memberships` tables, not its organization plugin. Plan approval needed before code (it touches auth). Then build:
 - sign-up and sign-in with Google and email;
 - an HttpOnly session cookie;
-- an API guard that resolves user → membership → org → role;
+- an API guard that resolves user → membership → org → role, the org coming from the `X-Organization-Id` header or, without it, the personal organization (ADR-023);
 - a personal organization created idempotently on first sign-in.
 
 *Exit:* an end-to-end test shows sign-up → org created → `GET /api/v1/me` returns that org. A second user gets 404 on the first user's org resources, and RLS blocks the read even when the guard is bypassed in a test.
@@ -82,7 +82,7 @@ Then stop. I approve the plan before M1.
 - an exception filter that returns the error envelope, and an envelope interceptor;
 - rate limiting;
 - CORS for the app domain;
-- `/health` and `/ready` (checks DB and Redis);
+- `/health` and `/ready` (checks the database);
 - OpenAPI served at `/api/v1/openapi.json`, plus a typed client generated into `packages/api-client`;
 - pino with redaction;
 - OpenTelemetry tracing;
@@ -90,8 +90,8 @@ Then stop. I approve the plan before M1.
 
 *Exit:* contract tests for the success and error shapes, and `apps/web` uses the generated client for `/me`.
 
-**M6 — Worker, outbox and idempotency.**
-- An `outbox_events` table (with RLS) and an outbox relay in `apps/worker` that feeds BullMQ.
+**M6 — Worker, job queue and idempotency.**
+- The PostgreSQL job queue (ADR-021): compare pg-boss, Graphile Worker and BullMQ's PostgreSQL support, pick one and record why in PROGRESS.md, and enqueue jobs in the same transaction as the state change.
 - An `idempotency_keys` table plus middleware for `Idempotency-Key`.
 - A sample `noop.echo` job that proves:
   - the enqueue is transactional;
@@ -100,7 +100,7 @@ Then stop. I approve the plan before M1.
   - duplicate deliveries are handled idempotently;
   - the org context is set inside the worker.
 
-*Exit:* integration tests for a crash between commit and enqueue, duplicate delivery, and an Idempotency-Key replay.
+*Exit:* integration tests for a rolled-back transaction (no job), a committed one (the job runs, even after a worker restart), duplicate delivery, and an Idempotency-Key replay.
 
 **M7 — App shell and deploy config.**
 - The web app shell: navigation for Contents, Review, Channel Audit and Settings, with empty states.

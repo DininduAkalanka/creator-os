@@ -40,7 +40,7 @@ Run them in this order. Each line gives the scope and the exit test to put in th
 | --- | --- | --- |
 | T2.1 | Contents and workflow engine: `contents`, `workflow_runs`, `workflow_steps`, templates (talking-head, screen-recording, podcast), cancel, retries, partial re-run that marks downstream steps STALE | Integration tests for start, cancel, retry, re-run → STALE, and cross-tenant isolation |
 | T2.2 | Entitlements and `usage_ledger` (minimal): plan limits in footage minutes, a check before expensive steps | A job is refused with a clear error code once a test org is over its limit; the ledger row and the job start share one transaction |
-| T2.3 | Audio-first upload: browser audio extraction (from spike C6), presigned multipart upload to MinIO/R2, `media_assets`, ffprobe validation in the worker, full-upload fallback with 7-day deletion | A 1-hour file uploads its audio in minutes on a throttled connection; invalid files are rejected with a clear error |
+| T2.3 | Audio-first upload: browser audio extraction (from spike C6), presigned multipart upload to local S3/R2, `media_assets`, ffprobe validation in the worker, full-upload fallback with 7-day deletion | A 1-hour file uploads its audio in minutes on a throttled connection; invalid files are rejected with a clear error |
 | T2.4 | `SttGateway` and the transcription step: port the concierge C1 code, language routing config, `transcripts` and `transcript_words`, cost logged | The transcript appears for English with filler words kept (verbatim setting on); cost is recorded per footage minute |
 | T2.5 | Cut detection step: port C2 into `packages/media` and the AI worker; `edit_decision_lists` and `edit_decisions` | EDL generated and stored with versions; matches the concierge output on the same file |
 | T2.6 | Review UI: transcript with cuts highlighted, proxy or audio preview that skips cut ranges, accept/reject (single and by type), captions editor | A creator reviews a 20-minute video using only the keyboard; every decision persists |
@@ -69,7 +69,7 @@ Run them in this order. Each line gives the scope and the exit test to put in th
 
 | ID | Task | Exit test |
 | --- | --- | --- |
-| T5.1 | Billing via the merchant of record: checkout, idempotent webhooks, entitlement sync, regional prices | Replaying a webhook doesn't double-grant; downgrades enforce limits |
+| T5.1 | Billing via the merchant of record: checkout, idempotent webhooks, entitlement sync, one USD price list (ADR-020) | Replaying a webhook doesn't double-grant; downgrades enforce limits |
 | T5.2 | Internal cost dashboard: cost per workflow, per org, per footage hour | Matches the `ai_generations` and `usage_ledger` totals |
 | T5.3 | Storage lifecycle: proxy and original deletion jobs | Files past retention are gone; tested with fake time |
 | T5.4 | Security pass, runbooks (failed job, revoked token, provider outage, quota), backup restore drill | Doc 14 P0 release gate passes |

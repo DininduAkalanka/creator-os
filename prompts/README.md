@@ -22,4 +22,6 @@ These files set up any AI coding agent (Claude Code, Codex, Cursor and others) t
 
 ## Your first message
 
-> Read AGENTS.md and prompts/01_KICKOFF_foundation.md, then do milestone M0 only.
+> Continue with the next milestone in prompts/01_KICKOFF_foundation.md. Read AGENTS.md and docs/engineering/PROGRESS.md first.
+
+M0 and M1 are done; PROGRESS.md always names the next milestone.

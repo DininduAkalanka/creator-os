@@ -10,6 +10,7 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "lint:deps": "depcruise apps packages --config packages/config/dependency-cruiser.cjs",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
@@ -20,6 +21,7 @@
     "docker:down": "docker compose --profile site down"
   },
   "devDependencies": {
+    "dependency-cruiser": "18.9.0",
     "prettier": "3.10.1",
     "turbo": "2.11.13",
     "typescript": "6.0.3"
