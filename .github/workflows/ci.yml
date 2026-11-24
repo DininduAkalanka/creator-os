@@ -39,6 +39,22 @@ jobs:
       # nothing internal, the web app never imports server packages, and so on.
       - run: pnpm lint:deps
 
+  integration:
+    name: Integration tests (PostgreSQL, tenancy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Testcontainers starts the same PostgreSQL 18 image as compose.yaml on the runner's Docker.
+      # Cross-tenant isolation, forced RLS, the bootstrap and repeatable migrations (PLAN.md §6).
+      - run: pnpm test:int
+
   e2e:
     name: End-to-end and accessibility tests
     runs-on: ubuntu-latest

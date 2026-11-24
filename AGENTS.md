@@ -119,7 +119,7 @@ tools/
   - IDs are UUID v7, generated in the app (ADR-022).
   - Use `timestamptz`, money in integer cents, durations in milliseconds.
 - **Queue.** A PostgreSQL-native job queue (ADR-021); the library is chosen in M6. No Redis in the MVP.
-- **Storage.** S3 API: a maintained S3-compatible image locally (chosen in M3, ADR-022), Cloudflare R2 in production.
+- **Storage.** S3 API: RustFS locally (chosen in M3 under ADR-022; code uses only the S3 API), Cloudflare R2 in production.
 - **Tests.**
   - Vitest for unit tests.
   - Testcontainers (real PostgreSQL) for integration tests.
@@ -152,15 +152,12 @@ pnpm test:e2e                 # Playwright end-to-end + axe accessibility tests 
 pnpm --filter @creatoros/www media   # photos/posters in apps/www/media-src/ -> web-ready JPEGs
 pnpm --filter @creatoros/www logo    # logo PNGs in apps/www/media-src/brand/ -> SVG paths, favicon, app icon
 pnpm docker:www               # website production image in Docker -> http://localhost:3000
-pnpm docker:down              # stop it
-```
-
-Not available yet (added in later milestones):
-
-```bash
-docker compose up -d          # PostgreSQL 18 + pgvector and local S3 (M3, ADR-022)
-pnpm db:migrate               # apply migrations
-pnpm test:int                 # integration tests (Testcontainers)
+pnpm docker:down              # stop and remove the website container only
+docker compose up -d          # PostgreSQL 18 + pgvector (db) and local S3 (s3); passwords from .env (see .env.example)
+docker compose stop           # stop db and s3, keeping their data (`docker compose down --volumes` deletes it)
+pnpm db:migrate               # apply migrations as creatoros_migrator (URLs in packages/db/.env.local)
+pnpm db:seed                  # development seed: 2 users, 2 organizations; refuses NODE_ENV=production
+pnpm test:int                 # integration tests: Testcontainers starts PostgreSQL 18 (needs Docker running)
 ```
 
 Website look and behaviour: follow `docs/design/website-design.md` (tokens, type, motion, quality bar).
