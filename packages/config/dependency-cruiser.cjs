@@ -5,6 +5,11 @@
  *
  * @type {import("dependency-cruiser").IConfiguration}
  */
+
+// A package's own tool configuration (eslint.config.mjs, vitest.config.ts and so on), at its root.
+// The product-code rules don't apply to these; tool-config-uses-only-presets does instead.
+const PACKAGE_TOOL_CONFIG = "^packages/[^/]+/[^/]+\\.config\\.[cm]?[jt]s$";
+
 module.exports = {
   forbidden: [
     {
@@ -25,15 +30,23 @@ module.exports = {
       name: "contracts-imports-nothing-internal",
       comment: "packages/contracts imports nothing internal (AGENTS.md §3).",
       severity: "error",
-      from: { path: "^packages/contracts/" },
+      from: { path: "^packages/contracts/", pathNot: PACKAGE_TOOL_CONFIG },
       to: { path: "^(apps|packages|tools)/", pathNot: "^packages/contracts/" },
     },
     {
       name: "packages-only-depend-on-contracts",
       comment: "db, ai, media, api-client and ui may import only contracts (PLAN.md §1).",
       severity: "error",
-      from: { path: "^packages/(db|ai|media|api-client|ui)/" },
+      from: { path: "^packages/(db|ai|media|api-client|ui)/", pathNot: PACKAGE_TOOL_CONFIG },
       to: { path: "^packages/", pathNot: "^packages/(contracts|$1)/" },
+    },
+    {
+      name: "tool-config-uses-only-presets",
+      comment:
+        "A package's tool configuration may import the shared presets (packages/config) and its own package, nothing else internal.",
+      severity: "error",
+      from: { path: "^packages/([^/]+)/[^/]+\\.config\\.[cm]?[jt]s$" },
+      to: { path: "^(apps|packages|tools)/", pathNot: ["^packages/config/", "^packages/$1/"] },
     },
     {
       name: "web-no-server-packages",

@@ -32,6 +32,9 @@ describe("import rules (AGENTS.md §3, PLAN.md §1)", () => {
         "contracts-imports-nothing-internal: packages/contracts/src/index.ts -> packages/ui/src/index.ts",
         "packages-only-depend-on-contracts: packages/db/src/index.ts -> packages/ui/src/index.ts",
         "no-package-to-app: packages/db/src/index.ts -> apps/worker/src/main.ts",
+        // packages/db/eslint.config.mjs may use the shared preset; a tool config reaching into
+        // another package's code may not.
+        "tool-config-uses-only-presets: packages/ui/vitest.config.ts -> packages/db/src/index.ts",
         // A cycle is reported once, at the first edge found, not once per edge.
         "no-circular: packages/media/src/index.ts -> packages/media/src/loop.ts",
       ].sort(),
