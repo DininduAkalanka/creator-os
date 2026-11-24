@@ -7,3 +7,9 @@ packages:
 allowBuilds:
   sharp: false
   unrs-resolver: false
+  # packages/db dev tools (M3), checked to work without their scripts: esbuild (drizzle-kit loads
+  # the TypeScript schema with it), and testcontainers' optional SSH speed-ups and a version check.
+  esbuild: false
+  ssh2: false
+  cpu-features: false
+  protobufjs: false
