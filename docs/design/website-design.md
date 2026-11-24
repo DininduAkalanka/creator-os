@@ -1,6 +1,6 @@
 # Website design: research, system and quality bar
 
-Status: v6.4 of the pre-launch site (`apps/www`), 23 Nov 2026: **light first** (§11), **adobe.com-style type** (§12), **the services as a guided tour** (§13), **our own service icons, an adobe.com-style hero and menu, how it works in pictures** (§14), **full width on large screens and calmer loading** (§15). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11 to §15, the later section wins.
+Status: v7 of the pre-launch site (`apps/www`), 24 Nov 2026: **light first** (§11), **adobe.com-style type** (§12), **the services as a guided tour** (§13), **our own service icons, an adobe.com-style hero and menu, how it works in pictures** (§14), **full width on large screens and calmer loading** (§15), **production polish after studying Notion and UptimeRobot** (§16). Read this before changing how the site looks or behaves. Sections 2 to 10 record earlier versions; where they disagree with §11 to §16, the later section wins.
 
 ## 1. What we learned from production sites
 
@@ -423,3 +423,31 @@ On large screens a numbered rail joins the steps and draws itself as they scroll
 **Links that worked only once (same family):** a section link clicked a second time, for example "Plans" or "Join early access" after scrolling away, also did nothing, because the address was already `/#plans`. One site-wide listener (`SectionLinkScroll`) now scrolls the section back into view when a Next.js link to the current page and the current `#section` is clicked; plain links and new-tab clicks are left alone. Tested with the hero's "Join early access" clicked twice (failed before the fix).
 
 **The editor demo no longer jumps in.** It used to load when scrolled near, behind a stand-in box of a fixed height, but its real height depends on the screen width (434 to 599 px), so the page below jumped by up to 55 px when it arrived (+35 px on a Pixel 7, -26 px on a 768 px tablet), and section links could land 35 px off. Its code is only 6 KB (against 561 KB of JavaScript already on the page), so it now comes with the page and the stand-in is gone. Main-thread blocking on a 4×-slowed phone, alternating runs: median 320 ms before, 293 ms after (within noise); CLS 0. Lighthouse failed every run that hour (`NO_NAVSTART`).
+
+## 16. v7: production polish after studying Notion and UptimeRobot (24 Nov 2026)
+
+**Why:** the founder judged the site not yet production-grade and pointed to adobe.com, notion.com, uptimerobot.com and canva.com. Notion and UptimeRobot were measured in a browser at 1440 × 900 and 390 × 844; adobe.com and canva.com refuse automated browsers (Access Denied, 403), so adobe.com rests on the Milo study in §15 and Canva was not studied.
+
+| | Notion | UptimeRobot | This site (v6.4) |
+| --- | --- | --- | --- |
+| Home page length, desktop | about 4,700 px | about 9,800 px | about 16,900 px |
+| Headline weight | 600, letter spacing about -0.048em | 600, about -0.04em | 900 (black) |
+| Section headings | 54 px, 700 | 36 px, 600 | 68 px, 800 |
+| Buttons | 8 px corners, 36 to 38 px tall, weight 500 | pills and 12 px cards | bold pills |
+| First thing after the headline | the product, in an app window | the product dashboard | a photo or video |
+
+**What production sites share:** the product itself near the top; one accent colour for actions; calm cards with a short title, one line and a product picture; real social proof (logos, ratings, testimonials); a short page that says each thing once; and no "unfinished" signals.
+
+**What changed:**
+
+- **Type:** display headings are bold (700, letter spacing -0.03em; the hero -0.035em), no longer black; section headings 56 px instead of 68 px.
+- **Unfinished signals removed or calmed, the honesty kept:**
+  - the red uppercase preview strip is a neutral announcement bar ("Preview · This site is not launched yet", with the launch list behind it);
+  - AI labels are small sentence-case captions instead of uppercase badges, still on every AI photo and video;
+  - the footer no longer prints "[to be added]": it shows only company details we have, and the preview bar lists what is missing;
+  - the six identical "Later" badges in the roadmap band are gone (the band is titled "Where it goes after the beta").
+- **Less repetition:** "The loop" strip under the services tour is gone, and "Everything the first pass needs" became one compact grid of seven product cards (rough cut, captions, footage stays local, hand-off, chapters, thumbnail ideas, what CreatorOS is not), each a title, a line and a small product picture drawn in code, like Notion's cards. It replaces four alternating photo rows with "03 / 04" counters. The page is about 1,900 px shorter on desktop and 1,550 px on phones.
+
+**Measured:** 95 end-to-end tests pass, 11 skipped by design; axe finds no WCAG 2.2 AA violations (the first run caught a 4.14:1 timecode in the new captions card, fixed before commit). The story slider's auto-advance test failed once under full-suite load and passed 6 times in a row when rerun.
+
+**Still needed for a production-grade site, and not something design can fake:** real social proof (creator quotes, a waitlist count, logos of channels using it, only when they exist), real product screenshots once the product exists, a real demo video from the founder's footage, and the final name and company details that clear the preview bar.
