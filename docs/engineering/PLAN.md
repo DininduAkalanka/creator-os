@@ -1,6 +1,6 @@
 # CreatorOS — Engineering Plan (milestone M0)
 
-**Status:** Draft, waiting for approval before M1.
+**Status:** Approved for M1 by the founder on 24 November 2026; M1 is built (see "As built in M1" in section 2). M3 and M4 need their own approval before code.
 **Written:** 20 November 2026, on branch `docs/m0-engineering-plan`.
 **Covers:** Step 1 — Foundation, milestones M1 to M7 in [prompts/01_KICKOFF_foundation.md](../../prompts/01_KICKOFF_foundation.md).
 **Rule:** this plan follows the [Decision Log](../00_Decision_Log.md) (ADR-001 to 020). Where it recommends a change, the change is listed as a proposal (P-01, P-02, …) in [PROGRESS.md](./PROGRESS.md). Nothing here edits an accepted ADR.
@@ -120,6 +120,18 @@ Rules from AGENTS.md §3: apps never import other apps; packages never import ap
 | Later | `@polar-sh/sdk`, `@polar-sh/better-auth` | 1.3.1, 2.1.5 | T5.1 billing, if P-05 is accepted |
 
 **New majors:** NestJS 12, Vitest 5, ESLint 10, TypeScript 6, Zod 4, Tailwind 4, Next 16 and React 19.3 may be newer than a coding agent's training data. Read each package's migration guide or README before writing its config, and keep PRs small.
+
+### As built in M1 (24 November 2026)
+
+Re-checked with `pnpm view` when installed. Differences from the table above:
+
+- **NestJS 12.6.0** (12.5.1 above). NestJS 12 is ESM-only, so the API is an ESM project on NodeNext.
+- **typescript-eslint 8.73.0**, as above: 8.74.0 was out but published within pnpm's one-day minimum release age, and the guard was kept rather than exempted. Both still require TypeScript below 6.1 (P-02 holds).
+- **ESLint 9.39.5** everywhere, not 10: `eslint-config-next`'s plugins don't support 10 yet (PROGRESS.md, known issues).
+- **dependency-cruiser 18.9.0** (18.8.0 above).
+- **No `@nestjs/cli`:** builds use `tsc`, and `pnpm dev` uses `packages/config/bin/dev-node.mjs` (tsc --watch + node --watch).
+- `@tanstack/react-query`, `tailwindcss` and `shadcn` were not added yet: nothing in M1 uses them (the app shell is M7).
+- Workspace packages export `"@creatoros/source"` (source, read only by the import rules), `"types"` and `"default"` (both from `dist/`).
 
 ---
 

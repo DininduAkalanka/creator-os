@@ -24,8 +24,14 @@ AGENTS.md                 standing rules for AI coding agents
 CLAUDE.md                 Claude Code entry point (imports AGENTS.md)
 apps/
   www/                    pre-launch website (Next.js): home, waitlist, privacy, terms, about
+  web/                    the CreatorOS app (Next.js, port 3001): a start page until the app shell (M7)
+  api/                    REST API under /api/v1 (NestJS 12, ESM, port 4000)
+  worker/                 background jobs (Node, ESM): starts and stops cleanly; queues arrive in M6
 packages/
-  config/                 shared TypeScript config
+  config/                 shared presets: TypeScript, ESLint, the import rules, the dev runner
+  contracts/              enums, schemas, error codes, envelope, IDs (M2); imports nothing internal
+  db/                     Drizzle schema, migrations, row-level security (M3)
+  ui/                     shared React components (M7)
 .github/                  CI (format, lint, typecheck, test, build, Docker build, secret scan, audit), Dependabot
 compose.yaml              local containers (today: the website, `pnpm docker:www`)
 prompts/                  coding-agent prompt kit (01 kickoff … 04 review)
@@ -53,10 +59,13 @@ Requirements: Node 26.13.1 (see `.nvmrc`) and pnpm 12 (the exact version is in `
 ```bash
 pnpm install
 cp .env.example .env.local    # optional: defaults work for local use
-pnpm dev                      # http://localhost:3000
-pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # run before every commit
+pnpm dev                      # website :3000, app :3001, API :4000/api/v1, and the worker
+pnpm --filter @creatoros/api dev   # one app only
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm lint:deps   # run before every commit
 pnpm test:e2e                 # end-to-end + accessibility tests (Playwright + axe; uses your installed Microsoft Edge)
 ```
+
+`pnpm lint:deps` checks the import rules: apps never import other apps, packages never import apps, `contracts` imports nothing internal, the app never imports server packages (`db`, `ai`, `media`), and no package is imported through its internal files.
 
 ### Run the website in Docker
 

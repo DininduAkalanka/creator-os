@@ -141,10 +141,11 @@ Keep these accurate whenever scripts change.
 
 ```bash
 pnpm install                  # Node 26.13.1 (.nvmrc), pnpm from "packageManager"
-pnpm dev                      # every app in watch mode (today: apps/www on http://localhost:3000)
-pnpm --filter @creatoros/www dev   # one app only
+pnpm dev                      # every app in watch mode: www :3000, web :3001, api :4000/api/v1, worker
+pnpm --filter @creatoros/api dev   # one app only (www, web, api, worker)
 pnpm format                   # fix formatting (Prettier)
-pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build   # the local gate (CI runs the same)
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm lint:deps   # the local gate (CI runs the same)
+pnpm lint:deps                # import rules (§3), dependency-cruiser; rules in packages/config/dependency-cruiser.cjs
 pnpm audit --prod --audit-level high   # dependency audit (CI runs it too)
 pnpm test:e2e                 # Playwright end-to-end + axe accessibility tests (builds first; uses installed Edge locally)
 pnpm --filter @creatoros/www media   # photos/posters in apps/www/media-src/ -> web-ready JPEGs
