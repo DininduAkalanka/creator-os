@@ -8,6 +8,7 @@ export * from "./envelope.js";
 export * from "./enums.js";
 export * from "./errors.js";
 export * from "./ids.js";
+export * from "./openapi.js";
 export * from "./pagination.js";
 export * from "./state-machine.js";
 export * from "./states.js";
