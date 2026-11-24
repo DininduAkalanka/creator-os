@@ -20,6 +20,18 @@
       "dependsOn": ["build"],
       "cache": false
     },
+    "test:int": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "migrate": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "seed": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
     "dev": {
       "cache": false,
       "persistent": true
