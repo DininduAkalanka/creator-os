@@ -1,6 +1,6 @@
 # Contracts reference (`packages/contracts`)
 
-**Status:** built in M2 on 24 November 2026, branch `feat/m2-contracts`. The transition maps (§2) and the error catalog (§4) are proposals **P-12** and **P-13** in [PROGRESS.md](./PROGRESS.md) until the founder approves them.
+**Status:** built in M2 on 24 November 2026, branch `feat/m2-contracts`. The founder approved the transition maps (§2) as **ADR-024** and the error catalog and response details (§4–5) as **ADR-025** on 24 November 2026 ([Decision Log](../00_Decision_Log.md)).
 **Rule:** the code is the source of truth, and this page explains it. Change both in the same commit, contracts first (AGENTS.md §4.2), after review (Doc 11 §89).
 **Who uses it:** the database CHECKs (M3), the API's error filter, validation and OpenAPI (M5), the workflow engine (T2.1) and the web app.
 

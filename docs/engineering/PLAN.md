@@ -3,7 +3,7 @@
 **Status:** Approved for M1 by the founder on 24 November 2026; M1 and M2 are built (see "As built in M1" and "As built in M2" in section 2). M3 and M4 need their own approval before code.
 **Written:** 20 November 2026, on branch `docs/m0-engineering-plan`.
 **Covers:** Step 1 — Foundation, milestones M1 to M7 in [prompts/01_KICKOFF_foundation.md](../../prompts/01_KICKOFF_foundation.md).
-**Rule:** this plan follows the [Decision Log](../00_Decision_Log.md) (ADR-001 to 023). Where it recommends a change, the change is listed as a proposal (P-01, P-02, …) in [PROGRESS.md](./PROGRESS.md). Nothing here edits an accepted ADR.
+**Rule:** this plan follows the [Decision Log](../00_Decision_Log.md) (ADR-001 to 025). Where it recommends a change, the change is listed as a proposal (P-01, P-02, …) in [PROGRESS.md](./PROGRESS.md). Nothing here edits an accepted ADR.
 
 ---
 
