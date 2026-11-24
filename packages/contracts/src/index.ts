@@ -5,3 +5,4 @@
  * that uses it (AGENTS.md §4.2).
  */
 export * from "./errors.js";
+export * from "./state-machine.js";
