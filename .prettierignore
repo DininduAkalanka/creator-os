@@ -16,6 +16,8 @@ pnpm-lock.yaml
 **/test-results/
 **/playwright-report/
 **/blob-report/
+# drizzle-kit's migration snapshots (packages/db/drizzle/meta), rewritten on every generate
+**/drizzle/meta/
 
 # Logo paths written by apps/www/scripts/prepare-logo.mjs
 apps/www/src/components/brand-paths.ts

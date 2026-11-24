@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1795524719781,
+      "tag": "0000_app_context",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795524720708,
+      "tag": "0001_tenancy_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795524721528,
+      "tag": "0002_tenancy_security",
+      "breakpoints": true
+    }
+  ]
+}
