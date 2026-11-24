@@ -2,11 +2,32 @@
   "name": "@creatoros/config",
   "version": "0.0.0",
   "private": true,
-  "description": "Shared tool presets (TypeScript). No runtime code.",
+  "description": "Shared tool presets: TypeScript (base, and node.json for ESM Node code such as the NestJS 12 API), ESLint for the Node packages, and the import rules (dependency-cruiser). No runtime code.",
+  "type": "module",
   "files": [
-    "tsconfig"
+    "tsconfig",
+    "eslint",
+    "dependency-cruiser.cjs"
   ],
   "exports": {
-    "./tsconfig/base.json": "./tsconfig/base.json"
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/node.json": "./tsconfig/node.json",
+    "./eslint/node": "./eslint/node.mjs",
+    "./dependency-cruiser": "./dependency-cruiser.cjs"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "typescript-eslint": "8.73.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "dependency-cruiser": "18.9.0",
+    "typescript": "6.0.3",
+    "vitest": "5.1.1"
   }
 }
