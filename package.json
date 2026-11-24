@@ -21,7 +21,7 @@
     "format:check": "prettier --check .",
     "docker:www": "docker compose up --build --detach www",
     "docker:www:logs": "docker compose logs --follow www",
-    "docker:down": "docker compose --profile site down"
+    "docker:down": "docker compose --profile site rm --stop --force www"
   },
   "devDependencies": {
     "dependency-cruiser": "18.9.0",
