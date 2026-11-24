@@ -2,8 +2,9 @@
   "name": "@creatoros/contracts",
   "version": "0.0.0",
   "private": true,
-  "description": "The single source of state enums and transitions, zod schemas, error codes, the response envelope and IDs. Imports nothing internal.",
+  "description": "The single source of state enums and transitions, zod schemas, error codes, the response envelope, pagination, IDs and the OpenAPI helpers. Imports nothing internal.",
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "@creatoros/source": "./src/index.ts",
@@ -17,7 +18,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "9.1.0",
