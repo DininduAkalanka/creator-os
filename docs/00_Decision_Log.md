@@ -1,11 +1,11 @@
 # CreatorOS — Decision Log
 
-**Last updated:** 20 November 2026
+**Last updated:** 24 November 2026
 **Rule:** this log wins over every other document. If a document disagrees with an accepted decision here, the document is out of date. Change a decision only by adding a new entry that supersedes the old one, never by editing history.
 
 **Status values:** Accepted · Superseded · Proposed
 
-The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan. The background for ADR-014 to ADR-019 is in [Document 26 — Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md). ADR-020 records the founder's market decision of 20 November 2026; its numbers come from the Doc 26 model re-run with one global price.
+The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan. The background for ADR-014 to ADR-019 is in [Document 26 — Revised SaaS Foundation & Unit Economics](./26_Revised_SaaS_Foundation_and_Unit_Economics.md). ADR-020 records the founder's market decision of 20 November 2026; its numbers come from the Doc 26 model re-run with one global price. ADR-021 to ADR-023 record the founder's approval, on 24 November 2026, of the engineering plan's proposals ([PLAN.md](./engineering/PLAN.md); the proposals are in [PROGRESS.md](./engineering/PROGRESS.md)).
 
 ---
 
@@ -18,10 +18,10 @@ The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan
 | 003 | Domain language | Accepted |
 | 004 | Canonical states | Accepted (extended 20 Nov 2026) |
 | 005 | API conventions | Accepted |
-| 006 | Stack | Accepted |
+| 006 | Stack | Accepted (Redis superseded by ADR-021; PostgreSQL version by ADR-022) |
 | 007 | ORM | Accepted |
-| 008 | Workflow execution | Accepted |
-| 009 | Auth and YouTube grant | Accepted |
+| 008 | Workflow execution | Accepted (BullMQ and the outbox superseded by ADR-021) |
+| 009 | Auth and YouTube grant | Accepted (provider chosen in ADR-023) |
 | 010 | AI gateway | Accepted |
 | 011 | No Python service in MVP | Accepted |
 | 012 | Billing | Accepted (extended 20 Nov 2026) |
@@ -33,6 +33,9 @@ The background for ADR-001 to ADR-013 is in the CTO Review & Implementation Plan
 | 018 | Regional pricing | **Superseded by ADR-020** |
 | 019 | Build order: copilot before Channel Audit | Accepted |
 | 020 | Worldwide market focus | **Accepted (20 Nov 2026)** |
+| 021 | Job queue in PostgreSQL | **Accepted (24 Nov 2026)** |
+| 022 | Data layer baseline | **Accepted (24 Nov 2026)** |
+| 023 | Sign-in with Better Auth; the organization header | **Accepted (24 Nov 2026)** |
 
 ---
 
@@ -268,3 +271,46 @@ We will **not** build, in the MVP or Phase 2 without a new ADR:
 - Doc 26 §4.2 customer group 3, the language routing in §5.1 item 3, regional pricing in §7, the South Asia assumption in §8.3, the "danger zone" in §9, the language edge in §10, and the benchmark clips, South Asia price and mixed-language check in §11.
 - The Implementation Plan's South Asia items: limit 4's reason, the pricing note, problem 12, Track A steps 3 and 5, the gate's language check, the language risk, Sinhala/Tamil/Hindi launch pages, and "public beta and India".
 - The geography in Docs 01, 04 and 05 (Sri Lanka → India → Southeast Asia → global).
+
+## ADR-021 — Job queue in PostgreSQL
+
+**Decision (founder, 24 November 2026; was proposal P-04):**
+
+- Background jobs run on a **PostgreSQL-native job queue**. The library is chosen in M6 after a short comparison: pg-boss, Graphile Worker, or BullMQ's PostgreSQL support if it proves production-ready.
+- A job is enqueued **in the same transaction** as the state change that needs it, and, for an expensive step, the `usage_ledger` row (ADR-014). If the transaction rolls back, no job exists; if it commits, the job is there. No outbox table and no relay.
+- **No Redis in the MVP.**
+- Unchanged from ADR-008: PostgreSQL holds the workflow and step state; jobs are idempotent, with retries, backoff and a dead-letter queue; "waiting for review" is a database state, not a sleeping job.
+
+**Why:**
+
+- Transactional enqueue comes for free. That removes the outbox relay, the most complex part of Step 1 (PLAN.md §9).
+- One managed service fewer to run, secure and pay for.
+- Job volume is small (a few long media and AI jobs per footage hour), well within what a PostgreSQL queue handles.
+
+**Supersedes:** ADR-006's "Redis + BullMQ" and ADR-008's "BullMQ runs the steps, and a transactional outbox enqueues the jobs". Revisit Redis, Temporal or Trigger.dev if job volume or workflow complexity outgrows PostgreSQL, as ADR-008 already allows.
+
+## ADR-022 — Data layer baseline
+
+**Decision (founder, 24 November 2026; was proposals P-03, P-06, P-07, P-08 and P-09):**
+
+- **PostgreSQL 18** with pgvector. Neon has it generally available.
+- **Drizzle 0.45.x** until 1.0 is generally available. Forced row-level security, functions and grants live in reviewed custom SQL migrations, because Drizzle doesn't generate `FORCE ROW LEVEL SECURITY`.
+- **IDs:** UUID v7, generated in the application (`uuid`'s `v7()`), so an ID is known before the insert. A database default (`uuidv7()`) can be added once PostgreSQL 18 runs everywhere.
+- **Database roles** (PLAN.md §3): `creatoros_migrator` owns the tables and runs the migrations; `app_user`, used by the API and the workers, owns nothing and cannot bypass row-level security; `auth_service` reaches only the identity tables; `tenant_bootstrap` (no login) owns the function that creates a new user's first organization.
+- **Local S3:** a maintained S3-compatible image replaces MinIO, whose community image is no longer published. The image is chosen in M3, and tests rely only on S3 API behaviour (presigned PUT, multipart upload, CORS). Cloudflare R2 stays in production.
+
+**Why:** least privilege in the database (no privileged connection pool in the API), IDs that can be used before the insert, and versions that exist and are maintained.
+
+**Supersedes:** ADR-006's "PostgreSQL 16+" (now 18), and "MinIO locally" in AGENTS.md.
+
+## ADR-023 — Sign-in with Better Auth; the organization header
+
+**Decision (founder, 24 November 2026; answers PROGRESS.md Q2 and Q3):**
+
+- **Better Auth**, self-hosted, one of ADR-009's options: Google and email sign-in and HttpOnly session cookies, with its data in our PostgreSQL and no per-user fee.
+- Better Auth's user table maps onto our `users`. **Organizations and memberships stay our own tables**, protected by row-level security; Better Auth's organization plugin is not used.
+- Each API request names its organization in an **`X-Organization-Id` header**, checked against the caller's membership. Without the header, the caller's personal organization is used. The checked organization is the one `withOrgTx` sets for the request (AGENTS.md §4).
+
+**Why:** the tenancy rules (ADR-002) stay in tables we control and test; there is no per-user fee; and a header keeps URLs clean and works the same for the web app and the generated API client.
+
+**Supersedes:** nothing. It chooses within ADR-009 and fills a gap the docs left open.

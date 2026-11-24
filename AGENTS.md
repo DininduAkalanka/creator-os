@@ -24,7 +24,7 @@ The product name is **not final**. "CreatorOS" / `creatoros` is the internal cod
 
 | # | File | Use |
 | --- | --- | --- |
-| 1 | `docs/00_Decision_Log.md` | ADR-001 to 020. **Wins over everything.** |
+| 1 | `docs/00_Decision_Log.md` | ADR-001 to 023. **Wins over everything.** |
 | 2 | `docs/26_Revised_SaaS_Foundation_and_Unit_Economics.md` | Scope, MVP in/out, pricing, metering, data additions (§14) |
 | 3 | `docs/Implementation_Plan.md` | Steps, exit tests, data model v1, engineering standards, beta metrics |
 | 4 | `docs/engineering/PROGRESS.md` | Where we are now, what's next, open questions |
@@ -57,8 +57,8 @@ tools/
 
 **Request flow:**
 1. The browser uploads to object storage through a signed URL.
-2. In **one transaction**, the API writes the state change and an `outbox_events` row.
-3. The worker relays the outbox to BullMQ and runs the steps.
+2. In **one transaction**, the API writes the state change and enqueues the job in the PostgreSQL job queue (ADR-021).
+3. A worker picks up the job and runs the steps.
 4. Workers write the results and step state back to PostgreSQL.
 
 **Import rules:** apps never import other apps. Packages never import apps. `contracts` imports nothing internal.
@@ -72,6 +72,7 @@ tools/
    - Enable RLS **and** `FORCE ROW LEVEL SECURITY` in the same migration that creates the table.
    - The app connects as `app_user`, which is not the table owner and has no `BYPASSRLS`.
    - Every request and every job runs inside `withOrgTx(orgId, fn)`, which does `SET LOCAL app.current_org_id`.
+   - A request names its organization in the `X-Organization-Id` header, checked against the caller's membership; without it, the caller's personal organization (ADR-023).
    - Every new tenant table gets a cross-tenant test.
 2. **Contracts first.** Enums, zod schemas, error codes and the envelope live in `packages/contracts`. Change them in their own commit, before the code that uses them.
 3. **API shape.**
@@ -80,7 +81,7 @@ tools/
    - Require an `Idempotency-Key` on workflow start, export and billing.
 4. **State machines.** Change state only through transition functions in contracts (`assertTransition`). Database `CHECK` constraints must match the enums.
 5. **Workflows.**
-   - PostgreSQL holds the workflow and step state; BullMQ only executes.
+   - PostgreSQL holds the workflow and step state, and the job queue (ADR-021).
    - Jobs are idempotent, with retries, backoff and a DLQ.
    - "Waiting for review" is a database state, never a sleeping job.
 6. **AI.**
@@ -114,14 +115,14 @@ tools/
 - **Node.** The current Active LTS, pinned in `.nvmrc` and `engines`. Use pnpm workspaces and Turborepo.
 - **Web.** Next.js App Router, TanStack Query, Tailwind, shadcn/ui. Use the generated typed API client, never hand-written fetch calls to our own API.
 - **API.** NestJS. Validate with zod at every edge. Generate OpenAPI from zod.
-- **DB.** PostgreSQL with pgvector, Drizzle ORM, and drizzle-kit migrations (read the generated SQL before committing).
-  - IDs are UUID v7.
+- **DB.** PostgreSQL 18 with pgvector, Drizzle ORM 0.45, and drizzle-kit migrations (read the generated SQL before committing). Database roles as in ADR-022.
+  - IDs are UUID v7, generated in the app (ADR-022).
   - Use `timestamptz`, money in integer cents, durations in milliseconds.
-- **Queue.** Redis + BullMQ.
-- **Storage.** S3 API (MinIO locally, Cloudflare R2 in production).
+- **Queue.** A PostgreSQL-native job queue (ADR-021); the library is chosen in M6. No Redis in the MVP.
+- **Storage.** S3 API: a maintained S3-compatible image locally (chosen in M3, ADR-022), Cloudflare R2 in production.
 - **Tests.**
   - Vitest for unit tests.
-  - Testcontainers (real Postgres and Redis) for integration tests.
+  - Testcontainers (real PostgreSQL) for integration tests.
   - Playwright for end-to-end tests.
   - Recorded fixtures for third-party APIs, never live creator channels.
 - **Observability.** OpenTelemetry traces; pino JSON logs that redact tokens, cookies and auth headers; Sentry.
@@ -157,7 +158,7 @@ pnpm docker:down              # stop it
 Not available yet (added in later milestones):
 
 ```bash
-docker compose up -d          # postgres+pgvector, redis, local S3 (P-03)
+docker compose up -d          # PostgreSQL 18 + pgvector and local S3 (M3, ADR-022)
 pnpm db:migrate               # apply migrations
 pnpm test:int                 # integration tests (Testcontainers)
 ```

@@ -3,7 +3,7 @@
 **Status:** Approved for M1 by the founder on 24 November 2026; M1 is built (see "As built in M1" in section 2). M3 and M4 need their own approval before code.
 **Written:** 20 November 2026, on branch `docs/m0-engineering-plan`.
 **Covers:** Step 1 — Foundation, milestones M1 to M7 in [prompts/01_KICKOFF_foundation.md](../../prompts/01_KICKOFF_foundation.md).
-**Rule:** this plan follows the [Decision Log](../00_Decision_Log.md) (ADR-001 to 020). Where it recommends a change, the change is listed as a proposal (P-01, P-02, …) in [PROGRESS.md](./PROGRESS.md). Nothing here edits an accepted ADR.
+**Rule:** this plan follows the [Decision Log](../00_Decision_Log.md) (ADR-001 to 023). Where it recommends a change, the change is listed as a proposal (P-01, P-02, …) in [PROGRESS.md](./PROGRESS.md). Nothing here edits an accepted ADR.
 
 ---
 
@@ -33,7 +33,7 @@ creator-os/
     config/         tsconfig, ESLint, Prettier, Vitest and dependency-cruiser presets (no runtime code)
   tools/
     concierge/      Track A scripts (prompts/02); become pipeline v0
-  docker-compose.yml   Postgres + pgvector, Redis, local S3 (M3)
+  docker-compose.yml   Postgres + pgvector, local S3 (M3)
   docs/  prompts/  AGENTS.md  CLAUDE.md
 ```
 
@@ -74,7 +74,7 @@ Rules from AGENTS.md §3: apps never import other apps; packages never import ap
 | Turborepo | 2.11.13 | | |
 | TypeScript | **6.0.3 — not 7.0.2** | exact | `latest` is 7.0.2, but typescript-eslint 8.73.0 requires `typescript >=4.8.4 <6.1.0` and `@thallesp/nestjs-better-auth` 2.8.0 requires `^5.9.2 \|\| ^6.0.0`. Revisit when both support 7.x (P-02) |
 | PostgreSQL | **18** + pgvector | | ADR-006 says 16+. 18 adds native `uuidv7()`; Neon has it GA and as the default (P-08). Docker image tag checked in M3 |
-| Redis | 8 (only if ADR-008 stays) | | Image tag checked in M3/M6 |
+| Redis | **Not used** (ADR-021) | | |
 
 ### Libraries, by the milestone that adds them
 
@@ -109,10 +109,7 @@ Rules from AGENTS.md §3: apps never import other apps; packages never import ap
 | M5 | `@sentry/nestjs`, `@sentry/nextjs` | 11.15.0 | DSN optional |
 | M5 | `@nestjs/throttler` | 6.8.0 | |
 | M5 | `@hey-api/openapi-ts` | 0.99.0 | generates `packages/api-client` |
-| M6 | `bullmq` | 6.7.8 | ADR-008 as accepted. Its peers list `ioredis >=5`, `redis >=5` **and `pg >=8`** — check whether 6.x can run on Postgres (affects P-04) |
-| M6 | `ioredis` | 6.0.0 | |
-| M6 | `@testcontainers/redis` | 12.2.2 | |
-| M6 alt. | `pg-boss` / `graphile-worker` | 12.38.2 / 0.18.0 | only if P-04 is accepted; node >=22.12 / >=22.18 |
+| M6 | `pg-boss` / `graphile-worker` | 12.38.2 / 0.18.0 | ADR-021: one PostgreSQL job queue, chosen in M6; BullMQ 6.7.8's PostgreSQL support is the third candidate. node >=22.12 / >=22.18 |
 | Later | `@playwright/test` | 1.65.1 | E2E from M4 |
 | Later | `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner` | 3.1173.0 | Step 2 uploads |
 | Later | `ai` (Vercel AI SDK) / `@anthropic-ai/sdk` | 7.0.177 / 1.11.0 | Step 2 AiGateway (ADR-010) |
@@ -381,7 +378,7 @@ export async function withOrgTx<T>(
 - **API:** the guard resolves session → user → membership → org → role, then the handler runs inside `withOrgTx`.
 - **Worker:** every job payload carries `orgId`; the handler wraps its database work in `withOrgTx(job.orgId)`.
 - **Never hold a transaction open across slow work.** Read in one transaction, call FFmpeg or a model outside it, and write the results in a second `withOrgTx`.
-- **Isolation level:** READ COMMITTED by default. Idempotency keys and the outbox may need row locks or SERIALIZABLE; this is decided in M6.
+- **Isolation level:** READ COMMITTED by default. Idempotency keys and the job queue may need row locks or SERIALIZABLE; this is decided in M6.
 
 ---
 
@@ -416,7 +413,7 @@ The default organization name is UI copy, decided in M4.
 
 Why:
 
-- IDs are known before the insert, which the bootstrap function, idempotency keys, outbox payloads and storage keys all need.
+- IDs are known before the insert, which the bootstrap function, idempotency keys, job payloads and storage keys all need.
 - It works on any PostgreSQL ≥ 16 (ADR-006) and in every test container, whatever the provider supports.
 - One implementation serves the API, the worker and the browser.
 
@@ -431,7 +428,7 @@ When PostgreSQL 18 runs in every environment (P-08), add `DEFAULT uuidv7()` as a
 | Layer | Tool | Runs | Where |
 | --- | --- | --- | --- |
 | Unit | Vitest | every PR | `contracts` (≥ 95% coverage, M2), pure functions |
-| Integration | Vitest + **Testcontainers** (PostgreSQL 18 + pgvector; Redis from M6) | every PR (`pnpm test:int`) | `packages/db`, API modules, worker |
+| Integration | Vitest + **Testcontainers** (PostgreSQL 18 + pgvector) | every PR (`pnpm test:int`) | `packages/db`, API modules, worker |
 | Contract | Vitest + generated OpenAPI | every PR (M5) | envelope and error shapes |
 | E2E | Playwright | nightly and before release (M4+) | sign-up → org → `/me` |
 
@@ -461,11 +458,11 @@ When PostgreSQL 18 runs in every environment (P-08), add `DEFAULT uuidv7()` as a
 - Keys are scoped per organization (RLS on `idempotency_keys`).
 - Keys expire.
 
-**Outbox (M6, as ADR-008 stands):**
+**Job queue (M6, ADR-021):**
 
-- A rolled-back transaction leaves no outbox row and no job.
-- Kill the relay between commit and enqueue: after restart the event is still delivered.
-- BullMQ `jobId` = outbox event ID, and a duplicate delivery runs side effects once.
+- A rolled-back transaction leaves no job.
+- A committed job runs even if the worker was down when it was enqueued (there is no relay to crash between commit and enqueue).
+- A duplicate delivery runs side effects once (the job ID is the idempotency key).
 - Retries back off, and after max attempts the job lands in the DLQ.
 - The handler runs inside `withOrgTx`, and a cross-tenant read in a handler returns 0 rows.
 
@@ -512,7 +509,7 @@ When PostgreSQL 18 runs in every environment (P-08), add `DEFAULT uuidv7()` as a
 5. **Line endings:** `.gitattributes` already forces LF. Keep `core.autocrlf=false` in WSL.
 6. **Playwright** (M4+): `pnpm exec playwright install --with-deps` inside WSL.
 7. **Git identity:** set your own `user.name` and `user.email` before M1. The M0 commit reused the identity from earlier commits through one-off `-c` flags; no config was changed.
-8. **Ports:** check that 5432 (Postgres), 6379 (Redis) and the local S3 port are free.
+8. **Ports:** check that 5432 (Postgres) and the local S3 port are free.
 
 ---
 
@@ -523,12 +520,12 @@ When PostgreSQL 18 runs in every environment (P-08), add `DEFAULT uuidv7()` as a
 | ~~Market focus conflict between the founder and the docs~~ **Resolved by ADR-020** (worldwide focus, US East region, English-first STT, one USD price) | — | Docs, prompts and AGENTS.md updated on branch `docs/adr-020-worldwide-focus` |
 | TypeScript 7 (`latest`) breaks typescript-eslint and the NestJS Better Auth adapter | Red CI from day one | Pin 6.0.3 (P-02) |
 | New majors are newer than agent training data | Wrong config, invented APIs | Read migration guides; small PRs; never guess (AGENTS.md §5) |
-| MinIO's community edition is archived and its official Docker image is no longer published (AGENTS.md §5 says "MinIO locally") | `docker compose up` fails in M3 | P-03: pick a maintained S3-compatible image; test only S3 API behaviour |
+| MinIO's community edition is archived and its official Docker image is no longer published (AGENTS.md §5 says "MinIO locally") | `docker compose up` fails in M3 | **ADR-022:** a maintained S3-compatible image, chosen in M3; test only S3 API behaviour |
 | RLS mistakes: a missing policy, the `''` cast, an owner or provider-admin bypass | Cross-tenant leak (P0) | Roles in section 3.1; tests 1–5 in section 6 |
 | Drizzle 1.0 is still RC; custom SQL can drift from the TS schema | Surprise drops or diffs on the next `generate` | Stay on 0.45.x; review every generated SQL file (AGENTS.md §5) |
 | The bootstrap function trusts `app.current_user_id` | A code bug could create an empty personal org for another user (no data exposure) | Only the session guard sets the user context; tests |
-| Better Auth's own tables vs. ours (users, and the organization plugin) | Rework in M4 | Q2: decide the table mapping in M4 before code |
-| ADR-008's outbox + relay is the most complex part of Step 1 | M6 runs long | P-04: a Postgres-native queue makes enqueue transactional without a relay |
+| Better Auth's own tables vs. ours (users, and the organization plugin) | Rework in M4 | **ADR-023:** our own `organizations` and `memberships`; Better Auth's user table maps onto `users` (details in the M4 plan) |
+| ADR-008's outbox + relay is the most complex part of Step 1 | M6 runs long | **ADR-021:** a Postgres-native queue makes enqueue transactional, with no relay |
 | Managed Postgres version and region | `uuidv7()` and latency | Neon has PG18 GA and US regions; ADR-020 picks US East |
 | Local `main` is stale and `origin/main` wasn't fetched (no network beyond the registry without approval) | This branch is based on `docs/prompt-kit-and-cleanup`, not on `main` | Q9 |
 | Windows + OneDrive friction | Slow, flaky installs | Section 8 |
