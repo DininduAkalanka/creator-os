@@ -35,6 +35,9 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      # Import rules (AGENTS.md §3, PLAN.md §1): apps never import apps, contracts imports
+      # nothing internal, the web app never imports server packages, and so on.
+      - run: pnpm lint:deps
 
   e2e:
     name: End-to-end and accessibility tests
