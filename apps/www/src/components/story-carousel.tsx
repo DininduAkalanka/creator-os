@@ -239,7 +239,7 @@ export function StoryCarousel({ images }: { images: Record<string, StaticImageDa
               />
               <div className="relative flex h-full max-w-3xl flex-col justify-end p-6 pb-20 text-white sm:p-10 sm:pb-20 md:justify-center md:p-16 lg:p-20">
                 <p className="detail text-[#ff9b96]">{slide.eyebrow}</p>
-                <h3 className="display mt-4 text-3xl leading-[1.02] font-black tracking-[-0.025em] text-balance sm:text-5xl lg:text-6xl">
+                <h3 className="display mt-4 text-3xl text-balance sm:text-5xl lg:text-[3.5rem]">
                   {slide.heading}
                 </h3>
                 <p className="mt-5 max-w-md text-lg leading-relaxed text-white/80">{slide.body}</p>

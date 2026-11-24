@@ -171,7 +171,7 @@ export const features = {
   index: "04",
   eyebrow: "What you get",
   heading: "Everything the first pass needs.",
-  note: "Planned for the first release. We'll confirm the final list before early access opens. On-screen examples are illustrations.",
+  note: "Planned for the first release. The pictures show the planned product.",
   blocks: {
     roughCut: {
       title: "Get to the rough cut, fast.",
@@ -187,6 +187,7 @@ export const features = {
         "Then you script, film and edit in blocks.",
       ],
       timecode: "00:00:09:12",
+      cueTimes: ["00:09", "00:12", "00:16"],
     },
     handoff: {
       title: "Hand it to your editor. Or finish it yourself.",

@@ -2,14 +2,10 @@ import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import eveningBack from "@/assets/media/evening-back.jpg";
-import footageLocal from "@/assets/media/footage-stays-local.jpg";
 import nightEdit from "@/assets/media/night-edit.jpg";
 import personaCreator from "@/assets/media/persona-creator.jpg";
 import personaEditor from "@/assets/media/persona-editor.jpg";
 import personaEducator from "@/assets/media/persona-educator.jpg";
-import reviewTogether from "@/assets/media/review-together.jpg";
-import talkingPoster from "@/assets/media/talking-poster.jpg";
-import timelineDetail from "@/assets/media/timeline-detail.jpg";
 import {
   ChaptersVisual,
   CutStripVisual,
@@ -21,8 +17,8 @@ import {
 import { CutDemo } from "@/components/cut-demo";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { HowItWorks } from "@/components/how-it-works";
-import { ArrowRightIcon, CheckIcon, CrossIcon, LoopIcon, PlusIcon } from "@/components/icons";
-import { AiCredit, Photo, VideoPanel } from "@/components/media";
+import { ArrowRightIcon, CheckIcon, CrossIcon, PlusIcon } from "@/components/icons";
+import { AiCredit, Photo } from "@/components/media";
 import {
   AuditMiniBody,
   AuditPreview,
@@ -46,9 +42,7 @@ import {
   roadmap,
   serviceIcons,
   services,
-  statusLabels,
   stories,
-  type ServiceStatus,
 } from "@/content/services";
 
 const storyPhotos: Record<string, StaticImageData> = {
@@ -87,20 +81,6 @@ export default function HomePage() {
       <Roadmap />
       <Waitlist />
     </>
-  );
-}
-
-function StatusPill({ status, className = "" }: { status: ServiceStatus; className?: string }) {
-  const tone =
-    status === "first"
-      ? "border-keep/50 text-keep"
-      : status === "beta"
-        ? "border-accent/50 text-accent"
-        : "border-line-strong text-faint";
-  return (
-    <span className={`detail rounded-full border px-2 py-0.5 text-[0.625rem] ${tone} ${className}`}>
-      {statusLabels[status]}
-    </span>
   );
 }
 
@@ -165,42 +145,6 @@ function Services() {
         />
         <div className="reveal mt-14">
           <ServiceSwitcher items={items} />
-        </div>
-
-        <div className="reveal mt-6 flex flex-col items-center gap-4 rounded-[1.75rem] border border-line p-5 sm:p-6">
-          <h3 className="detail text-faint">{services.loopHeading}</h3>
-          {/* Wraps and centres. No sideways scrolling: a scroll box with nothing to focus in it
-              can't be scrolled from the keyboard (axe: scrollable-region-focusable). */}
-          <ol className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-2.5">
-            {services.loop.map((stage, index) => (
-              <li key={stage.step} className="flex shrink-0 items-center gap-1.5">
-                <span className="flex items-center gap-2 rounded-full bg-raised py-2 ps-3 pe-3.5">
-                  <span
-                    aria-hidden="true"
-                    className={`size-1.5 rounded-full ${
-                      stage.status === "first"
-                        ? "bg-keep"
-                        : stage.status === "beta"
-                          ? "bg-brand"
-                          : stage.status === "later"
-                            ? "bg-faint"
-                            : "bg-fg"
-                    }`}
-                  />
-                  <span className="text-sm font-semibold">{stage.step}</span>
-                  <span className="detail text-[0.625rem] text-faint">
-                    {stage.status ? statusLabels[stage.status] : "You"}
-                  </span>
-                </span>
-                {index < services.loop.length - 1 && (
-                  <ArrowRightIcon className="hidden size-4 text-faint sm:block" />
-                )}
-              </li>
-            ))}
-            <li aria-hidden="true" className="shrink-0 ps-1 text-brand">
-              <LoopIcon className="size-5" />
-            </li>
-          </ol>
         </div>
       </div>
     </section>
@@ -304,147 +248,91 @@ function TryIt() {
   );
 }
 
-function FeatureBlock(props: {
-  index: number;
-  total: number;
-  title: string;
-  body: string;
-  media: ReactNode;
-  flip?: boolean;
-}) {
+/** A feature card's words: a short bold title and one line. */
+function FeatureText({ title, body }: { title: string; body: string }) {
   return (
-    <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-20">
-      <div className={`reveal ${props.flip ? "lg:order-2" : ""}`}>
-        <div className="settle">{props.media}</div>
-      </div>
-      <div className={`reveal ${props.flip ? "lg:order-1" : ""}`}>
-        <p className="detail text-faint tabular-nums">
-          <span className="text-accent">0{props.index}</span> / 0{props.total}
-        </p>
-        <h3 className="display mt-4 text-3xl leading-[1.02] font-extrabold tracking-[-0.025em] text-balance sm:text-4xl lg:text-5xl">
-          {props.title}
-        </h3>
-        <p className="mt-5 max-w-lg text-lg text-pretty text-muted">{props.body}</p>
-      </div>
+    <div>
+      <h3 className="text-2xl leading-tight font-bold tracking-[-0.02em] text-balance">{title}</h3>
+      <p className="mt-2 max-w-xl text-pretty text-muted">{body}</p>
     </div>
   );
 }
 
+/** Caption cues as a caption editor lists them; the highlighted one follows the cut. */
+function CaptionsVisual() {
+  const { lines, cueTimes } = features.blocks.captions;
+  return (
+    <ol aria-hidden="true" className="space-y-1.5 text-[0.8rem]">
+      {lines.map((line, index) => (
+        <li
+          key={line}
+          className={`flex gap-3 rounded-lg px-3 py-2 ${index === 1 ? "bg-ink text-on-ink" : "bg-raised text-muted"}`}
+        >
+          <span className="shrink-0 font-mono tabular-nums">{cueTimes[index]}</span>
+          <span>{line}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/**
+ * Everything the first pass gives you, as a grid of product cards (v7, like notion.com's): each
+ * card a title, one line and a small picture of the planned product, drawn in code. v6 had four
+ * alternating photo rows here, which repeated the services tour at three times the length.
+ */
 function Features() {
   const { blocks } = features;
-  const half = "(min-width: 1024px) 50vw, 100vw";
+  const card = "reveal flex flex-col gap-8 rounded-[1.75rem] bg-raised p-6 sm:p-8";
+  const panel = "mt-auto rounded-2xl bg-bg p-4 shadow-soft";
   return (
     <section id="features" aria-labelledby="features-heading">
       <div className={`${container} py-20 sm:py-28 lg:py-32`}>
         <SectionIntro
-          center
           id="features-heading"
           eyebrow={features.eyebrow}
           heading={features.heading}
           lead={features.note}
         />
-        <div className="mt-20 space-y-24 lg:space-y-36">
-          <FeatureBlock
-            index={1}
-            total={4}
-            title={blocks.roughCut.title}
-            body={blocks.roughCut.body}
-            media={
-              <Photo
-                src={timelineDetail}
-                alt={blocks.roughCut.imageAlt}
-                sizes={half}
-                className="aspect-[4/3]"
-                overlay={<RoughCutVisual />}
-              />
-            }
-          />
-          <FeatureBlock
-            flip
-            index={2}
-            total={4}
-            title={blocks.captions.title}
-            body={blocks.captions.body}
-            media={
-              <VideoPanel
-                poster={talkingPoster}
-                src="/videos/talking-loop.mp4"
-                sizes={half}
-                className="aspect-[4/3] sm:aspect-video"
-              >
-                <span className="pointer-events-none absolute top-3 right-3 font-mono text-[0.65rem] text-white/80">
-                  {blocks.captions.timecode}
-                </span>
-                <p
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 bottom-16 mx-auto w-fit max-w-[85%] rounded-md bg-black/80 px-3 py-1.5 text-center text-sm text-white sm:text-base"
-                >
-                  {blocks.captions.lines[1]}
-                </p>
-              </VideoPanel>
-            }
-          />
-          <FeatureBlock
-            index={3}
-            total={4}
-            title={blocks.handoff.title}
-            body={blocks.handoff.body}
-            media={
-              <Photo
-                src={reviewTogether}
-                alt={blocks.handoff.imageAlt}
-                sizes={half}
-                className="aspect-[4/3]"
-                overlay={<HandoffVisual />}
-                overlayClassName="right-4 bottom-4 w-56"
-              />
-            }
-          />
-          <FeatureBlock
-            flip
-            index={4}
-            total={4}
-            title={blocks.local.title}
-            body={blocks.local.body}
-            media={
-              <Photo
-                src={footageLocal}
-                alt={blocks.local.imageAlt}
-                sizes={half}
-                className="aspect-[4/3]"
-                overlay={<LocalFootageVisual />}
-                overlayClassName="right-4 bottom-4 left-4 sm:left-auto sm:w-72"
-              />
-            }
-          />
-        </div>
-
-        <h3 className="detail mt-32 text-center text-faint">{features.extrasHeading}</h3>
-        <ul className="mt-6 grid gap-4 md:grid-cols-3">
-          <li className="reveal flex flex-col gap-6 rounded-[1.75rem] bg-raised p-6">
-            <div className="rounded-2xl bg-bg p-4 shadow-soft">
+        <ul className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+          <li className={`${card} md:col-span-2 lg:col-span-4`}>
+            <FeatureText title={blocks.roughCut.title} body={blocks.roughCut.body} />
+            <div className={panel}>
+              <RoughCutVisual />
+            </div>
+          </li>
+          <li className={`${card} lg:col-span-2`}>
+            <FeatureText title={blocks.captions.title} body={blocks.captions.body} />
+            <div className={panel}>
+              <CaptionsVisual />
+            </div>
+          </li>
+          <li className={`${card} lg:col-span-2`}>
+            <FeatureText title={blocks.local.title} body={blocks.local.body} />
+            <div className={panel}>
+              <LocalFootageVisual />
+            </div>
+          </li>
+          <li className={`${card} md:col-span-2 lg:col-span-4`}>
+            <FeatureText title={blocks.handoff.title} body={blocks.handoff.body} />
+            <div className={panel}>
+              <HandoffVisual />
+            </div>
+          </li>
+          <li className={`${card} lg:col-span-2`}>
+            <FeatureText title={features.chapters.title} body={features.chapters.body} />
+            <div className={panel}>
               <ChaptersVisual />
             </div>
-            <div>
-              <h4 className="display text-xl font-bold tracking-[-0.015em]">
-                {features.chapters.title}
-              </h4>
-              <p className="mt-2 text-muted">{features.chapters.body}</p>
-            </div>
           </li>
-          <li className="reveal flex flex-col gap-6 rounded-[1.75rem] bg-raised p-6">
-            <div className="rounded-2xl bg-bg p-4 shadow-soft">
+          <li className={`${card} lg:col-span-2`}>
+            <FeatureText title={features.thumbnails.title} body={features.thumbnails.body} />
+            <div className={panel}>
               <ThumbnailsVisual />
             </div>
-            <div>
-              <h4 className="display text-xl font-bold tracking-[-0.015em]">
-                {features.thumbnails.title}
-              </h4>
-              <p className="mt-2 text-muted">{features.thumbnails.body}</p>
-            </div>
           </li>
-          <li className="reveal flex flex-col justify-center rounded-[1.75rem] border border-line p-6">
-            <h4 className="detail text-faint">{features.notList.heading}</h4>
+          <li className="reveal flex flex-col justify-center rounded-[1.75rem] border border-line p-6 sm:p-8 md:col-span-2 lg:col-span-2">
+            <h3 className="text-lg font-bold">{features.notList.heading}</h3>
             <ul className="mt-5 space-y-4">
               {features.notList.items.map((item) => (
                 <li key={item} className="flex gap-3 text-muted">
@@ -701,10 +589,8 @@ function Roadmap() {
             <li key={item.title} className="reveal">
               <div className={`lag h-full ${tabletLag[index % 2]} ${desktopLag[index % 3]}`}>
                 <div className="flex h-full flex-col rounded-[1.5rem] bg-raised p-6 transition-colors duration-300 hover:bg-panel sm:min-h-60 sm:p-7">
-                  <div className="flex items-center justify-between gap-3">
-                    <ServiceIcon name={laterIcons[index] ?? "publish"} size="md" />
-                    <StatusPill status="later" />
-                  </div>
+                  {/* No "Later" badge per card: the whole band is the later list (v7). */}
+                  <ServiceIcon name={laterIcons[index] ?? "publish"} size="md" />
                   <h3 className="display mt-auto pt-6 text-2xl font-bold tracking-[-0.015em] sm:pt-12">
                     {item.title}
                   </h3>

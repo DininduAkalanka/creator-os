@@ -160,16 +160,6 @@ export const services = {
     example: "Example",
     more: (title: string) => `More about ${title}`,
   },
-  loopHeading: "The loop",
-  loop: [
-    { step: "Film", status: null },
-    { step: "Cut", status: "first" as ServiceStatus },
-    { step: "Review", status: "beta" as ServiceStatus },
-    { step: "Export", status: "first" as ServiceStatus },
-    { step: "Publish", status: "later" as ServiceStatus },
-    { step: "Learn", status: "beta" as ServiceStatus },
-    { step: "Next idea", status: "beta" as ServiceStatus },
-  ],
 };
 
 export const audit = {

@@ -343,7 +343,7 @@ export function HeroCarousel() {
                         <p
                           aria-hidden="true"
                           style={order(1)}
-                          className={`${rise} display mt-5 max-w-[18ch] text-[clamp(2.6rem,min(4.6vw,7.5svh),4.5rem)] leading-[0.98] font-black tracking-[-0.03em] text-balance`}
+                          className={`${rise} display mt-5 max-w-[18ch] text-[clamp(2.6rem,min(4.6vw,7.5svh),4.5rem)] leading-[1] tracking-[-0.035em] text-balance`}
                         >
                           {hero.headlineBefore} <span className="hero-cut">{hero.headlineCut}</span>{" "}
                           {hero.headlineAfter}
@@ -371,7 +371,7 @@ export function HeroCarousel() {
                       <>
                         <h2
                           style={order(1)}
-                          className="slide-rise display mt-5 max-w-[18ch] text-[clamp(2.4rem,min(4.4vw,7svh),4.25rem)] leading-[0.98] font-black tracking-[-0.03em] text-balance"
+                          className="slide-rise display mt-5 max-w-[18ch] text-[clamp(2.4rem,min(4.4vw,7svh),4.25rem)] leading-[1] tracking-[-0.035em] text-balance"
                         >
                           {slide.heading}
                         </h2>
@@ -403,7 +403,7 @@ export function HeroCarousel() {
           <p className="pointer-events-none mb-3 flex justify-end px-1 lg:absolute lg:end-10 lg:bottom-full lg:px-0">
             <span
               data-media-label=""
-              className="detail rounded-full bg-black/60 px-2 py-1 text-[0.625rem] text-white/85"
+              className="rounded-full bg-black/55 px-2 py-0.5 text-[0.6875rem] font-medium text-white/90 backdrop-blur-sm"
             >
               {SLIDE_MEDIA[active]?.media.kind === "video"
                 ? siteCopy.aiGeneratedVideo

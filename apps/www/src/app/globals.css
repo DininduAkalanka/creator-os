@@ -196,12 +196,16 @@ body {
 
 /* In the components layer so Tailwind utilities (leading-*, tracking-*) can still override. */
 @layer components {
-  /* Display type: heavy and tight, like adobe.com's headings (Milo: weight 700 to 800). */
+  /*
+   * Display type (v7): bold, not black, with tight tracking. Production sites set their big
+   * headings at 600 to 700 (Notion 600 at -0.048em, UptimeRobot 600 at -0.04em, adobe.com 700 to
+   * 800); v6's 800 to 900 read as heavy rather than refined.
+   */
   .display {
     font-family: var(--font-display);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
   }
 
   /* adobe.com "detail" text (Milo: weight 700, uppercase): eyebrows, badges, status labels. */

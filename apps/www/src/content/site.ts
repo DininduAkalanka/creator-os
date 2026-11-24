@@ -37,7 +37,8 @@ export const siteCopy = {
   },
   preview: {
     label: "Preview notice",
-    lead: "Preview site, not launched yet.",
+    badge: "Preview",
+    lead: "This site is not launched yet.",
     summary: (count: number) => `${count} ${count === 1 ? "item" : "items"} left before launch`,
   },
   draft: {

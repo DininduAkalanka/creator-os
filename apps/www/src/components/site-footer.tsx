@@ -4,27 +4,29 @@ import { serviceIcons, services } from "@/content/services";
 import { siteCopy } from "@/content/site";
 import { ServiceIcon } from "./service-icon";
 import { Logo, Wordmark } from "./logo";
-import { EmailLink, MissingValue } from "./missing-value";
+import { EmailLink } from "./missing-value";
 import { buttonPrimary, container } from "./styles";
 
 export function SiteFooter() {
   const { footer } = siteCopy;
+  // Only the company details we have: a public footer never prints "[to be added]". What is
+  // still missing is listed in the preview notice at the top until launch.
+  const companyLines = [COMPANY.legalName, COMPANY.postalAddress].filter(Boolean);
+  const showCompany = companyLines.length > 0 || Boolean(COMPANY.contactEmail);
   return (
     // Black, like adobe.com's footer: the one place every page ends in the dark, with the
     // closing wordmark. The rest of the site is light.
     <footer className="theme-dark mt-auto">
       <div className={`${container} pt-20 pb-16`}>
         <div className="flex flex-col items-start justify-between gap-8 border-b border-line pb-12 lg:flex-row lg:items-end">
-          <p className="display max-w-2xl text-4xl leading-[1.02] font-black tracking-[-0.025em] text-balance sm:text-6xl">
-            {footer.statement}
-          </p>
+          <p className="display max-w-2xl text-4xl text-balance sm:text-6xl">{footer.statement}</p>
           <Link href="/#waitlist" className={`${buttonPrimary} px-6 py-3.5 text-base`}>
             {footer.cta}
           </Link>
         </div>
 
         <div className="grid gap-10 pt-12 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-2">
+          <div className={showCompany ? "lg:col-span-2" : "lg:col-span-3"}>
             <p className="text-fg">
               <Logo className="h-9 w-auto" />
             </p>
@@ -74,20 +76,21 @@ export function SiteFooter() {
             </ul>
           </nav>
 
-          <div>
-            <h2 className="text-sm font-bold text-fg">{footer.companyHeading}</h2>
-            <address className="mt-4 space-y-1.5 text-sm text-muted not-italic">
-              <p>
-                <MissingValue value={COMPANY.legalName} />
-              </p>
-              <p>
-                <MissingValue value={COMPANY.postalAddress} />
-              </p>
-              <p>
-                <EmailLink email={COMPANY.contactEmail} />
-              </p>
-            </address>
-          </div>
+          {showCompany && (
+            <div>
+              <h2 className="text-sm font-bold text-fg">{footer.companyHeading}</h2>
+              <address className="mt-4 space-y-1.5 text-sm text-muted not-italic">
+                {companyLines.map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+                {COMPANY.contactEmail && (
+                  <p>
+                    <EmailLink email={COMPANY.contactEmail} />
+                  </p>
+                )}
+              </address>
+            </div>
+          )}
         </div>
 
         <div className="mt-12 space-y-2 border-t border-line pt-6 text-xs text-faint">
